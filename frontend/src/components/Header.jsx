@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,8 +47,17 @@ const Header = () => {
           <button onClick={toggleLanguage} className="btn-icon">
             {language === 'en' ? '🇧🇬' : '🇬🇧'}
           </button>
-          <Link to="/login" className="btn btn-login">{t('signIn')}</Link>
-          <Link to="/register" className="btn btn-register">{t('register')}</Link>
+          {user ? (
+            <div className="user-menu">
+              <span className="user-name">{user.firstName}</span>
+              <button onClick={logout} className="btn btn-logout">{t('logout') || 'Logout'}</button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="btn btn-login">{t('signIn')}</Link>
+              <Link to="/register" className="btn btn-register">{t('register')}</Link>
+            </>
+          )}
         </div>
       </div>
     </header>

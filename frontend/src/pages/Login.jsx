@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import './Auth.css';
 
 const Login = () => {
     const { t } = useLanguage();
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
@@ -22,7 +24,7 @@ const Login = () => {
         setError('');
 
         try {
-            const response = await fetch('https://localhost:7252/api/auth/login', {
+            const response = await fetch('http://localhost:5150/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,12 +39,11 @@ const Login = () => {
             }
 
             // Store token
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify({
+            login({
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email
-            }));
+            }, data.token);
 
             navigate('/');
         } catch (err) {

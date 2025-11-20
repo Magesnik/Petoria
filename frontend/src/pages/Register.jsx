@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import './Auth.css';
 
 const Register = () => {
     const { t } = useLanguage();
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
@@ -24,7 +26,7 @@ const Register = () => {
         setError('');
 
         try {
-            const response = await fetch('https://localhost:7252/api/auth/register', {
+            const response = await fetch('http://localhost:5150/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -39,12 +41,11 @@ const Register = () => {
             }
 
             // Store token
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify({
+            login({
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email
-            }));
+            }, data.token);
 
             navigate('/');
         } catch (err) {
