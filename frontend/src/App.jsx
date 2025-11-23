@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Hotels from './pages/Hotels';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <div className="App">
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/hotels" element={<Hotels />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Routes>
