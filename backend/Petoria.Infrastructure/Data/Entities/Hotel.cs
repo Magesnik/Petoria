@@ -29,7 +29,8 @@ public class Hotel
     [Column(TypeName = "decimal(18,2)")]
     public decimal PricePerNight { get; set; }
 
-    [Column(TypeName = "decimal(3,2)")]
+    [Column(TypeName = "decimal(2,1)")]
+    [Range(0, 5)]
     public decimal Rating { get; set; } = 0;
 
     [MaxLength(500)]
@@ -48,6 +49,9 @@ public class Hotel
     public string RoomTypes { get; set; } = "[]";
 
     public bool IsAvailable { get; set; } = true;
+
+    // Track who created the hotel - set by controller, not required from client
+    public string CreatedById { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

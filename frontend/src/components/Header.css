@@ -66,6 +66,15 @@
     width: 100%;
 }
 
+.nav-link.admin-link {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.nav-link.admin-link::after {
+    background-color: #667eea;
+}
+
 .header-actions {
     display: flex;
     gap: 15px;
@@ -179,6 +188,32 @@
     background-color: rgba(0, 0, 0, 0.05);
 }
 
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-name {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.btn-logout {
+    background: transparent;
+    color: var(--primary-color);
+    font-weight: 600;
+    padding: 8px 16px;
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    transition: var(--transition);
+}
+
+.btn-logout:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
 /* Dark Mode Adjustments */
 [data-theme='dark'] .header {
     background-color: rgba(2, 12, 27, 0.95);
@@ -195,4 +230,8 @@
 
 [data-theme='dark'] .btn-icon:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .user-name {
+    color: var(--text-light);
 }

@@ -44,7 +44,8 @@ const Register = () => {
             login({
                 firstName: data.firstName,
                 lastName: data.lastName,
-                email: data.email
+                email: data.email,
+                roles: data.roles || []
             }, data.token);
 
             navigate('/');

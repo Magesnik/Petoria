@@ -9,7 +9,7 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,7 +28,7 @@ const Header = () => {
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         <Link to="/" className="logo">
-          Petoria<span>.</span>
+          (Petoria)<span>.</span>
         </Link>
 
         <nav>
@@ -37,6 +37,9 @@ const Header = () => {
             <li><Link to="/hotels" className="nav-link">{t('hotels')}</Link></li>
             <li><Link to="/destinations" className="nav-link">{t('destinations')}</Link></li>
             <li><Link to="/about" className="nav-link">{t('about')}</Link></li>
+            {isAdmin() && (
+              <li><Link to="/create-hotel" className="nav-link admin-link">➕ Създай хотел</Link></li>
+            )}
           </ul>
         </nav>
 

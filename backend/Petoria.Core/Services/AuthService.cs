@@ -14,15 +14,18 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
+        RoleManager<IdentityRole> roleManager,
         IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
         _configuration = configuration;
     }
 
@@ -40,7 +43,8 @@ public class AuthService : IAuthService
             return null;
         }
 
-        return GenerateJwtToken(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        return await GenerateJwtToken(user, roles.ToList());
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterModel model)
@@ -63,10 +67,51 @@ public class AuthService : IAuthService
             throw new Exception($"Registration failed: {errors}");
         }
 
-        return GenerateJwtToken(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        return await GenerateJwtToken(user, roles.ToList());
     }
 
-    private AuthResponse GenerateJwtToken(ApplicationUser user)
+    public async Task InitializeRolesAndAdminAsync()
+    {
+        // Create Admin role if it doesn't exist
+        if (!await _roleManager.RoleExistsAsync("Admin"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole("Admin"));
+        }
+
+        // Check if admin user exists
+        var adminEmail = "admin@admin.com";
+        var adminUser = await _userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            // Create admin user
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                FirstName = "Admin",
+                LastName = "User",
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(adminUser, "123456Q@w");
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+        else
+        {
+            // Ensure existing admin user has Admin role
+            if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                await _userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+    }
+
+    private async Task<AuthResponse> GenerateJwtToken(ApplicationUser user, List<string> roles)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
@@ -79,6 +124,12 @@ public class AuthService : IAuthService
             new Claim("FirstName", user.FirstName ?? ""),
             new Claim("LastName", user.LastName ?? "")
         };
+
+        // Add role claims
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -98,7 +149,8 @@ public class AuthService : IAuthService
             Email = user.Email!,
             FirstName = user.FirstName ?? "",
             LastName = user.LastName ?? "",
-            Expiration = tokenDescriptor.Expires.Value
+            Expiration = tokenDescriptor.Expires.Value,
+            Roles = roles
         };
     }
 }

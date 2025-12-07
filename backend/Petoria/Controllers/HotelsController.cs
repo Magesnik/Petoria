@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Petoria.Infrastructure.Data;
@@ -107,19 +108,54 @@ public class HotelsController : ControllerBase
 
     // POST: api/hotels
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Hotel>> CreateHotel(Hotel hotel)
     {
-        hotel.CreatedAt = DateTime.UtcNow;
-        hotel.UpdatedAt = DateTime.UtcNow;
+        try
+        {
+            // Get the current user's ID from claims
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            // Log for debugging
+            Console.WriteLine($"User ID from claims: {userId}");
+            Console.WriteLine($"User claims count: {User.Claims.Count()}");
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
+            }
+            
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "User ID not found in token", claims = User.Claims.Select(c => new { c.Type, c.Value }) });
+            }
 
-        _context.Hotels.Add(hotel);
-        await _context.SaveChangesAsync();
+            hotel.CreatedById = userId;
+            hotel.CreatedAt = DateTime.UtcNow;
+            hotel.UpdatedAt = DateTime.UtcNow;
 
-        return CreatedAtAction(nameof(GetHotel), new { id = hotel.Id }, hotel);
+            Console.WriteLine($"About to save hotel with CreatedById: {hotel.CreatedById}");
+
+            _context.Hotels.Add(hotel);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetHotel), new { id = hotel.Id }, hotel);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating hotel: {ex.Message}");
+            Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            return StatusCode(500, new { 
+                message = ex.Message, 
+                innerException = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace 
+            });
+        }
     }
 
     // PUT: api/hotels/5
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateHotel(int id, Hotel hotel)
     {
         if (id != hotel.Id)
@@ -151,6 +187,7 @@ public class HotelsController : ControllerBase
 
     // DELETE: api/hotels/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteHotel(int id)
     {
         var hotel = await _context.Hotels.FindAsync(id);

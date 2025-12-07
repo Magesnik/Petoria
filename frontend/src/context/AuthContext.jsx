@@ -35,8 +35,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
     };
 
+    const isAdmin = () => {
+        return user?.roles?.includes('Admin') || false;
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, isAdmin }}>
             {!loading && children}
         </AuthContext.Provider>
     );

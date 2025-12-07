@@ -7,6 +7,9 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Hotels from './pages/Hotels';
+import CreateHotel from './pages/CreateHotel';
+import Destinations from './pages/Destinations';
+import About from './pages/About';
 
 function App() {
   return (
@@ -18,8 +21,11 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/hotels" element={<Hotels />} />
+                <Route path="/destinations" element={<Destinations />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/create-hotel" element={<CreateHotel />} />
               </Routes>
             </div>
           </Router>
