@@ -1,35 +1,85 @@
+/* Theme Variables */
+:root {
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+    --border-color: #e0e0e0;
+    --primary-color: #667eea;
+    --primary-hover: #5568d3;
+    --success-color: #3c3;
+    --error-color: #c33;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #020c1b;
+    --bg-secondary: #112240;
+    --text-primary: #e6f1ff;
+    --text-secondary: #a8b2d1;
+    --border-color: #233554;
+}
+
 .create-hotel-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding-top: 80px;
+    padding-bottom: 3rem;
 }
 
 .create-hotel-container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
 
 .create-hotel-card {
-    background: white;
+    background: var(--bg-secondary);
     border-radius: 20px;
     padding: 3rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .create-hotel-card h2 {
-    font-size: 2rem;
-    color: #333;
+    font-size: 2.5rem;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
     text-align: center;
+    font-weight: 700;
 }
 
 .create-hotel-card .subtitle {
     text-align: center;
-    color: #666;
-    margin-bottom: 2rem;
+    color: var(--text-secondary);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
 }
 
+/* Form Sections */
+.form-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    border: 2px solid var(--border-color);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-description {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* Form Elements */
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -44,65 +94,283 @@
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #333;
-    font-weight: 500;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e0e0e0;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
     font-size: 1rem;
     transition: all 0.3s ease;
     font-family: inherit;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .form-group small {
     display: block;
-    margin-top: 0.25rem;
-    color: #999;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
     font-size: 0.85rem;
 }
 
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Image Preview */
+.image-preview {
+    margin-top: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 300px;
+    border: 2px solid var(--border-color);
+}
+
+.image-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Dynamic Lists (Images & Room Types) */
+.dynamic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.dynamic-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.dynamic-item input {
+    flex: 1;
+}
+
+.btn-remove {
+    padding: 0.875rem 1.25rem;
+    background: #fee;
+    color: var(--error-color);
+    border: 2px solid var(--error-color);
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.btn-remove:hover {
+    background: var(--error-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-add {
+    padding: 0.875rem 1.5rem;
+    background: var(--bg-secondary);
+    color: var(--primary-color);
+    border: 2px dashed var(--primary-color);
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 0.95rem;
+}
+
+.btn-add:hover {
+    background: var(--primary-color);
+    color: white;
+    border-style: solid;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Amenities Grid */
+.amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.amenity-tag {
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.amenity-tag:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.amenity-tag.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.amenity-tag.selected:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.selected-count {
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border: 2px solid var(--primary-color);
+}
+
+/* Messages */
 .error-message {
     background-color: #fee;
-    color: #c33;
-    padding: 1rem;
-    border-radius: 10px;
+    color: var(--error-color);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
     margin-bottom: 1.5rem;
-    border-left: 4px solid #c33;
+    border-left: 5px solid var(--error-color);
+    font-weight: 500;
+    white-space: pre-line;
 }
 
 .success-message {
     background-color: #efe;
-    color: #3c3;
-    padding: 1rem;
-    border-radius: 10px;
+    color: var(--success-color);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
     margin-bottom: 1.5rem;
-    border-left: 4px solid #3c3;
+    border-left: 5px solid var(--success-color);
+    font-weight: 500;
 }
 
+/* Submit Button */
 .btn-block {
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 2rem;
+    padding: 1.25rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+.btn-block:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+}
+
+.btn-block:active {
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+    .create-hotel-page {
+        padding-top: 60px;
+    }
+
+    .create-hotel-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .create-hotel-card {
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+    }
+
+    .create-hotel-card h2 {
+        font-size: 2rem;
+    }
+
+    .form-section {
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+    }
+
     .form-row {
         grid-template-columns: 1fr;
         gap: 0;
     }
 
+    .amenities-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .amenity-tag {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .dynamic-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-remove {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
     .create-hotel-card {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .create-hotel-card h2 {
+        font-size: 1.75rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+
+    .amenities-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-block {
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
     }
 }

@@ -79,6 +79,9 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowReactApp");
 
+// Enable serving static files from wwwroot
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

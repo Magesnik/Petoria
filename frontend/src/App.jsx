@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Hotels from './pages/Hotels';
+import HotelDetails from './pages/HotelDetails';
 import CreateHotel from './pages/CreateHotel';
 import Destinations from './pages/Destinations';
 import About from './pages/About';
@@ -21,6 +22,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/hotels" element={<Hotels />} />
+                <Route path="/hotels/:id" element={<HotelDetails />} />
                 <Route path="/destinations" element={<Destinations />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
