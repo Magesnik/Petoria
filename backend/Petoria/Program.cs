@@ -58,6 +58,13 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
+})
+.AddGoogle(options =>
+{
+    var googleAuth = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuth["ClientId"]!;
+    options.ClientSecret = googleAuth["ClientSecret"]!;
+    options.CallbackPath = "/api/auth/google-callback";
 });
 
 var app = builder.Build();

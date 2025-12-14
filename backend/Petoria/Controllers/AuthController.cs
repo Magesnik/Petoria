@@ -40,4 +40,25 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLogin([FromBody] ExternalAuthModel model)
+    {
+        try
+        {
+            model.Provider = "Google";
+            var result = await _authService.ExternalLoginAsync(model);
+            
+            if (result == null)
+            {
+                return BadRequest(new { message = "Google login failed" });
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

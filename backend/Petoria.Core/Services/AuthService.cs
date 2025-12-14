@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Petoria.Core.Contracts;
@@ -152,5 +153,50 @@ public class AuthService : IAuthService
             Expiration = tokenDescriptor.Expires.Value,
             Roles = roles
         };
+    }
+
+    public async Task<AuthResponse?> ExternalLoginAsync(ExternalAuthModel model)
+    {
+        // Try to find user by external provider ID first
+        var user = await _userManager.Users
+            .FirstOrDefaultAsync(u => u.ExternalProviderId == model.ExternalUserId && u.AuthProvider == model.Provider);
+        
+        // If not found by external ID, try to find by email
+        if (user == null && !string.IsNullOrEmpty(model.Email))
+        {
+            user = await _userManager.FindByEmailAsync(model.Email);
+            
+            // If found by email but has different provider, link the accounts
+            if (user != null)
+            {
+                user.AuthProvider = model.Provider;
+                user.ExternalProviderId = model.ExternalUserId;
+                await _userManager.UpdateAsync(user);
+            }
+        }
+        
+        // If user still not found, create a new user
+        if (user == null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName ?? "",
+                LastName = model.LastName ?? "",
+                AuthProvider = model.Provider,
+                ExternalProviderId = model.ExternalUserId,
+                EmailConfirmed = true // External providers verify email
+            };
+            
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                return null;
+            }
+        }
+        
+        var roles = await _userManager.GetRolesAsync(user);
+        return await GenerateJwtToken(user, roles.ToList());
     }
 }

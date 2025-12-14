@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -7,6 +7,8 @@ import './Header.css';
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
   const { user, logout, isAdmin } = useAuth();
@@ -23,6 +25,41 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  const menuItems = [
+    { path: '/', label: 'Начална страница', icon: '🏠' },
+    { path: '/reservations', label: 'История на резервации', icon: '📋' },
+    { path: '/paid', label: 'Вече платени', icon: '✅' },
+    { path: '/profile', label: 'Профил', icon: '👤' },
+    { path: '/planned', label: 'Планирани', icon: '📅' },
+    { path: '/settings', label: 'Настройки', icon: '⚙️' },
+    { path: '/support', label: 'Support', icon: '💬' },
+  ];
 
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
@@ -44,6 +81,36 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
+          {/* Menu Dropdown Button */}
+          <div className="menu-dropdown" ref={menuRef}>
+            <button onClick={toggleMenu} className="btn-icon menu-btn" aria-label="Menu">
+              <span className="menu-icon">☰</span>
+            </button>
+
+            {menuOpen && (
+              <div className="dropdown-menu">
+                <div className="dropdown-header">
+                  <h3>Меню</h3>
+                  <button onClick={closeMenu} className="close-btn">✕</button>
+                </div>
+                <ul className="dropdown-list">
+                  {menuItems.map((item, index) => (
+                    <li key={index}>
+                      <Link
+                        to={item.path}
+                        className="dropdown-item"
+                        onClick={closeMenu}
+                      >
+                        <span className="dropdown-icon">{item.icon}</span>
+                        <span className="dropdown-label">{item.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
           <button onClick={toggleTheme} className="btn-icon">
             {theme === 'light' ? '🌙' : '☀️'}
           </button>

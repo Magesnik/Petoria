@@ -130,3 +130,45 @@
 [data-theme='dark'] .auth-footer a {
     color: var(--secondary-color);
 }
+
+/* Social Login Styles */
+.social-login {
+    margin-bottom: 20px;
+}
+
+.social-login>div {
+    display: flex;
+    justify-content: center;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.divider span {
+    padding: 0 15px;
+    color: #999;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Dark Mode for Social Login */
+[data-theme='dark'] .divider::before,
+[data-theme='dark'] .divider::after {
+    border-bottom-color: #233554;
+}
+
+[data-theme='dark'] .divider span {
+    color: #8892b0;
+}
