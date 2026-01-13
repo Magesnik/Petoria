@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useFavorites } from '../context/FavoritesContext';
 import Header from '../components/Header';
 import './HotelDetails.css';
 
@@ -8,9 +9,11 @@ const HotelDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { t } = useLanguage();
+    const { isFavorite, toggleFavorite } = useFavorites();
     const [hotel, setHotel] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         fetchHotelDetails();
@@ -42,6 +45,34 @@ const HotelDetails = () => {
 
     const handleBackClick = () => {
         navigate('/hotels');
+    };
+
+    // Get all hotel images (main + additional)
+    const getHotelImages = () => {
+        if (!hotel) return [];
+        const additionalImages = hotel.images ? JSON.parse(hotel.images) : [];
+        const mainImage = hotel.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80';
+        return [mainImage, ...additionalImages];
+    };
+
+    const handlePreviousImage = () => {
+        if (!hotel) return;
+        const images = getHotelImages();
+        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    };
+
+    const handleNextImage = () => {
+        if (!hotel) return;
+        const images = getHotelImages();
+        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    };
+
+    const handleThumbnailClick = (index) => {
+        setCurrentImageIndex(index);
+    };
+
+    const handleFavoriteClick = () => {
+        toggleFavorite(parseInt(id));
     };
 
     if (loading) {
@@ -76,6 +107,7 @@ const HotelDetails = () => {
     }
 
     const amenities = hotel.amenities ? JSON.parse(hotel.amenities) : [];
+    const hotelImages = getHotelImages();
 
     return (
         <div className="hotel-details-page">
@@ -84,12 +116,21 @@ const HotelDetails = () => {
             {/* Hero Section */}
             <section
                 className="hotel-hero"
-                style={{ backgroundImage: `url(${hotel.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80'})` }}
+                style={{ backgroundImage: `url(${hotelImages[currentImageIndex]})` }}
             >
                 <div className="hero-overlay">
-                    <button onClick={handleBackClick} className="btn-back-hero">
-                        ← {t('backToHotels')}
-                    </button>
+                    <div className="hero-actions">
+                        <button onClick={handleBackClick} className="btn-back-hero">
+                            ← {t('backToHotels')}
+                        </button>
+                        <button
+                            className={`favorite-btn-hero ${isFavorite(parseInt(id)) ? 'favorited' : ''}`}
+                            onClick={handleFavoriteClick}
+                            aria-label={isFavorite(parseInt(id)) ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                            {isFavorite(parseInt(id)) ? '❤️' : '🤍'}
+                        </button>
+                    </div>
                     {hotel.rating > 0 && (
                         <div className="hotel-rating-badge">
                             <span className="rating-star">★</span>
@@ -97,7 +138,38 @@ const HotelDetails = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Image Navigation Controls */}
+                {hotelImages.length > 1 && (
+                    <>
+                        <button className="image-nav-btn prev-btn" onClick={handlePreviousImage}>
+                            ‹
+                        </button>
+                        <button className="image-nav-btn next-btn" onClick={handleNextImage}>
+                            ›
+                        </button>
+                        <div className="image-counter">
+                            {currentImageIndex + 1} / {hotelImages.length}
+                        </div>
+                    </>
+                )}
             </section>
+
+            {/* Thumbnail Gallery */}
+            {hotelImages.length > 1 && (
+                <div className="thumbnail-gallery container">
+                    <div className="thumbnails-container">
+                        {hotelImages.map((image, index) => (
+                            <div
+                                key={index}
+                                className={`thumbnail ${index === currentImageIndex ? 'active' : ''}`}
+                                onClick={() => handleThumbnailClick(index)}
+                                style={{ backgroundImage: `url(${image})` }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Main Content */}
             <div className="hotel-details-content container">

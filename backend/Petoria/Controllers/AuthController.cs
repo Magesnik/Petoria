@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Petoria.Core.Contracts;
 using Petoria.Core.Models.Auth;
 
+
 namespace Petoria.Controllers;
 
 [Route("api/[controller]")]
@@ -36,6 +37,18 @@ public class AuthController : ControllerBase
         if (result == null)
         {
             return Unauthorized("Invalid credentials");
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginModel model)
+    {
+        var result = await _authService.GoogleLoginAsync(model.GoogleToken);
+        if (result == null)
+        {
+            return Unauthorized("Google authentication failed");
         }
 
         return Ok(result);

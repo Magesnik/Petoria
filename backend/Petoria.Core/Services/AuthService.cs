@@ -7,6 +7,7 @@ using Petoria.Infrastructure.Data.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Google.Apis.Auth;
 
 namespace Petoria.Core.Services;
 
@@ -46,6 +47,68 @@ public class AuthService : IAuthService
         var roles = await _userManager.GetRolesAsync(user);
         return await GenerateJwtToken(user, roles.ToList());
     }
+
+    public async Task<AuthResponse?> GoogleLoginAsync(string googleToken)
+    {
+        try
+        {
+            // Verify the Google token
+            var payload = await GoogleJsonWebSignature.ValidateAsync(googleToken);
+
+            if (payload == null)
+            {
+                return null;
+            }
+
+            // Check if user exists
+            var user = await _userManager.FindByEmailAsync(payload.Email);
+
+            if (user == null)
+            {
+                // Create new user from Google data
+                user = new ApplicationUser
+                {
+                    UserName = payload.Email,
+                    Email = payload.Email,
+                    FirstName = payload.GivenName ?? "",
+                    LastName = payload.FamilyName ?? "",
+                    EmailConfirmed = true // Google emails are verified
+                };
+
+                var result = await _userManager.CreateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    return null;
+                }
+
+                // Assign Admin role to specific email
+                if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    await _userManager.AddToRoleAsync(user, "Admin");
+                }
+            }
+            else
+            {
+                // User exists - ensure pepi.200712@gmail.com has Admin role
+                if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                    }
+                }
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            return await GenerateJwtToken(user, roles.ToList());
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
 
     public async Task<AuthResponse> RegisterAsync(RegisterModel model)
     {

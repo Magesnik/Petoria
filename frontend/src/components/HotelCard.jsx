@@ -1,14 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFavorites } from '../context/FavoritesContext';
 import './HotelCard.css';
 
 const HotelCard = ({ hotel }) => {
     const navigate = useNavigate();
+    const { isFavorite, toggleFavorite } = useFavorites();
     const amenities = hotel.amenities ? JSON.parse(hotel.amenities) : [];
     const displayAmenities = amenities.slice(0, 4);
 
     const handleViewDetails = () => {
         navigate(`/hotels/${hotel.id}`);
+    };
+
+    const handleFavoriteClick = (e) => {
+        e.stopPropagation(); // Prevent card navigation
+        toggleFavorite(hotel.id);
     };
 
     return (
@@ -17,6 +24,13 @@ const HotelCard = ({ hotel }) => {
                 className="hotel-card-image"
                 style={{ backgroundImage: `url(${hotel.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'})` }}
             >
+                <button
+                    className={`favorite-btn ${isFavorite(hotel.id) ? 'favorited' : ''}`}
+                    onClick={handleFavoriteClick}
+                    aria-label={isFavorite(hotel.id) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    {isFavorite(hotel.id) ? '❤️' : '🤍'}
+                </button>
                 {hotel.rating > 0 && (
                     <div className="hotel-rating">
                         <span className="rating-star">★</span>

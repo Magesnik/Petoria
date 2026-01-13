@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -53,6 +54,41 @@ const Login = () => {
         }
     };
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            const response = await fetch('http://localhost:5150/api/auth/google-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ googleToken: credentialResponse.credential })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Google login failed');
+            }
+
+            // Store token
+            login({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                roles: data.roles || []
+            }, data.token);
+
+            navigate('/');
+        } catch (err) {
+            setError('Google authentication failed. Please try again.');
+            console.error(err);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setError('Google authentication failed. Please try again.');
+    };
+
     return (
         <div className="auth-page">
             <Header />
@@ -90,6 +126,20 @@ const Login = () => {
                             {t('loginBtn')}
                         </button>
                     </form>
+
+                    <div className="auth-divider">
+                        <span>ИЛИ</span>
+                    </div>
+
+                    <div className="google-login-wrapper">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            theme="outline"
+                            size="large"
+                            width="100%"
+                        />
+                    </div>
 
                     <div className="auth-footer">
                         {t('noAccount')} <Link to="/register">{t('registerLink')}</Link>

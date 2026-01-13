@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,9 @@ import './Header.css';
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
   const { user, logout, isAdmin } = useAuth();
@@ -23,6 +26,28 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setDropdownOpen(false);
+    navigate('/');
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
 
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
@@ -51,9 +76,36 @@ const Header = () => {
             {language === 'en' ? '🇧🇬' : '🇬🇧'}
           </button>
           {user ? (
-            <div className="user-menu">
-              <span className="user-name">{user.firstName}</span>
-              <button onClick={logout} className="btn btn-logout">{t('logout') || 'Logout'}</button>
+            <div className="user-menu" ref={dropdownRef}>
+              <button onClick={toggleDropdown} className="user-dropdown-trigger">
+                <span className="user-name">{user.firstName}</span>
+                <span className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▼</span>
+              </button>
+              {dropdownOpen && (
+                <div className="user-dropdown">
+                  <Link to="/favorites" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                    <span className="dropdown-icon">❤️</span>
+                    {t('favorites')}
+                  </Link>
+                  <Link to="/purchase-history" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                    <span className="dropdown-icon">🛒</span>
+                    {t('purchaseHistory')}
+                  </Link>
+                  <Link to="/settings" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                    <span className="dropdown-icon">⚙️</span>
+                    {t('settings')}
+                  </Link>
+                  <Link to="/support" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                    <span className="dropdown-icon">💬</span>
+                    {t('support')}
+                  </Link>
+                  <div className="dropdown-divider"></div>
+                  <button onClick={handleLogout} className="dropdown-item logout-item">
+                    <span className="dropdown-icon">🚪</span>
+                    {t('logout')}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <>

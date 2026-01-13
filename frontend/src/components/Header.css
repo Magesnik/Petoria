@@ -189,14 +189,102 @@
 }
 
 .user-menu {
+    position: relative;
+}
+
+.user-dropdown-trigger {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.user-dropdown-trigger:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .user-name {
     color: var(--text-dark);
     font-weight: 600;
+}
+
+.dropdown-arrow {
+    font-size: 0.7rem;
+    color: var(--text-dark);
+    transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+    transform: rotate(180deg);
+}
+
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    min-width: 220px;
+    padding: 8px 0;
+    z-index: 1000;
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: var(--transition);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}
+
+.dropdown-icon {
+    font-size: 1.2rem;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    margin: 8px 0;
+}
+
+.logout-item {
+    color: #e63946;
+}
+
+.logout-item:hover {
+    background-color: rgba(230, 57, 70, 0.1);
+    color: #e63946;
 }
 
 .btn-logout {
@@ -234,4 +322,29 @@
 
 [data-theme='dark'] .user-name {
     color: var(--text-light);
+}
+
+[data-theme='dark'] .dropdown-arrow {
+    color: var(--text-light);
+}
+
+[data-theme='dark'] .user-dropdown-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .user-dropdown {
+    background-color: rgba(2, 12, 27, 0.98);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .dropdown-item {
+    color: var(--text-light);
+}
+
+[data-theme='dark'] .dropdown-item:hover {
+    background-color: rgba(102, 126, 234, 0.2);
+}
+
+[data-theme='dark'] .dropdown-divider {
+    background-color: rgba(255, 255, 255, 0.1);
 }

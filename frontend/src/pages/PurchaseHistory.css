@@ -1,0 +1,260 @@
+.purchase-history-page {
+    min-height: 100vh;
+    padding-top: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.purchase-hero {
+    text-align: center;
+    padding: 60px 20px;
+    color: white;
+}
+
+.purchase-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.purchase-hero p {
+    font-size: 1.3rem;
+    opacity: 0.95;
+}
+
+.purchase-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+}
+
+/* Empty State */
+.empty-state {
+    background: white;
+    border-radius: 20px;
+    padding: 80px 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.empty-state h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+/* Purchase List */
+.purchase-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.purchase-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-columns: 250px 1fr auto;
+    transition: var(--transition);
+}
+
+.purchase-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.purchase-image {
+    height: 100%;
+    overflow: hidden;
+}
+
+.purchase-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.purchase-details {
+    padding: 25px;
+}
+
+.purchase-details h3 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.purchase-location {
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.purchase-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-item {
+    display: flex;
+    gap: 10px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    min-width: 120px;
+}
+
+.info-value {
+    color: var(--text-dark);
+    opacity: 0.8;
+}
+
+.purchase-summary {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px;
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 2px solid rgba(102, 126, 234, 0.2);
+    min-width: 200px;
+}
+
+.purchase-price {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.price-label {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    opacity: 0.7;
+}
+
+.price-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.purchase-status {
+    margin: 15px 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-confirmed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.btn-view {
+    padding: 10px 20px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Dark Mode */
+[data-theme='dark'] .empty-state,
+[data-theme='dark'] .purchase-card {
+    background-color: rgba(2, 12, 27, 0.95);
+}
+
+[data-theme='dark'] .empty-state h2,
+[data-theme='dark'] .purchase-details h3 {
+    color: var(--text-light);
+}
+
+[data-theme='dark'] .empty-state p,
+[data-theme='dark'] .purchase-location,
+[data-theme='dark'] .info-label,
+[data-theme='dark'] .info-value,
+[data-theme='dark'] .price-label {
+    color: var(--text-light);
+}
+
+[data-theme='dark'] .purchase-summary {
+    background: rgba(102, 126, 234, 0.1);
+    border-left-color: rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .purchase-card {
+        grid-template-columns: 1fr;
+    }
+
+    .purchase-image {
+        height: 200px;
+    }
+
+    .purchase-summary {
+        border-left: none;
+        border-top: 2px solid rgba(102, 126, 234, 0.2);
+    }
+}
+
+@media (max-width: 768px) {
+    .purchase-hero h1 {
+        font-size: 2rem;
+    }
+
+    .purchase-hero p {
+        font-size: 1rem;
+    }
+
+    .empty-state {
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+    }
+
+    .purchase-details,
+    .purchase-summary {
+        padding: 20px;
+    }
+}
