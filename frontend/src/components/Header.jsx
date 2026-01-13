@@ -78,6 +78,13 @@ const Header = () => {
           {user ? (
             <div className="user-menu" ref={dropdownRef}>
               <button onClick={toggleDropdown} className="user-dropdown-trigger">
+                <div className="user-avatar-small">
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.firstName} />
+                  ) : (
+                    <span>👤</span>
+                  )}
+                </div>
                 <span className="user-name">{user.firstName}</span>
                 <span className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▼</span>
               </button>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import Header from '../components/Header';
+import CommentsSection from '../components/CommentsSection';
 import './HotelDetails.css';
 
 const HotelDetails = () => {
@@ -252,6 +253,9 @@ const HotelDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Comments Section */}
+                <CommentsSection hotelId={parseInt(id)} />
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -6,7 +6,7 @@ import './Settings.css';
 
 const Settings = () => {
     const { t } = useLanguage();
-    const { user } = useAuth();
+    const { user, login } = useAuth();
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
@@ -19,6 +19,10 @@ const Settings = () => {
     });
     const [message, setMessage] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
+    const [avatarMessage, setAvatarMessage] = useState('');
+    const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || null);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef(null);
 
     const handleProfileChange = (e) => {
         setFormData({
@@ -34,11 +38,124 @@ const Settings = () => {
         });
     };
 
-    const handleProfileSubmit = (e) => {
+    const handleProfileSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Add API call to update profile
-        setMessage(t('profileUpdated'));
-        setTimeout(() => setMessage(''), 3000);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5150/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    firstName: formData.firstName,
+                    lastName: formData.lastName
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Update user in context
+                login({ ...user, firstName: data.user.firstName, lastName: data.user.lastName }, token);
+                setMessage(t('profileUpdated') || 'Profile updated successfully');
+                setTimeout(() => setMessage(''), 3000);
+            } else {
+                setMessage('Failed to update profile');
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            setMessage('Error updating profile');
+        }
+    };
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                setAvatarMessage('Only JPG, JPEG, and PNG files are allowed');
+                setTimeout(() => setAvatarMessage(''), 3000);
+                return;
+            }
+
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                setAvatarMessage('File size must be less than 2MB');
+                setTimeout(() => setAvatarMessage(''), 3000);
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+
+            // Upload immediately
+            handleAvatarUpload(file);
+        }
+    };
+
+    const handleAvatarUpload = async (file) => {
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5150/api/profile/avatar', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const fullAvatarUrl = `http://localhost:5150${data.avatarUrl}`;
+                setAvatarPreview(fullAvatarUrl);
+                // Update user in context
+                login({ ...user, avatarUrl: fullAvatarUrl }, token);
+                setAvatarMessage('Avatar uploaded successfully');
+                setTimeout(() => setAvatarMessage(''), 3000);
+            } else {
+                setAvatarMessage('Failed to upload avatar');
+            }
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            setAvatarMessage('Error uploading avatar');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleAvatarRemove = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5150/api/profile/avatar', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setAvatarPreview(null);
+                // Update user in context
+                login({ ...user, avatarUrl: null }, token);
+                setAvatarMessage('Avatar removed successfully');
+                setTimeout(() => setAvatarMessage(''), 3000);
+            } else {
+                setAvatarMessage('Failed to remove avatar');
+            }
+        } catch (error) {
+            console.error('Error removing avatar:', error);
+            setAvatarMessage('Error removing avatar');
+        }
     };
 
     const handlePasswordSubmit = (e) => {
@@ -68,6 +185,47 @@ const Settings = () => {
                 </div>
 
                 <div className="settings-container">
+                    {/* Avatar Section */}
+                    <div className="settings-section avatar-section">
+                        <h2>{t('profilePicture') || 'Profile Picture'}</h2>
+                        <div className="avatar-upload-container">
+                            <div className="avatar-preview">
+                                {avatarPreview ? (
+                                    <img src={avatarPreview} alt="Avatar" />
+                                ) : (
+                                    <div className="avatar-placeholder">👤</div>
+                                )}
+                            </div>
+                            <div className="avatar-actions">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/jpg,image/png"
+                                    onChange={handleAvatarChange}
+                                    style={{ display: 'none' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={uploading}
+                                >
+                                    {uploading ? 'Uploading...' : (t('uploadPicture') || 'Upload Picture')}
+                                </button>
+                                {avatarPreview && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={handleAvatarRemove}
+                                    >
+                                        {t('removePicture') || 'Remove Picture'}
+                                    </button>
+                                )}
+                            </div>
+                            {avatarMessage && <div className="info-message">{avatarMessage}</div>}
+                        </div>
+                    </div>
+
                     {/* Profile Information Section */}
                     <div className="settings-section">
                         <h2>{t('profileInfo')}</h2>
