@@ -131,6 +131,18 @@
     min-height: 100px;
 }
 
+/* Coordinate inputs */
+.coordinate-input {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+}
+
+.coordinate-input::placeholder {
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
 /* Image Preview */
 .image-preview {
     margin-top: 1rem;

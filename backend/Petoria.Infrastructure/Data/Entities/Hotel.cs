@@ -25,6 +25,13 @@ public class Hotel
     [MaxLength(100)]
     public string Country { get; set; } = string.Empty;
 
+    // Geographic coordinates for map display (nullable for existing hotels without coordinates)
+    [Column(TypeName = "decimal(10,7)")]
+    public decimal? Latitude { get; set; }
+
+    [Column(TypeName = "decimal(10,7)")]
+    public decimal? Longitude { get; set; }
+
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal PricePerNight { get; set; }

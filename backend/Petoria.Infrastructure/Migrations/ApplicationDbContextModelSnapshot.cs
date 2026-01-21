@@ -266,7 +266,7 @@ namespace Petoria.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.CommentRating", b =>
@@ -296,7 +296,7 @@ namespace Petoria.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CommentRatings");
+                    b.ToTable("CommentRatings", (string)null);
                 });
 
             modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.Hotel", b =>
@@ -373,7 +373,7 @@ namespace Petoria.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Hotels");
+                    b.ToTable("Hotels", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

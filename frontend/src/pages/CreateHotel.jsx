@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
+import LocationPicker from '../components/LocationPicker';
 import './CreateHotel.css';
 
 const CreateHotel = () => {
@@ -16,6 +17,8 @@ const CreateHotel = () => {
         location: '',
         city: '',
         country: '',
+        latitude: null,
+        longitude: null,
         pricePerNight: '',
         rating: '',
         imageUrl: ''
@@ -208,6 +211,8 @@ const CreateHotel = () => {
                 location: formData.location,
                 city: formData.city,
                 country: formData.country,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
                 pricePerNight: parseFloat(formData.pricePerNight),
                 rating: parseFloat(formData.rating),
                 imageUrl: formData.imageUrl || '',
@@ -251,6 +256,8 @@ const CreateHotel = () => {
                 location: '',
                 city: '',
                 country: '',
+                latitude: null,
+                longitude: null,
                 pricePerNight: '',
                 rating: '',
                 imageUrl: ''
@@ -390,6 +397,49 @@ const CreateHotel = () => {
                                     />
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Location Picker */}
+                        <div className="form-section">
+                            <h3 className="section-title">📍 Местоположение на картата</h3>
+                            <p className="section-description">Изберете точното местоположение на хотела на картата</p>
+
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Географска ширина (Latitude)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.latitude || ''}
+                                        onChange={(e) => setFormData({ ...formData, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                                        step="0.000001"
+                                        placeholder="42.697708"
+                                        className="coordinate-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Географска дължина (Longitude)</label>
+                                    <input
+                                        type="number"
+                                        value={formData.longitude || ''}
+                                        onChange={(e) => setFormData({ ...formData, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                                        step="0.000001"
+                                        placeholder="23.321868"
+                                        className="coordinate-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <LocationPicker
+                                onLocationSelect={(lat, lng) => {
+                                    setFormData({
+                                        ...formData,
+                                        latitude: lat,
+                                        longitude: lng
+                                    });
+                                }}
+                                initialLat={formData.latitude}
+                                initialLng={formData.longitude}
+                            />
                         </div>
 
                         {/* Images */}
