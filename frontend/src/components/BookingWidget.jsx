@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import DateRangeCalendar from './DateRangeCalendar';
 import './BookingWidget.css';
 
 const BookingWidget = ({ hotelId, onBookingComplete }) => {
@@ -37,12 +38,12 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
         fetchRoomTypes();
     }, [hotelId]);
 
-    // Fetch availability when dates or room type changes
+    // Fetch availability when room type changes
     useEffect(() => {
-        if (selectedRoomType && checkInDate) {
+        if (selectedRoomType) {
             fetchAvailability();
         }
-    }, [selectedRoomType, checkInDate]);
+    }, [selectedRoomType]);
 
     // Calculate price when dates or room selection changes
     useEffect(() => {
@@ -74,12 +75,10 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
     };
 
     const fetchAvailability = async () => {
-        if (!checkInDate) return;
-
         try {
-            // Fetch 90 days from check-in date
-            const fromDate = checkInDate;
-            const toDate = new Date(checkInDate);
+            // Fetch 90 days from today
+            const fromDate = new Date().toISOString().split('T')[0];
+            const toDate = new Date();
             toDate.setDate(toDate.getDate() + 90);
             const toDateStr = toDate.toISOString().split('T')[0];
 
@@ -251,33 +250,20 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                 </div>
             </div>
 
-            {/* Date Selection */}
-            <div className="booking-section dates-section">
-                <div className="date-input-group">
-                    <label>Настаняване</label>
-                    <input
-                        type="date"
-                        value={checkInDate}
-                        onChange={(e) => {
-                            setCheckInDate(e.target.value);
-                            // Reset check-out if it's before check-in
-                            if (checkOutDate && e.target.value >= checkOutDate) {
-                                setCheckOutDate('');
-                            }
-                        }}
-                        min={today}
-                    />
-                </div>
-                <div className="date-input-group">
-                    <label>Напускане</label>
-                    <input
-                        type="date"
-                        value={checkOutDate}
-                        onChange={(e) => setCheckOutDate(e.target.value)}
-                        min={checkInDate || today}
-                        disabled={!checkInDate}
-                    />
-                </div>
+            {/* Date Selection - Visual Calendar */}
+            <div className="booking-section">
+                <label>Изберете дати</label>
+                <DateRangeCalendar
+                    hotelId={hotelId}
+                    selectedRoomType={selectedRoomType}
+                    checkInDate={checkInDate}
+                    checkOutDate={checkOutDate}
+                    onDateChange={(checkIn, checkOut) => {
+                        setCheckInDate(checkIn);
+                        setCheckOutDate(checkOut);
+                    }}
+                    availability={availability}
+                />
             </div>
 
             {/* Number of Rooms */}
