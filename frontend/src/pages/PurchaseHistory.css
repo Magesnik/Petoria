@@ -1,7 +1,7 @@
 .purchase-history-page {
     min-height: 100vh;
     padding-top: 80px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
 }
 
 .purchase-hero {
@@ -11,250 +11,366 @@
 }
 
 .purchase-hero h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     margin-bottom: 15px;
     font-weight: 700;
 }
 
 .purchase-hero p {
-    font-size: 1.3rem;
-    opacity: 0.95;
+    font-size: 1.1rem;
+    opacity: 0.8;
 }
 
 .purchase-container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 40px 20px 80px;
+    padding: 20px 20px 80px;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px;
+    color: #888;
+}
+
+.loading-state .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error Message */
+.error-message {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 /* Empty State */
 .empty-state {
-    background: white;
+    background: rgba(30, 35, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 80px 40px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .empty-icon {
     font-size: 5rem;
     margin-bottom: 20px;
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
 .empty-state h2 {
-    font-size: 2rem;
-    color: var(--primary-color);
+    font-size: 1.75rem;
+    color: #fff;
     margin-bottom: 15px;
 }
 
 .empty-state p {
-    font-size: 1.1rem;
-    color: var(--text-dark);
+    font-size: 1rem;
+    color: #888;
     margin-bottom: 30px;
-    opacity: 0.8;
 }
 
-/* Purchase List */
-.purchase-list {
+.empty-state .btn-primary {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.empty-state .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Reservations List */
+.reservations-list {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 20px;
 }
 
-.purchase-card {
-    background: white;
+.reservation-card {
+    background: rgba(30, 35, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     display: grid;
-    grid-template-columns: 250px 1fr auto;
-    transition: var(--transition);
+    grid-template-columns: 220px 1fr auto;
+    transition: all 0.3s ease;
 }
 
-.purchase-card:hover {
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+.reservation-card:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.purchase-image {
+.reservation-card.status-cancelled {
+    opacity: 0.7;
+}
+
+/* Reservation Image */
+.reservation-image {
+    position: relative;
     height: 100%;
-    overflow: hidden;
+    min-height: 200px;
 }
 
-.purchase-image img {
+.reservation-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.purchase-details {
-    padding: 25px;
+.reservation-image .status-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
 }
 
-.purchase-details h3 {
-    font-size: 1.5rem;
-    color: var(--primary-color);
-    margin-bottom: 8px;
-}
-
-.purchase-location {
-    color: var(--text-dark);
-    margin-bottom: 20px;
-    opacity: 0.8;
-}
-
-.purchase-info {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.info-item {
-    display: flex;
-    gap: 10px;
-}
-
-.info-label {
-    font-weight: 600;
-    color: var(--text-dark);
-    min-width: 120px;
-}
-
-.info-value {
-    color: var(--text-dark);
-    opacity: 0.8;
-}
-
-.purchase-summary {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 25px;
-    background: rgba(102, 126, 234, 0.05);
-    border-left: 2px solid rgba(102, 126, 234, 0.2);
-    min-width: 200px;
-}
-
-.purchase-price {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.price-label {
-    font-size: 0.9rem;
-    color: var(--text-dark);
-    opacity: 0.7;
-}
-
-.price-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--accent-color);
-}
-
-.purchase-status {
-    margin: 15px 0;
-}
-
+/* Status Badges */
 .status-badge {
     display: inline-block;
-    padding: 8px 16px;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
 .status-confirmed {
-    background-color: #d4edda;
-    color: #155724;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .status-pending {
-    background-color: #fff3cd;
-    color: #856404;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
 .status-cancelled {
-    background-color: #f8d7da;
-    color: #721c24;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-completed {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Reservation Details */
+.reservation-details {
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reservation-details h3 {
+    font-size: 1.3rem;
+    color: #fff;
+    margin: 0;
+}
+
+.room-type {
+    color: #888;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.reservation-dates {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.date-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.date-label {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.date-value {
+    font-size: 0.95rem;
+    color: #fff;
+    font-weight: 500;
+}
+
+.reservation-dates .date-separator {
+    color: #667eea;
+    font-size: 1.25rem;
+}
+
+.reservation-info {
+    display: flex;
+    gap: 20px;
+    color: #888;
+    font-size: 0.9rem;
+    margin-top: auto;
+}
+
+/* Reservation Summary */
+.reservation-summary {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 25px;
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 180px;
+}
+
+.price-breakdown {
+    margin-bottom: 8px;
+}
+
+.price-detail {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.total-price {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: auto;
+}
+
+.total-price .price-label {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.total-price .price-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.reservation-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
 }
 
 .btn-view {
     padding: 10px 20px;
-    background: var(--primary-color);
-    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     text-align: center;
-    transition: var(--transition);
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
 
 .btn-view:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
-/* Dark Mode */
-[data-theme='dark'] .empty-state,
-[data-theme='dark'] .purchase-card {
-    background-color: rgba(2, 12, 27, 0.95);
+.btn-cancel {
+    padding: 10px 20px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-[data-theme='dark'] .empty-state h2,
-[data-theme='dark'] .purchase-details h3 {
-    color: var(--text-light);
-}
-
-[data-theme='dark'] .empty-state p,
-[data-theme='dark'] .purchase-location,
-[data-theme='dark'] .info-label,
-[data-theme='dark'] .info-value,
-[data-theme='dark'] .price-label {
-    color: var(--text-light);
-}
-
-[data-theme='dark'] .purchase-summary {
-    background: rgba(102, 126, 234, 0.1);
-    border-left-color: rgba(102, 126, 234, 0.3);
+.btn-cancel:hover {
+    background: rgba(239, 68, 68, 0.2);
 }
 
 /* Responsive */
-@media (max-width: 968px) {
-    .purchase-card {
+@media (max-width: 900px) {
+    .reservation-card {
         grid-template-columns: 1fr;
     }
 
-    .purchase-image {
-        height: 200px;
+    .reservation-image {
+        height: 180px;
     }
 
-    .purchase-summary {
+    .reservation-summary {
         border-left: none;
-        border-top: 2px solid rgba(102, 126, 234, 0.2);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .reservation-actions {
+        flex-direction: row;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .purchase-hero h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .purchase-hero p {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
-    .empty-state {
-        padding: 60px 20px;
+    .reservation-dates {
+        flex-wrap: wrap;
     }
 
-    .empty-icon {
-        font-size: 3rem;
+    .reservation-info {
+        flex-wrap: wrap;
+        gap: 10px;
     }
 
-    .purchase-details,
-    .purchase-summary {
-        padding: 20px;
+    .reservation-summary {
+        padding: 15px 20px;
+    }
+
+    .total-price .price-value {
+        font-size: 1.3rem;
     }
 }

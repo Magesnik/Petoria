@@ -1,95 +1,205 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import './PurchaseHistory.css';
 
 const PurchaseHistory = () => {
     const { t } = useLanguage();
-    const [purchases, setPurchases] = useState([]);
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    const [reservations, setReservations] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        // TODO: Fetch purchase history from API
-        // For now, using empty array as placeholder
-        setPurchases([]);
-    }, []);
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchReservations();
+    }, [user, navigate]);
+
+    const fetchReservations = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5150/api/reservations/my', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch reservations');
+
+            const data = await response.json();
+            setReservations(data);
+        } catch (err) {
+            console.error('Error fetching reservations:', err);
+            setError('Грешка при зареждане на резервациите');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCancelReservation = async (reservationId) => {
+        if (!window.confirm('Сигурни ли сте, че искате да отмените тази резервация?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5150/api/reservations/${reservationId}/cancel`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to cancel reservation');
+
+            // Refresh list
+            fetchReservations();
+        } catch (err) {
+            console.error('Error cancelling reservation:', err);
+            setError('Грешка при отмяна на резервацията');
+        }
+    };
 
     const getStatusClass = (status) => {
-        switch (status.toLowerCase()) {
+        switch (status?.toLowerCase()) {
             case 'confirmed':
                 return 'status-confirmed';
             case 'pending':
                 return 'status-pending';
             case 'cancelled':
                 return 'status-cancelled';
+            case 'completed':
+                return 'status-completed';
             default:
                 return '';
         }
     };
+
+    const getStatusLabel = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'confirmed':
+                return 'Потвърдена';
+            case 'pending':
+                return 'Изчакваща';
+            case 'cancelled':
+                return 'Отменена';
+            case 'completed':
+                return 'Завършена';
+            default:
+                return status;
+        }
+    };
+
+    const formatDate = (dateStr) => {
+        return new Date(dateStr).toLocaleDateString('bg-BG', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    if (loading) {
+        return (
+            <>
+                <Header />
+                <div className="purchase-history-page">
+                    <div className="loading-state">
+                        <div className="spinner"></div>
+                        <p>Зареждане...</p>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
             <Header />
             <div className="purchase-history-page">
                 <div className="purchase-hero">
-                    <h1>{t('purchaseHistoryTitle')}</h1>
-                    <p>{t('purchaseHistorySubtitle')}</p>
+                    <h1>📋 Моите резервации</h1>
+                    <p>Преглед на вашите минали и предстоящи резервации</p>
                 </div>
 
                 <div className="purchase-container">
-                    {purchases.length === 0 ? (
+                    {error && <div className="error-message">{error}</div>}
+
+                    {reservations.length === 0 ? (
                         <div className="empty-state">
-                            <div className="empty-icon">🛒</div>
-                            <h2>{t('noPurchases')}</h2>
-                            <p>{t('noPurchasesText')}</p>
+                            <div className="empty-icon">🏨</div>
+                            <h2>Нямате резервации</h2>
+                            <p>Все още нямате направени резервации. Разгледайте нашите хотели!</p>
                             <Link to="/hotels" className="btn btn-primary">
-                                {t('exploreHotels')}
+                                Разгледай хотели
                             </Link>
                         </div>
                     ) : (
-                        <div className="purchase-list">
-                            {purchases.map((purchase) => (
-                                <div key={purchase.id} className="purchase-card">
-                                    <div className="purchase-image">
-                                        <img src={purchase.hotelImageUrl} alt={purchase.hotelName} />
+                        <div className="reservations-list">
+                            {reservations.map((reservation) => (
+                                <div key={reservation.id} className={`reservation-card ${getStatusClass(reservation.status)}`}>
+                                    <div className="reservation-image">
+                                        <img
+                                            src={reservation.hotelImageUrl || '/placeholder-hotel.jpg'}
+                                            alt={reservation.hotelName}
+                                        />
+                                        <span className={`status-badge ${getStatusClass(reservation.status)}`}>
+                                            {getStatusLabel(reservation.status)}
+                                        </span>
                                     </div>
-                                    <div className="purchase-details">
-                                        <h3>{purchase.hotelName}</h3>
-                                        <p className="purchase-location">📍 {purchase.location}</p>
-                                        <div className="purchase-info">
-                                            <div className="info-item">
-                                                <span className="info-label">{t('bookingDate')}:</span>
-                                                <span className="info-value">
-                                                    {new Date(purchase.bookingDate).toLocaleDateString()}
-                                                </span>
+
+                                    <div className="reservation-details">
+                                        <h3>{reservation.hotelName}</h3>
+                                        <p className="room-type">🛏️ {reservation.roomTypeName}</p>
+
+                                        <div className="reservation-dates">
+                                            <div className="date-item">
+                                                <span className="date-label">Настаняване</span>
+                                                <span className="date-value">{formatDate(reservation.checkInDate)}</span>
                                             </div>
-                                            <div className="info-item">
-                                                <span className="info-label">{t('checkIn')}:</span>
-                                                <span className="info-value">
-                                                    {new Date(purchase.checkInDate).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            <div className="info-item">
-                                                <span className="info-label">{t('checkOut')}:</span>
-                                                <span className="info-value">
-                                                    {new Date(purchase.checkOutDate).toLocaleDateString()}
-                                                </span>
+                                            <div className="date-separator">→</div>
+                                            <div className="date-item">
+                                                <span className="date-label">Напускане</span>
+                                                <span className="date-value">{formatDate(reservation.checkOutDate)}</span>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="purchase-summary">
-                                        <div className="purchase-price">
-                                            <span className="price-label">{t('totalPrice')}</span>
-                                            <span className="price-value">${purchase.totalPrice}</span>
+
+                                        <div className="reservation-info">
+                                            <span>🌙 {reservation.numberOfNights} нощувки</span>
+                                            <span>🚪 {reservation.numberOfRooms} {reservation.numberOfRooms === 1 ? 'стая' : 'стаи'}</span>
                                         </div>
-                                        <div className="purchase-status">
-                                            <span className={`status-badge ${getStatusClass(purchase.status)}`}>
-                                                {t(purchase.status.toLowerCase())}
+                                    </div>
+
+                                    <div className="reservation-summary">
+                                        <div className="price-breakdown">
+                                            <span className="price-detail">
+                                                {reservation.pricePerNight} лв × {reservation.numberOfNights} нощи
+                                                {reservation.numberOfRooms > 1 && ` × ${reservation.numberOfRooms} стаи`}
                                             </span>
                                         </div>
-                                        <Link to={`/hotels/${purchase.hotelId}`} className="btn btn-view">
-                                            View Hotel
-                                        </Link>
+                                        <div className="total-price">
+                                            <span className="price-label">Обща сума</span>
+                                            <span className="price-value">{reservation.totalPrice} лв</span>
+                                        </div>
+
+                                        <div className="reservation-actions">
+                                            <Link to={`/hotel/${reservation.hotelId}`} className="btn btn-view">
+                                                Виж хотел
+                                            </Link>
+                                            {reservation.status?.toLowerCase() === 'confirmed' && (
+                                                <button
+                                                    className="btn btn-cancel"
+                                                    onClick={() => handleCancelReservation(reservation.id)}
+                                                >
+                                                    Отмени
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}
