@@ -1,14 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --primary-color: #0a192f; /* Deep Navy */
-  --secondary-color: #64ffda; /* Teal/Cyan Accent */
-  --accent-color: #fca311; /* Gold/Amber */
+  --primary-color: #0a192f;
+  /* Deep Navy */
+  --secondary-color: #64ffda;
+  /* Teal/Cyan Accent */
+  --accent-color: #fca311;
+  /* Gold/Amber */
   --text-light: #e6f1ff;
   --text-dark: #112240;
   --bg-light: #ffffff;
   --bg-dark: #020c1b;
   --transition: all 0.3s ease-in-out;
+  --header-height: 80px;
+}
+
+/* Global class for pages that need header spacing */
+.page-with-header {
+  padding-top: var(--header-height);
 }
 
 * {

@@ -24,6 +24,7 @@
 .hotel-details-page {
     min-height: 100vh;
     background: var(--bg-primary);
+    padding-top: var(--header-height, 80px);
 }
 
 /* Hero Section */

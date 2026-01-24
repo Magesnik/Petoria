@@ -52,17 +52,92 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
     const [mapCenter, setMapCenter] = useState(
         initialLat && initialLng ? [initialLat, initialLng] : defaultCenter
     );
+    const [addressInfo, setAddressInfo] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const handleMapClick = (lat, lng) => {
-        const newPosition = [lat, lng];
-        setPosition(newPosition);
-        onLocationSelect(lat, lng);
+    // Reverse geocoding using Nominatim API
+    const reverseGeocode = async (lat, lng) => {
+        setLoading(true);
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+                {
+                    headers: {
+                        'Accept-Language': 'bg,en'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Geocoding failed');
+            }
+
+            const data = await response.json();
+            const address = data.address || {};
+
+            // Extract relevant address components
+            const city = address.city || address.town || address.village || address.municipality || '';
+            const country = address.country || '';
+            const street = address.road || address.street || '';
+            const houseNumber = address.house_number || '';
+            const suburb = address.suburb || address.neighbourhood || '';
+
+            // Build full address
+            let fullAddress = '';
+            if (street) {
+                fullAddress = street;
+                if (houseNumber) {
+                    fullAddress += ' ' + houseNumber;
+                }
+            }
+            if (suburb && !fullAddress.includes(suburb)) {
+                fullAddress = fullAddress ? `${fullAddress}, ${suburb}` : suburb;
+            }
+
+            const info = {
+                city,
+                country,
+                address: fullAddress || data.display_name?.split(',')[0] || ''
+            };
+
+            setAddressInfo(info);
+            return info;
+        } catch (error) {
+            console.error('Reverse geocoding error:', error);
+            return null;
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleMarkerDrag = (e) => {
+    const handleMapClick = async (lat, lng) => {
+        const newPosition = [lat, lng];
+        setPosition(newPosition);
+
+        // Fetch address info and pass everything to parent
+        const info = await reverseGeocode(lat, lng);
+        onLocationSelect({
+            lat,
+            lng,
+            city: info?.city || '',
+            country: info?.country || '',
+            address: info?.address || ''
+        });
+    };
+
+    const handleMarkerDrag = async (e) => {
         const { lat, lng } = e.target.getLatLng();
         setPosition([lat, lng]);
-        onLocationSelect(lat, lng);
+
+        // Fetch address info and pass everything to parent
+        const info = await reverseGeocode(lat, lng);
+        onLocationSelect({
+            lat,
+            lng,
+            city: info?.city || '',
+            country: info?.country || '',
+            address: info?.address || ''
+        });
     };
 
     // Update position when initial coordinates change
@@ -78,7 +153,12 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
         <div className="location-picker">
             <div className="location-picker-instructions">
                 <p>📍 Кликнете на картата за избор на местоположението на хотела</p>
-                {position && (
+                {loading && (
+                    <div className="geocoding-loading">
+                        ⏳ Зареждане на адрес...
+                    </div>
+                )}
+                {position && !loading && (
                     <div className="coordinates-display">
                         <span className="coordinate">
                             <strong>Lat:</strong> {position[0].toFixed(6)}
@@ -86,6 +166,25 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
                         <span className="coordinate">
                             <strong>Lng:</strong> {position[1].toFixed(6)}
                         </span>
+                    </div>
+                )}
+                {addressInfo && !loading && (
+                    <div className="address-display">
+                        {addressInfo.address && (
+                            <span className="address-item">
+                                <strong>📍 Адрес:</strong> {addressInfo.address}
+                            </span>
+                        )}
+                        {addressInfo.city && (
+                            <span className="address-item">
+                                <strong>🏙️ Град:</strong> {addressInfo.city}
+                            </span>
+                        )}
+                        {addressInfo.country && (
+                            <span className="address-item">
+                                <strong>🌍 Държава:</strong> {addressInfo.country}
+                            </span>
+                        )}
                     </div>
                 )}
             </div>
