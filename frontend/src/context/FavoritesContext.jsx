@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
 
 const FavoritesContext = createContext();
 
@@ -11,37 +12,118 @@ export const useFavorites = () => {
 };
 
 export const FavoritesProvider = ({ children }) => {
-    const [favorites, setFavorites] = useState(() => {
-        // Initialize from localStorage
-        const stored = localStorage.getItem('hotelFavorites');
-        return stored ? JSON.parse(stored) : [];
-    });
+    const [favorites, setFavorites] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const { user } = useAuth();
 
-    // Persist to localStorage whenever favorites change
-    useEffect(() => {
-        localStorage.setItem('hotelFavorites', JSON.stringify(favorites));
-    }, [favorites]);
+    // Fetch favorites from API when user logs in
+    const fetchFavorites = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token || !user) {
+            setFavorites([]);
+            return;
+        }
 
-    const toggleFavorite = (hotelId) => {
-        setFavorites((prev) => {
-            if (prev.includes(hotelId)) {
-                // Remove from favorites
-                return prev.filter(id => id !== hotelId);
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:5150/api/favorites/ids', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setFavorites(data);
             } else {
-                // Add to favorites
-                return [...prev, hotelId];
+                setFavorites([]);
             }
-        });
+        } catch (error) {
+            console.error('Error fetching favorites:', error);
+            setFavorites([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [user]);
+
+    // Fetch favorites when user changes
+    useEffect(() => {
+        fetchFavorites();
+    }, [fetchFavorites]);
+
+    // Toggle favorite via API
+    const toggleFavorite = async (hotelId) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn('User must be logged in to manage favorites');
+            return false;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5150/api/favorites/toggle/${hotelId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                if (data.isFavorite) {
+                    // Add to local state
+                    setFavorites(prev => [...prev, hotelId]);
+                } else {
+                    // Remove from local state
+                    setFavorites(prev => prev.filter(id => id !== hotelId));
+                }
+
+                return data.isFavorite;
+            } else {
+                console.error('Failed to toggle favorite');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            return null;
+        }
     };
 
     const isFavorite = (hotelId) => {
         return favorites.includes(hotelId);
     };
 
+    // Get full favorites list with hotel details
+    const getFavoritesWithDetails = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return [];
+        }
+
+        try {
+            const response = await fetch('http://localhost:5150/api/favorites', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                return await response.json();
+            }
+            return [];
+        } catch (error) {
+            console.error('Error fetching favorites with details:', error);
+            return [];
+        }
+    };
+
     const value = {
         favorites,
+        loading,
         toggleFavorite,
-        isFavorite
+        isFavorite,
+        getFavoritesWithDetails,
+        refreshFavorites: fetchFavorites
     };
 
     return (

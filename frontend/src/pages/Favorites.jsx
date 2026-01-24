@@ -2,23 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import HotelCard from '../components/HotelCard';
 import './Favorites.css';
 
 const Favorites = () => {
     const { t } = useLanguage();
-    const { favorites, toggleFavorite } = useFavorites();
+    const { favorites, getFavoritesWithDetails, loading: favoritesLoading } = useFavorites();
+    const { user } = useAuth();
     const [favoriteHotels, setFavoriteHotels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchFavoriteHotels();
-    }, [favorites]);
+    }, [favorites, user]);
 
     const fetchFavoriteHotels = async () => {
-        if (favorites.length === 0) {
+        if (!user) {
+            setFavoriteHotels([]);
+            setLoading(false);
+            return;
+        }
+
+        if (favorites.length === 0 && !favoritesLoading) {
             setFavoriteHotels([]);
             setLoading(false);
             return;
@@ -28,18 +36,21 @@ const Favorites = () => {
         setError(null);
 
         try {
-            // Fetch all hotels, then filter by favorite IDs
-            const response = await fetch('http://localhost:5150/api/hotels');
+            // Use the API to get favorites with full hotel details
+            const favoritesData = await getFavoritesWithDetails();
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch hotels');
-            }
+            // Transform API response to match HotelCard expected format
+            const hotels = favoritesData.map(fav => ({
+                id: fav.hotelId,
+                name: fav.hotelName,
+                city: fav.hotelCity,
+                country: fav.hotelCountry,
+                imageUrl: fav.hotelImageUrl,
+                pricePerNight: fav.hotelPricePerNight,
+                rating: fav.hotelRating
+            }));
 
-            const allHotels = await response.json();
-
-            // Filter to only show favorited hotels
-            const favoritedHotels = allHotels.filter(hotel => favorites.includes(hotel.id));
-            setFavoriteHotels(favoritedHotels);
+            setFavoriteHotels(hotels);
         } catch (err) {
             setError(err.message);
             console.error('Error fetching favorite hotels:', err);
