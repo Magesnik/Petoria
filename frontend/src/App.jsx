@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Favorites from './pages/Favorites';
 import PurchaseHistory from './pages/PurchaseHistory';
 import Support from './pages/Support';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
                     <Route path="/favorites" element={<Favorites />} />
                     <Route path="/purchase-history" element={<PurchaseHistory />} />
                     <Route path="/support" element={<Support />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
                   </Routes>
                 </div>
               </Router>

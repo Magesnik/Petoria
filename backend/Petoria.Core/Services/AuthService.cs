@@ -82,17 +82,22 @@ public class AuthService : IAuthService
                     return null;
                 }
 
-                // Assign Admin role to specific email
+                // Assign SuperAdmin role to specific email
                 if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
                 {
+                    await _userManager.AddToRoleAsync(user, "SuperAdmin");
                     await _userManager.AddToRoleAsync(user, "Admin");
                 }
             }
             else
             {
-                // User exists - ensure pepi.200712@gmail.com has Admin role
+                // User exists - ensure pepi.200712@gmail.com has SuperAdmin role
                 if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
                 {
+                    if (!await _userManager.IsInRoleAsync(user, "SuperAdmin"))
+                    {
+                        await _userManager.AddToRoleAsync(user, "SuperAdmin");
+                    }
                     if (!await _userManager.IsInRoleAsync(user, "Admin"))
                     {
                         await _userManager.AddToRoleAsync(user, "Admin");
@@ -142,6 +147,12 @@ public class AuthService : IAuthService
             await _roleManager.CreateAsync(new IdentityRole("Admin"));
         }
 
+        // Create SuperAdmin role if it doesn't exist
+        if (!await _roleManager.RoleExistsAsync("SuperAdmin"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+        }
+
         // Check if admin user exists
         var adminEmail = "admin@admin.com";
         var adminUser = await _userManager.FindByEmailAsync(adminEmail);
@@ -170,6 +181,22 @@ public class AuthService : IAuthService
             if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
             {
                 await _userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+
+        // Ensure pepi.200712@gmail.com has SuperAdmin role
+        var superAdminEmail = "pepi.200712@gmail.com";
+        var superAdminUser = await _userManager.FindByEmailAsync(superAdminEmail);
+        if (superAdminUser != null)
+        {
+            if (!await _userManager.IsInRoleAsync(superAdminUser, "SuperAdmin"))
+            {
+                await _userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+            }
+            // Also ensure they have Admin role for backwards compatibility
+            if (!await _userManager.IsInRoleAsync(superAdminUser, "Admin"))
+            {
+                await _userManager.AddToRoleAsync(superAdminUser, "Admin");
             }
         }
     }

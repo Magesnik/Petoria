@@ -12,7 +12,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isSuperAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,6 +64,9 @@ const Header = () => {
             <li><Link to="/about" className="nav-link">{t('about')}</Link></li>
             {isAdmin() && (
               <li><Link to="/create-hotel" className="nav-link admin-link">➕ Създай хотел</Link></li>
+            )}
+            {isSuperAdmin() && (
+              <li><Link to="/admin" className="nav-link super-admin-link">🛡️ Admin Panel</Link></li>
             )}
           </ul>
         </nav>

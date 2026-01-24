@@ -235,8 +235,37 @@ public class HotelsController : ControllerBase
             return BadRequest();
         }
 
-        hotel.UpdatedAt = DateTime.UtcNow;
-        _context.Entry(hotel).State = EntityState.Modified;
+        var existingHotel = await _context.Hotels.FindAsync(id);
+        if (existingHotel == null)
+        {
+            return NotFound();
+        }
+
+        // Check authorization: SuperAdmin can edit any, Admin can only edit own hotels
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var isSuperAdmin = User.IsInRole("SuperAdmin");
+        
+        if (!isSuperAdmin && existingHotel.CreatedById != userId)
+        {
+            return Forbid("You can only edit hotels that you created");
+        }
+
+        // Update the existing hotel properties
+        existingHotel.Name = hotel.Name;
+        existingHotel.Description = hotel.Description;
+        existingHotel.Location = hotel.Location;
+        existingHotel.City = hotel.City;
+        existingHotel.Country = hotel.Country;
+        existingHotel.Latitude = hotel.Latitude;
+        existingHotel.Longitude = hotel.Longitude;
+        existingHotel.PricePerNight = hotel.PricePerNight;
+        existingHotel.Rating = hotel.Rating;
+        existingHotel.ImageUrl = hotel.ImageUrl;
+        existingHotel.Images = hotel.Images;
+        existingHotel.Amenities = hotel.Amenities;
+        existingHotel.RoomTypes = hotel.RoomTypes;
+        existingHotel.IsAvailable = hotel.IsAvailable;
+        existingHotel.UpdatedAt = DateTime.UtcNow;
 
         try
         {
@@ -266,6 +295,15 @@ public class HotelsController : ControllerBase
         if (hotel == null)
         {
             return NotFound();
+        }
+
+        // Check authorization: SuperAdmin can delete any, Admin can only delete own hotels
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var isSuperAdmin = User.IsInRole("SuperAdmin");
+        
+        if (!isSuperAdmin && hotel.CreatedById != userId)
+        {
+            return Forbid("You can only delete hotels that you created");
         }
 
         _context.Hotels.Remove(hotel);
