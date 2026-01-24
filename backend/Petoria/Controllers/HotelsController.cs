@@ -24,6 +24,7 @@ public class HotelsController : ControllerBase
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
         [FromQuery] string? city,
+        [FromQuery] string? country,
         [FromQuery] string? amenities,
         [FromQuery] decimal? minRating)
     {
@@ -53,6 +54,12 @@ public class HotelsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(city))
         {
             query = query.Where(h => h.City == city);
+        }
+
+        // Filter by country
+        if (!string.IsNullOrWhiteSpace(country))
+        {
+            query = query.Where(h => h.Country == country);
         }
 
         // Filter by amenities
@@ -126,6 +133,70 @@ public class HotelsController : ControllerBase
         return Ok(cities);
     }
 
+    // GET: api/hotels/countries
+    [HttpGet("countries")]
+    public async Task<ActionResult<IEnumerable<string>>> GetCountries()
+    {
+        var countries = await _context.Hotels
+            .Where(h => !string.IsNullOrEmpty(h.Country))
+            .Select(h => h.Country)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+
+        return Ok(countries);
+    }
+
+    // GET: api/hotels/amenities
+    [HttpGet("amenities")]
+    public async Task<ActionResult<IEnumerable<string>>> GetAllAmenities()
+    {
+        var hotels = await _context.Hotels
+            .Where(h => !string.IsNullOrEmpty(h.Amenities))
+            .Select(h => h.Amenities)
+            .ToListAsync();
+
+        // Parse JSON arrays and get unique amenities
+        var allAmenities = new HashSet<string>();
+        foreach (var amenitiesJson in hotels)
+        {
+            try
+            {
+                var amenitiesList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(amenitiesJson);
+                if (amenitiesList != null)
+                {
+                    foreach (var amenity in amenitiesList)
+                    {
+                        if (!string.IsNullOrWhiteSpace(amenity))
+                        {
+                            allAmenities.Add(amenity.Trim());
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // If JSON parsing fails, try to extract amenities as simple string
+                if (!string.IsNullOrWhiteSpace(amenitiesJson))
+                {
+                    allAmenities.Add(amenitiesJson.Trim());
+                }
+            }
+        }
+
+        return Ok(allAmenities.OrderBy(a => a).ToList());
+    }
+
+    // GET: api/hotels/price-range
+    [HttpGet("price-range")]
+    public async Task<ActionResult<object>> GetPriceRange()
+    {
+        var minPrice = await _context.Hotels.MinAsync(h => h.PricePerNight);
+        var maxPrice = await _context.Hotels.MaxAsync(h => h.PricePerNight);
+
+        return Ok(new { minPrice, maxPrice });
+    }
+
     // GET: api/hotels/map
     [HttpGet("map")]
     public async Task<ActionResult<IEnumerable<object>>> GetHotelsForMap(
@@ -133,6 +204,7 @@ public class HotelsController : ControllerBase
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
         [FromQuery] string? city,
+        [FromQuery] string? country,
         [FromQuery] string? amenities,
         [FromQuery] decimal? minRating)
     {
@@ -160,6 +232,11 @@ public class HotelsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(city))
         {
             query = query.Where(h => h.City == city);
+        }
+
+        if (!string.IsNullOrWhiteSpace(country))
+        {
+            query = query.Where(h => h.Country == country);
         }
 
         if (!string.IsNullOrWhiteSpace(amenities))

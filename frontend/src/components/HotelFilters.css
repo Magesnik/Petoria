@@ -4,7 +4,7 @@
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     position: sticky;
-    top: 20px;
+    top: 100px;
     transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -56,10 +56,12 @@
 }
 
 .filter-label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 600;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-size: 14px;
 }
 
@@ -67,79 +69,264 @@
     color: #e6f1ff;
 }
 
-/* Price Range */
-.price-inputs {
+.selected-count {
+    font-weight: 400;
+    color: #667eea;
+    font-size: 12px;
+}
+
+/* Price Range Slider */
+.price-slider-container {
+    padding: 5px 0;
+}
+
+/* Editable Price Inputs */
+.price-inputs-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    width: 100%;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
-.price-inputs span {
-    color: #666;
+.price-input-group {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1;
+}
+
+.currency-symbol {
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    margin-right: 4px;
+}
+
+.price-input-field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.price-input-field::-webkit-outer-spin-button,
+.price-input-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.price-separator {
+    color: #667eea;
+    font-size: 16px;
     font-weight: 600;
     flex-shrink: 0;
 }
 
-[data-theme="dark"] .price-inputs span {
+[data-theme="dark"] .price-separator {
     color: #8892b0;
 }
 
-.price-input {
-    flex: 1;
-    min-width: 0;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.2s ease;
-    background: white;
-    color: #333;
+/* Dual Range Slider */
+.slider-container {
+    position: relative;
+    height: 8px;
+    margin: 10px 5px 20px;
 }
 
-[data-theme="dark"] .price-input {
-    background: #0f3460;
-    border: 1px solid #2d3748;
-    color: #e6f1ff;
-}
-
-.price-input:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-[data-theme="dark"] .price-input::placeholder {
-    color: #8892b0;
-}
-
-/* City Select */
-.filter-select {
+.slider-track-bg {
+    position: absolute;
     width: 100%;
-    padding: 10px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    top: 0;
+}
+
+[data-theme="dark"] .slider-track-bg {
+    background: #2d3748;
+}
+
+.slider-track-fill {
+    position: absolute;
+    height: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    top: 0;
+}
+
+.slider-container .slider {
+    position: absolute;
+    width: 100%;
+    height: 8px;
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.slider-container .slider::-webkit-slider-runnable-track {
+    height: 8px;
+    background: transparent;
+    border-radius: 4px;
+}
+
+.slider-container .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    margin-top: -6px;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.slider-container .slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.5);
+}
+
+.slider-container .slider::-moz-range-track {
+    height: 8px;
+    background: transparent;
+}
+
+.slider-container .slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
+/* Searchable Select */
+.searchable-select {
+    position: relative;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.filter-search-input {
+    width: 100%;
+    padding: 10px 35px 10px 12px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 14px;
     background: white;
-    cursor: pointer;
-    transition: border-color 0.2s ease;
     color: #333;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-[data-theme="dark"] .filter-select {
+[data-theme="dark"] .filter-search-input {
     background: #0f3460;
     border: 1px solid #2d3748;
     color: #e6f1ff;
 }
 
-[data-theme="dark"] .filter-select option {
-    background: #0f3460;
+[data-theme="dark"] .filter-search-input::placeholder {
+    color: #8892b0;
+}
+
+.filter-search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.clear-selection {
+    position: absolute;
+    right: 8px;
+    background: #e0e0e0;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.clear-selection:hover {
+    background: #667eea;
+    color: white;
+}
+
+[data-theme="dark"] .clear-selection {
+    background: #2d3748;
     color: #e6f1ff;
 }
 
-.filter-select:focus {
-    outline: none;
-    border-color: #667eea;
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .dropdown-list {
+    background: #1a1a2e;
+    border: 1px solid #2d3748;
+}
+
+.dropdown-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px;
+    color: #333;
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: #e6f1ff;
+}
+
+.dropdown-item:hover {
+    background: #f0f4ff;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background: #0f3460;
+}
+
+.dropdown-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
 }
 
 /* Rating Options */
@@ -183,10 +370,35 @@
 }
 
 /* Amenities */
+.amenities-search {
+    margin-bottom: 12px;
+}
+
 .amenities-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.amenities-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.amenities-list::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+
+[data-theme="dark"] .amenities-list::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.amenities-list::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
 }
 
 .amenity-checkbox {
@@ -194,17 +406,20 @@
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
     transition: background 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .amenity-checkbox:hover {
     background: #f8f9ff;
+    border-color: #e0e0e0;
 }
 
 [data-theme="dark"] .amenity-checkbox:hover {
     background: #0f3460;
+    border-color: #2d3748;
 }
 
 .amenity-checkbox input[type="checkbox"] {
@@ -212,6 +427,7 @@
     height: 18px;
     cursor: pointer;
     accent-color: #667eea;
+    flex-shrink: 0;
 }
 
 .amenity-checkbox span {
@@ -220,6 +436,18 @@
 }
 
 [data-theme="dark"] .amenity-checkbox span {
+    color: #8892b0;
+}
+
+.no-results {
+    color: #999;
+    font-size: 13px;
+    text-align: center;
+    padding: 15px;
+    font-style: italic;
+}
+
+[data-theme="dark"] .no-results {
     color: #8892b0;
 }
 

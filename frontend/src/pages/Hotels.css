@@ -82,14 +82,29 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Main Container */
+/* Main Container - Improved for large screens */
 .hotels-container {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 30px;
-    padding: 40px 20px;
-    max-width: 1400px;
+    padding: 40px 40px;
+    max-width: 100%;
     margin: 0 auto;
+}
+
+/* Large screens - even wider layout */
+@media (min-width: 1400px) {
+    .hotels-container {
+        padding: 40px 50px;
+        gap: 35px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .hotels-container {
+        padding: 40px 80px;
+        gap: 40px;
+    }
 }
 
 .filters-sidebar {
@@ -177,8 +192,29 @@
 /* Hotels Grid */
 .hotels-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 24px;
+}
+
+/* Large screens - fit more cards */
+@media (min-width: 1400px) {
+    .hotels-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 28px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .hotels-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 30px;
+    }
+}
+
+@media (min-width: 2200px) {
+    .hotels-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
 }
 
 /* Loading State */

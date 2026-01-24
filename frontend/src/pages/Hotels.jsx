@@ -11,6 +11,9 @@ const Hotels = () => {
     const [hotels, setHotels] = useState([]);
     const [mapHotels, setMapHotels] = useState([]);
     const [cities, setCities] = useState([]);
+    const [countries, setCountries] = useState([]);
+    const [allAmenities, setAllAmenities] = useState([]);
+    const [priceRange, setPriceRange] = useState({ minPrice: 0, maxPrice: 1000 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -19,13 +22,14 @@ const Hotels = () => {
         minPrice: '',
         maxPrice: '',
         city: '',
+        country: '',
         amenities: [],
         minRating: null
     });
 
-    // Fetch cities for filter dropdown
+    // Fetch filter data on mount
     useEffect(() => {
-        fetchCities();
+        fetchFilterData();
     }, []);
 
     // Fetch hotels when filters or search changes
@@ -37,15 +41,34 @@ const Hotels = () => {
         }
     }, [filters, searchQuery, view]);
 
-    const fetchCities = async () => {
+    const fetchFilterData = async () => {
         try {
-            const response = await fetch('http://localhost:5150/api/hotels/cities');
-            if (response.ok) {
-                const data = await response.json();
+            // Fetch all filter data in parallel
+            const [citiesRes, countriesRes, amenitiesRes, priceRangeRes] = await Promise.all([
+                fetch('http://localhost:5150/api/hotels/cities'),
+                fetch('http://localhost:5150/api/hotels/countries'),
+                fetch('http://localhost:5150/api/hotels/amenities'),
+                fetch('http://localhost:5150/api/hotels/price-range')
+            ]);
+
+            if (citiesRes.ok) {
+                const data = await citiesRes.json();
                 setCities(data);
             }
+            if (countriesRes.ok) {
+                const data = await countriesRes.json();
+                setCountries(data);
+            }
+            if (amenitiesRes.ok) {
+                const data = await amenitiesRes.json();
+                setAllAmenities(data);
+            }
+            if (priceRangeRes.ok) {
+                const data = await priceRangeRes.json();
+                setPriceRange(data);
+            }
         } catch (err) {
-            console.error('Error fetching cities:', err);
+            console.error('Error fetching filter data:', err);
         }
     };
 
@@ -61,6 +84,7 @@ const Hotels = () => {
             if (filters.minPrice) params.append('minPrice', filters.minPrice);
             if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
             if (filters.city) params.append('city', filters.city);
+            if (filters.country) params.append('country', filters.country);
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
 
@@ -92,6 +116,7 @@ const Hotels = () => {
             if (filters.minPrice) params.append('minPrice', filters.minPrice);
             if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
             if (filters.city) params.append('city', filters.city);
+            if (filters.country) params.append('country', filters.country);
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
 
@@ -123,6 +148,7 @@ const Hotels = () => {
             minPrice: '',
             maxPrice: '',
             city: '',
+            country: '',
             amenities: [],
             minRating: null
         });
@@ -159,12 +185,15 @@ const Hotels = () => {
             </section>
 
             {/* Main Content */}
-            <div className="hotels-container container">
+            <div className="hotels-container">
                 <aside className="filters-sidebar">
                     <HotelFilters
                         filters={filters}
                         onFilterChange={handleFilterChange}
                         cities={cities}
+                        countries={countries}
+                        allAmenities={allAmenities}
+                        priceRange={priceRange}
                         onClearFilters={handleClearFilters}
                     />
                 </aside>
