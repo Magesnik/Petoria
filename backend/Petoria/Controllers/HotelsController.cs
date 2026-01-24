@@ -92,6 +92,26 @@ public class HotelsController : ControllerBase
         return Ok(hotel);
     }
 
+    // GET: api/hotels/my - Get hotels created by current user
+    [HttpGet("my")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<Hotel>>> GetMyHotels()
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var hotels = await _context.Hotels
+            .Where(h => h.CreatedById == userId)
+            .OrderByDescending(h => h.CreatedAt)
+            .ToListAsync();
+
+        return Ok(hotels);
+    }
+
     // GET: api/hotels/cities
     [HttpGet("cities")]
     public async Task<ActionResult<IEnumerable<string>>> GetCities()

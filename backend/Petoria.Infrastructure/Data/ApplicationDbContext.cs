@@ -16,12 +16,23 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CommentRating> CommentRatings { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<RoomType> RoomTypes { get; set; }
+    public DbSet<RoomAvailability> RoomAvailabilities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        // Customize the ASP.NET Identity model and override the defaults if needed.
-        // For example, you can rename the ASP.NET Identity table names and more.
-        // Add your customizations after calling base.OnModelCreating(builder);
+        
+        // Unique index for room availability (one record per room type per date)
+        builder.Entity<RoomAvailability>()
+            .HasIndex(ra => new { ra.RoomTypeId, ra.Date })
+            .IsUnique();
+        
+        // Configure Hotel -> RoomTypes relationship
+        builder.Entity<RoomType>()
+            .HasOne(rt => rt.Hotel)
+            .WithMany()
+            .HasForeignKey(rt => rt.HotelId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -20,6 +20,15 @@ public class Reservation
     [ForeignKey("HotelId")]
     public Hotel? Hotel { get; set; }
 
+    // Room type selection
+    public int? RoomTypeId { get; set; }
+
+    [ForeignKey("RoomTypeId")]
+    public RoomType? RoomType { get; set; }
+
+    [Range(1, 100)]
+    public int NumberOfRooms { get; set; } = 1;  // How many rooms of this type
+
     [Required]
     public DateTime CheckInDate { get; set; }
 

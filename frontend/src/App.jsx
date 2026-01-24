@@ -18,6 +18,8 @@ import Favorites from './pages/Favorites';
 import PurchaseHistory from './pages/PurchaseHistory';
 import Support from './pages/Support';
 import AdminDashboard from './pages/AdminDashboard';
+import MyHotels from './pages/MyHotels';
+import ManageHotel from './pages/ManageHotel';
 
 function App() {
   return (
@@ -42,6 +44,9 @@ function App() {
                     <Route path="/purchase-history" element={<PurchaseHistory />} />
                     <Route path="/support" element={<Support />} />
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/my-hotels" element={<MyHotels />} />
+                    <Route path="/manage-hotel/:id" element={<ManageHotel />} />
+                    <Route path="/hotel/:id" element={<HotelDetails />} />
                   </Routes>
                 </div>
               </Router>

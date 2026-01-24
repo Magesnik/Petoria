@@ -235,6 +235,7 @@ public class AuthService : IAuthService
 
         return new AuthResponse
         {
+            Id = user.Id,
             Token = tokenHandler.WriteToken(token),
             Email = user.Email!,
             FirstName = user.FirstName ?? "",

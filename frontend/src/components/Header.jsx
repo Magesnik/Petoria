@@ -63,7 +63,10 @@ const Header = () => {
             <li><Link to="/destinations" className="nav-link">{t('destinations')}</Link></li>
             <li><Link to="/about" className="nav-link">{t('about')}</Link></li>
             {isAdmin() && (
-              <li><Link to="/create-hotel" className="nav-link admin-link">➕ Създай хотел</Link></li>
+              <>
+                <li><Link to="/my-hotels" className="nav-link admin-link">🏨 Моите хотели</Link></li>
+                <li><Link to="/create-hotel" className="nav-link admin-link">➕ Създай хотел</Link></li>
+              </>
             )}
             {isSuperAdmin() && (
               <li><Link to="/admin" className="nav-link super-admin-link">🛡️ Admin Panel</Link></li>

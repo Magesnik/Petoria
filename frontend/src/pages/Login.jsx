@@ -41,6 +41,7 @@ const Login = () => {
 
             // Store token
             login({
+                id: data.id,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
@@ -72,6 +73,7 @@ const Login = () => {
 
             // Store token
             login({
+                id: data.id,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,

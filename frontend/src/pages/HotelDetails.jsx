@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import CommentsSection from '../components/CommentsSection';
+import BookingWidget from '../components/BookingWidget';
+import RoomTypeManager from '../components/RoomTypeManager';
 import './HotelDetails.css';
 
 const HotelDetails = () => {
@@ -11,6 +14,7 @@ const HotelDetails = () => {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const { isFavorite, toggleFavorite } = useFavorites();
+    const { user, isAdmin } = useAuth();
     const [hotel, setHotel] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -213,38 +217,14 @@ const HotelDetails = () => {
                         )}
                     </div>
 
-                    {/* Right Column - Booking Card */}
+                    {/* Right Column - Booking Widget */}
                     <div className="details-sidebar">
-                        <div className="booking-card">
-                            <div className="booking-price">
-                                <span className="booking-amount">${hotel.pricePerNight}</span>
-                                <span className="booking-period">{t('perNight')}</span>
-                            </div>
-
-                            {hotel.rating > 0 && (
-                                <div className="booking-rating">
-                                    <span className="rating-stars">★★★★★</span>
-                                    <span className="rating-text">{hotel.rating.toFixed(1)} {t('rating')}</span>
-                                </div>
-                            )}
-
-                            <button className="btn-book-now">{t('bookNow')}</button>
-
-                            <div className="booking-info">
-                                <div className="info-row">
-                                    <span className="info-label">📍 {t('location')}:</span>
-                                    <span className="info-value">{hotel.city}</span>
-                                </div>
-                                {hotel.isAvailable !== undefined && (
-                                    <div className="info-row">
-                                        <span className="info-label">📅 {t('availability')}:</span>
-                                        <span className={`info-value ${hotel.isAvailable ? 'available' : 'unavailable'}`}>
-                                            {hotel.isAvailable ? t('available') : t('notAvailable')}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <BookingWidget
+                            hotelId={parseInt(id)}
+                            onBookingComplete={(reservation) => {
+                                console.log('Booking completed:', reservation);
+                            }}
+                        />
 
                         <div className="contact-card">
                             <h3>{t('needHelp')}</h3>
@@ -253,6 +233,11 @@ const HotelDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Admin Section - Room Management */}
+                {isAdmin() && hotel.createdById === user?.id && (
+                    <RoomTypeManager hotelId={parseInt(id)} />
+                )}
 
                 {/* Comments Section */}
                 <CommentsSection hotelId={parseInt(id)} />
