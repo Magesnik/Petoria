@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import './Home.css';
 
 const Destinations = () => {
@@ -12,6 +13,7 @@ const Destinations = () => {
                     <p>Скоро...</p>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

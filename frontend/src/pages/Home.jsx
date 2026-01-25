@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import './Home.css';
 
 const Home = () => {
@@ -59,8 +60,11 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            <Footer />
         </div>
     );
 };
 
 export default Home;
+

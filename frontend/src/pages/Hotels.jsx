@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import HotelCard from '../components/HotelCard';
 import HotelFilters from '../components/HotelFilters';
 import HotelMap from '../components/HotelMap';
@@ -268,6 +269,8 @@ const Hotels = () => {
                     )}
                 </main>
             </div>
+
+            <Footer />
         </div>
     );
 };
