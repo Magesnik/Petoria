@@ -347,6 +347,7 @@
 @media (max-width: 1024px) {
     .hotels-container {
         grid-template-columns: 1fr;
+        padding: 30px 20px;
     }
 
     .filters-sidebar {
@@ -359,17 +360,27 @@
 }
 
 @media (max-width: 768px) {
+    .hotels-page {
+        padding-top: 70px;
+    }
+
+    .hotels-hero {
+        padding: 60px 15px 40px;
+    }
+
     .hotels-hero .hero-content h1 {
-        font-size: 32px;
+        font-size: 28px;
     }
 
     .hotels-hero .hero-content p {
-        font-size: 16px;
+        font-size: 15px;
+        margin-bottom: 24px;
     }
 
     .hotels-hero .search-box {
         flex-direction: column;
         border-radius: 12px;
+        padding: 12px;
     }
 
     .hotels-hero .search-input,
@@ -377,7 +388,82 @@
         border-radius: 8px;
     }
 
+    .hotels-hero .search-input {
+        text-align: center;
+    }
+
+    .hotels-hero .btn-search {
+        width: 100%;
+    }
+
+    .hotels-container {
+        padding: 20px 15px;
+        gap: 20px;
+    }
+
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .results-header h2 {
+        font-size: 22px;
+    }
+
+    .view-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
     .hotels-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .empty-state,
+    .error-state {
+        padding: 40px 15px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hotels-page {
+        padding-top: 60px;
+    }
+
+    .hotels-hero {
+        padding: 50px 12px 35px;
+    }
+
+    .hotels-hero .hero-content h1 {
+        font-size: 24px;
+    }
+
+    .hotels-hero .hero-content p {
+        font-size: 14px;
+    }
+
+    .hotels-container {
+        padding: 15px 12px;
+    }
+
+    .results-header h2 {
+        font-size: 20px;
+    }
+
+    .view-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .btn-clear,
+    .btn-retry {
+        padding: 10px 20px;
+        font-size: 14px;
     }
 }

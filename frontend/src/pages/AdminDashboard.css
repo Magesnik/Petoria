@@ -511,14 +511,41 @@
 @media (max-width: 768px) {
     .admin-dashboard {
         padding: 1rem;
+        padding-top: calc(70px + 1rem);
     }
 
     .dashboard-header h1 {
         font-size: 1.75rem;
     }
 
+    .dashboard-header p {
+        font-size: 0.95rem;
+    }
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
     }
 
     .user-stats {
@@ -533,5 +560,75 @@
     .profile-actions {
         width: 100%;
         justify-content: center;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .search-input {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-dashboard {
+        padding: 0.75rem;
+        padding-top: calc(60px + 0.75rem);
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .users-panel,
+    .details-panel {
+        border-radius: 12px;
+    }
+
+    .panel-header {
+        padding: 1rem;
+    }
+
+    .panel-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .users-list {
+        padding: 0.75rem;
+    }
+
+    .user-card {
+        padding: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .btn-promote,
+    .btn-demote {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .details-section {
+        padding: 1rem;
     }
 }

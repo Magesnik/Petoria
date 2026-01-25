@@ -159,7 +159,7 @@
     margin-bottom: 20px;
 }
 
-.google-login-wrapper > div {
+.google-login-wrapper>div {
     width: 100% !important;
 }
 
@@ -171,4 +171,87 @@
 [data-theme='dark'] .auth-divider::before,
 [data-theme='dark'] .auth-divider::after {
     border-bottom-color: #233554;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE STYLES
+   ========================================== */
+
+@media (max-width: 768px) {
+    .auth-page {
+        padding-top: 70px;
+        padding-bottom: 40px;
+    }
+
+    .auth-container {
+        padding: 15px;
+    }
+
+    .auth-card {
+        padding: 30px 25px;
+        border-radius: 12px;
+    }
+
+    .auth-card h2 {
+        font-size: 1.7rem;
+    }
+
+    .auth-subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+    }
+
+    /* Single column form rows on mobile */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group input {
+        padding: 14px 15px;
+    }
+
+    .btn-block {
+        padding: 14px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-page {
+        padding-top: 60px;
+    }
+
+    .auth-card {
+        padding: 25px 20px;
+    }
+
+    .auth-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .auth-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-group input {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    .auth-footer {
+        font-size: 0.85rem;
+    }
+
+    .auth-divider span {
+        font-size: 0.8rem;
+    }
 }

@@ -241,12 +241,25 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .support-page {
+        padding-top: 70px;
+    }
+
+    .support-hero {
+        padding: 50px 15px;
+    }
+
     .support-hero h1 {
         font-size: 2rem;
     }
 
     .support-hero p {
         font-size: 1rem;
+    }
+
+    .support-container {
+        padding: 30px 15px 60px;
+        gap: 30px;
     }
 
     .support-section {
@@ -259,5 +272,85 @@
 
     .contact-cards {
         grid-template-columns: 1fr;
+    }
+
+    .faq-question {
+        padding: 16px;
+        font-size: 1rem;
+    }
+
+    .faq-answer {
+        padding: 0 16px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .support-page {
+        padding-top: 60px;
+    }
+
+    .support-hero {
+        padding: 40px 12px;
+    }
+
+    .support-hero h1 {
+        font-size: 1.7rem;
+    }
+
+    .support-hero p {
+        font-size: 0.95rem;
+    }
+
+    .support-container {
+        padding: 25px 12px 50px;
+        gap: 25px;
+    }
+
+    .support-section {
+        padding: 25px 15px;
+        border-radius: 12px;
+    }
+
+    .support-section h2 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+    }
+
+    .contact-card {
+        padding: 25px 20px;
+        border-radius: 12px;
+    }
+
+    .contact-icon {
+        font-size: 2.5rem;
+    }
+
+    .contact-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .contact-card p {
+        font-size: 0.95rem;
+    }
+
+    .faq-question {
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+
+    .faq-icon {
+        font-size: 1.25rem;
+    }
+
+    .faq-answer {
+        padding: 0 14px 14px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        padding: 10px 14px;
+        font-size: 0.95rem;
     }
 }
