@@ -88,7 +88,7 @@ const Header = () => {
           <ul className="nav-menu">
             <li><Link to="/" className="nav-link">{t('home')}</Link></li>
             <li><Link to="/hotels" className="nav-link">{t('hotels')}</Link></li>
-            <li><Link to="/destinations" className="nav-link">{t('destinations')}</Link></li>
+            <li><Link to="/deals" className="nav-link">🎁 Оферти</Link></li>
             <li><Link to="/about" className="nav-link">{t('about')}</Link></li>
             {isAdmin() && (
               <>
@@ -177,7 +177,7 @@ const Header = () => {
           <ul className="mobile-nav-menu">
             <li><Link to="/" className="mobile-nav-link" onClick={closeMobileMenu}>{t('home')}</Link></li>
             <li><Link to="/hotels" className="mobile-nav-link" onClick={closeMobileMenu}>{t('hotels')}</Link></li>
-            <li><Link to="/destinations" className="mobile-nav-link" onClick={closeMobileMenu}>{t('destinations')}</Link></li>
+            <li><Link to="/deals" className="mobile-nav-link" onClick={closeMobileMenu}>🎁 Оферти</Link></li>
             <li><Link to="/about" className="mobile-nav-link" onClick={closeMobileMenu}>{t('about')}</Link></li>
             {isAdmin() && (
               <>

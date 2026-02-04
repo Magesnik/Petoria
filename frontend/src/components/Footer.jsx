@@ -41,7 +41,7 @@ const Footer = () => {
                         <ul className="footer-links">
                             <li><Link to="/">Начало</Link></li>
                             <li><Link to="/hotels">Хотели</Link></li>
-                            <li><Link to="/destinations">Дестинации</Link></li>
+                            <li><Link to="/deals">🎁 Оферти</Link></li>
                             <li><Link to="/about">За нас</Link></li>
                         </ul>
                     </div>

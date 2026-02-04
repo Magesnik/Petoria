@@ -241,7 +241,8 @@ public class AuthService : IAuthService
             FirstName = user.FirstName ?? "",
             LastName = user.LastName ?? "",
             Expiration = tokenDescriptor.Expires.Value,
-            Roles = roles
+            Roles = roles,
+            AvatarUrl = user.AvatarUrl
         };
     }
 }

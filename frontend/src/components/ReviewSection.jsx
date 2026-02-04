@@ -166,7 +166,17 @@ const ReviewSection = ({ hotelId }) => {
                             <div className="review-header">
                                 <div className="reviewer-info">
                                     <div className="reviewer-avatar">
-                                        {review.user.firstName?.[0] || 'U'}
+                                        {review.user.avatarUrl ? (
+                                            <img
+                                                src={review.user.avatarUrl.startsWith('http')
+                                                    ? review.user.avatarUrl
+                                                    : `http://localhost:5150${review.user.avatarUrl}`
+                                                }
+                                                alt={review.user.firstName}
+                                            />
+                                        ) : (
+                                            <span>{review.user.firstName?.[0] || 'U'}</span>
+                                        )}
                                     </div>
                                     <div>
                                         <div className="reviewer-name">

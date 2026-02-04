@@ -37,6 +37,7 @@ public class AdminController : ControllerBase
                 .Where(r => r.UserId == user.Id && r.Status == "Completed")
                 .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
             var hotelsCreated = await _context.Hotels.CountAsync(h => h.CreatedById == user.Id);
+            var commentsCount = await _context.Comments.CountAsync(c => c.UserId == user.Id && c.ParentCommentId == null);
 
             userStats.Add(new
             {
@@ -49,7 +50,8 @@ public class AdminController : ControllerBase
                 favoritesCount,
                 reservationsCount,
                 totalSpent,
-                hotelsCreated
+                hotelsCreated,
+                commentsCount
             });
         }
 
@@ -118,6 +120,26 @@ public class AdminController : ControllerBase
             })
             .ToListAsync();
 
+        // Get user's comments with hotel and rating details
+        var comments = await _context.Comments
+            .Where(c => c.UserId == id && c.ParentCommentId == null) // Only top-level comments
+            .Include(c => c.Hotel)
+            .Include(c => c.Ratings)
+            .Include(c => c.Replies)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new
+            {
+                id = c.Id,
+                text = c.Text,
+                hotelId = c.HotelId,
+                hotelName = c.Hotel!.Name,
+                createdAt = c.CreatedAt,
+                likesCount = c.Ratings.Count(r => r.IsLike),
+                dislikesCount = c.Ratings.Count(r => !r.IsLike),
+                repliesCount = c.Replies.Count
+            })
+            .ToListAsync();
+
         var totalSpent = await _context.Reservations
             .Where(r => r.UserId == id && r.Status == "Completed")
             .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
@@ -133,7 +155,8 @@ public class AdminController : ControllerBase
             totalSpent,
             favorites,
             reservations,
-            hotelsCreated
+            hotelsCreated,
+            comments
         });
     }
 
@@ -206,6 +229,7 @@ public class AdminController : ControllerBase
             .Where(r => r.Status == "Completed")
             .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
         var totalHotels = await _context.Hotels.CountAsync();
+        var totalComments = await _context.Comments.CountAsync();
 
         return Ok(new
         {
@@ -215,7 +239,8 @@ public class AdminController : ControllerBase
             totalFavorites,
             totalReservations,
             totalRevenue,
-            totalHotels
+            totalHotels,
+            totalComments
         });
     }
 }

@@ -167,6 +167,17 @@ textarea {
     justify-content: center;
     font-weight: bold;
     color: #2d3748;
+    overflow: hidden;
+}
+
+.reviewer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reviewer-avatar span {
+    font-size: 1.2rem;
 }
 
 .reviewer-name {

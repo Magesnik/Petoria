@@ -118,7 +118,10 @@ const Comment = ({ comment, hotelId, onDeleted, onRatingUpdated }) => {
                 <div className="comment-author">
                     <div className="author-avatar">
                         {comment.avatarUrl ? (
-                            <img src={comment.avatarUrl} alt={comment.firstName} />
+                            <img
+                                src={comment.avatarUrl.startsWith('http') ? comment.avatarUrl : `http://localhost:5150${comment.avatarUrl}`}
+                                alt={comment.firstName}
+                            />
                         ) : (
                             <span>👤</span>
                         )}

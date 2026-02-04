@@ -13,7 +13,14 @@ export const AuthProvider = ({ children }) => {
 
         if (storedUser && storedToken) {
             try {
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+
+                // Fix avatar URL if it's a relative path
+                if (parsedUser.avatarUrl && parsedUser.avatarUrl.startsWith('/uploads/')) {
+                    parsedUser.avatarUrl = `http://localhost:5150${parsedUser.avatarUrl}`;
+                }
+
+                setUser(parsedUser);
             } catch (error) {
                 console.error("Failed to parse user data:", error);
                 localStorage.removeItem('user');

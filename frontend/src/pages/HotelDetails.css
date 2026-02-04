@@ -27,6 +27,11 @@
     padding-top: var(--header-height, 80px);
 }
 
+/* Hide room manager section */
+.hotel-details-page .room-manager {
+    display: none;
+}
+
 /* Hero Section */
 .hotel-hero {
     height: 500px;
@@ -48,13 +53,15 @@
     align-items: flex-start;
     justify-content: space-between;
     padding: 2rem;
-    z-index: 1001;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .hero-actions {
     display: flex;
     align-items: center;
     gap: 1rem;
+    pointer-events: auto;
 }
 
 .btn-back-hero {
@@ -796,6 +803,7 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
+    pointer-events: auto;
 }
 
 .star-rating-badge-hero {

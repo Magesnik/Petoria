@@ -11,7 +11,7 @@ import Register from './pages/Register';
 import Hotels from './pages/Hotels';
 import HotelDetails from './pages/HotelDetails';
 import CreateHotel from './pages/CreateHotel';
-import Destinations from './pages/Destinations';
+import Deals from './pages/Deals';
 import About from './pages/About';
 import Settings from './pages/Settings';
 import Favorites from './pages/Favorites';
@@ -34,7 +34,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/hotels" element={<Hotels />} />
                     <Route path="/hotels/:id" element={<HotelDetails />} />
-                    <Route path="/destinations" element={<Destinations />} />
+                    <Route path="/deals" element={<Deals />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />

@@ -37,8 +37,7 @@ public class ReviewsController : ControllerBase
                     r.User.Id,
                     r.User.FirstName,
                     r.User.LastName,
-                    // If AvatarUrl exists in User entity, include it here
-                    // AvatarUrl = r.User.AvatarUrl 
+                    r.User.AvatarUrl
                 }
             })
             .ToListAsync();

@@ -39,13 +39,18 @@ const Login = () => {
                 throw new Error(data.message || 'Login failed');
             }
 
-            // Store token
+            // Store token with avatar URL
+            const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
+                ? `http://localhost:5150${data.avatarUrl}`
+                : data.avatarUrl;
+
             login({
                 id: data.id,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
-                roles: data.roles || []
+                roles: data.roles || [],
+                avatarUrl: avatarUrl
             }, data.token);
 
             navigate('/');
@@ -71,13 +76,18 @@ const Login = () => {
                 throw new Error(data.message || 'Google login failed');
             }
 
-            // Store token
+            // Store token with avatar URL
+            const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
+                ? `http://localhost:5150${data.avatarUrl}`
+                : data.avatarUrl;
+
             login({
                 id: data.id,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
-                roles: data.roles || []
+                roles: data.roles || [],
+                avatarUrl: avatarUrl
             }, data.token);
 
             navigate('/');

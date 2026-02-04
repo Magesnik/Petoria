@@ -178,6 +178,13 @@ const AdminDashboard = () => {
                                 <span className="stat-label">Reservations</span>
                             </div>
                         </div>
+                        <div className="stat-card">
+                            <div className="stat-icon">💬</div>
+                            <div className="stat-info">
+                                <span className="stat-value">{stats.totalComments}</span>
+                                <span className="stat-label">Comments</span>
+                            </div>
+                        </div>
                         <div className="stat-card revenue">
                             <div className="stat-icon">💰</div>
                             <div className="stat-info">
@@ -225,6 +232,7 @@ const AdminDashboard = () => {
                                     <div className="user-stats">
                                         <span title="Favorites">❤️ {u.favoritesCount}</span>
                                         <span title="Reservations">📅 {u.reservationsCount}</span>
+                                        <span title="Comments">💬 {u.commentsCount}</span>
                                         <span title="Hotels Created">🏨 {u.hotelsCreated}</span>
                                     </div>
                                 </div>
@@ -333,6 +341,32 @@ const AdminDashboard = () => {
                                         ))
                                     ) : (
                                         <p className="empty-message">No hotels created</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="details-section">
+                                <h4>💬 Comments ({userDetails.comments?.length || 0})</h4>
+                                <div className="items-list">
+                                    {userDetails.comments?.length > 0 ? (
+                                        userDetails.comments.map(c => (
+                                            <div key={c.id} className="item-card comment">
+                                                <div className="comment-content">
+                                                    <span className="comment-text">{c.text}</span>
+                                                    <span className="comment-hotel">On: {c.hotelName}</span>
+                                                    <span className="comment-date">
+                                                        {new Date(c.createdAt).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <div className="comment-stats">
+                                                    <span>👍 {c.likesCount}</span>
+                                                    <span>👎 {c.dislikesCount}</span>
+                                                    <span>💬 {c.repliesCount}</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="empty-message">No comments yet</p>
                                     )}
                                 </div>
                             </div>
