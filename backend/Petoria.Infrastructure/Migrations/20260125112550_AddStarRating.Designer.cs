@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Petoria.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Petoria.Infrastructure.Data;
 namespace Petoria.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260125112550_AddStarRating")]
+    partial class AddStarRating
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -401,53 +404,12 @@ namespace Petoria.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int>("StarRating")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("Hotels");
-                });
-
-            modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.HotelReview", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("HotelId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ReviewText")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HotelId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("HotelReviews");
                 });
 
             modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.Reservation", b =>
@@ -684,25 +646,6 @@ namespace Petoria.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.Favorite", b =>
-                {
-                    b.HasOne("Petoria.Infrastructure.Data.Entities.Hotel", "Hotel")
-                        .WithMany()
-                        .HasForeignKey("HotelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Petoria.Infrastructure.Data.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Hotel");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.HotelReview", b =>
                 {
                     b.HasOne("Petoria.Infrastructure.Data.Entities.Hotel", "Hotel")
                         .WithMany()

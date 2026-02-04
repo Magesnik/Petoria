@@ -40,6 +40,9 @@ public class Hotel
     [Range(0, 5)]
     public decimal Rating { get; set; } = 0;
 
+    [Range(1, 5)]
+    public int StarRating { get; set; } = 3;
+
     [MaxLength(500)]
     public string ImageUrl { get; set; } = string.Empty;
 

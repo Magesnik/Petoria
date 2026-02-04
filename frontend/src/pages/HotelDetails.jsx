@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
-import CommentsSection from '../components/CommentsSection';
+import ReviewSection from '../components/ReviewSection';
 import BookingWidget from '../components/BookingWidget';
 import RoomTypeManager from '../components/RoomTypeManager';
 import './HotelDetails.css';
@@ -136,12 +136,17 @@ const HotelDetails = () => {
                             {isFavorite(parseInt(id)) ? '❤️' : '🤍'}
                         </button>
                     </div>
-                    {hotel.rating > 0 && (
-                        <div className="hotel-rating-badge">
-                            <span className="rating-star">★</span>
-                            <span className="rating-value">{hotel.rating.toFixed(1)}</span>
+                    <div className="hotel-badges-hero">
+                        <div className="star-rating-badge-hero">
+                            {Array(hotel.starRating || 0).fill('★').join('')}
                         </div>
-                    )}
+                        {hotel.rating > 0 && (
+                            <div className="user-rating-badge-hero">
+                                <span className="rating-value">{hotel.rating.toFixed(1)}</span>
+                                <span className="rating-label">/ 5</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Image Navigation Controls */}
@@ -239,8 +244,8 @@ const HotelDetails = () => {
                     <RoomTypeManager hotelId={parseInt(id)} />
                 )}
 
-                {/* Comments Section */}
-                <CommentsSection hotelId={parseInt(id)} />
+                {/* Review Section */}
+                <ReviewSection hotelId={parseInt(id)} />
             </div>
         </div>
     );

@@ -268,6 +268,7 @@ public class HotelsController : ControllerBase
                 h.Longitude,
                 h.PricePerNight,
                 h.Rating,
+                h.StarRating,
                 h.ImageUrl
             })
             .ToListAsync();

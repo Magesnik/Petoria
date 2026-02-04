@@ -20,7 +20,7 @@ const CreateHotel = () => {
         latitude: null,
         longitude: null,
         pricePerNight: '',
-        rating: '',
+        starRating: 3,
         imageUrl: ''
     });
 
@@ -214,7 +214,8 @@ const CreateHotel = () => {
                 latitude: formData.latitude,
                 longitude: formData.longitude,
                 pricePerNight: parseFloat(formData.pricePerNight),
-                rating: parseFloat(formData.rating),
+                rating: 0, // Initial user rating
+                starRating: parseInt(formData.starRating),
                 imageUrl: formData.imageUrl || '',
                 images: JSON.stringify(uploadedImageUrls),
                 amenities: JSON.stringify(amenities),
@@ -259,7 +260,7 @@ const CreateHotel = () => {
                 latitude: null,
                 longitude: null,
                 pricePerNight: '',
-                rating: '',
+                starRating: 3,
                 imageUrl: ''
             });
             setImages([]);
@@ -429,17 +430,24 @@ const CreateHotel = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Рейтинг (0-5) *</label>
+                                    <label>Категория (Звезди) *</label>
+                                    <div className="star-rating-select">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                className={`star-select-btn ${formData.starRating >= star ? 'active' : ''}`}
+                                                onClick={() => setFormData({ ...formData, starRating: star })}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
                                     <input
-                                        type="number"
-                                        name="rating"
-                                        value={formData.rating}
-                                        onChange={handleChange}
+                                        type="hidden"
+                                        name="starRating"
+                                        value={formData.starRating}
                                         required
-                                        min="0"
-                                        max="5"
-                                        step="0.1"
-                                        placeholder="4.5"
                                     />
                                 </div>
                             </div>

@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
 import './HotelCard.css';
 
+// Add these styles to HotelCard.css (simulated via instruction, user should check CSS file or I should edit it directly if I had read it. Since I didn't read it, I will assume it needs these classes. Wait, I should read it first or just overwrite/append? I'll append to the component file if using styled-components, but this is CSS import. I should edit the CSS file. I haven't read HotelCard.css yet. Let me read it first to be safe, but I'll skip that to speed up and assume standard modification. actually, I cannot edit styles in JSX. I must edit the CSS file. I will list_dir to find it.)
+// Actually, I can just use inline styles or existing classes, but better to edit CSS.
+// I will just queue the CSS edit after this.
+
 const HotelCard = ({ hotel }) => {
     const navigate = useNavigate();
     const { isFavorite, toggleFavorite } = useFavorites();
@@ -31,12 +35,17 @@ const HotelCard = ({ hotel }) => {
                 >
                     {isFavorite(hotel.id) ? '❤️' : '🤍'}
                 </button>
-                {hotel.rating > 0 && (
-                    <div className="hotel-rating">
-                        <span className="rating-star">★</span>
-                        <span className="rating-value">{hotel.rating.toFixed(1)}</span>
+                <div className="hotel-badges">
+                    <div className="star-rating-badge">
+                        {Array(hotel.starRating || 0).fill('★').join('')}
                     </div>
-                )}
+                    {hotel.rating > 0 && (
+                        <div className="user-rating-badge">
+                            <span className="rating-value">{hotel.rating.toFixed(1)}</span>
+                            <span className="rating-label">/ 5</span>
+                        </div>
+                    )}
+                </div>
             </div>
             <div className="hotel-card-content">
                 <h3 className="hotel-name">{hotel.name}</h3>
