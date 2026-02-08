@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import './ReviewSection.css';
 
 const ReviewSection = ({ hotelId }) => {
@@ -9,6 +10,7 @@ const ReviewSection = ({ hotelId }) => {
     const [userReview, setUserReview] = useState({ rating: 5, reviewText: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [averageRating, setAverageRating] = useState(0);
 
     useEffect(() => {
@@ -108,7 +110,7 @@ const ReviewSection = ({ hotelId }) => {
     return (
         <div className="review-section">
             <h2 className="section-title">
-                Мнения на гости
+                {t('reviews')}
                 {reviews.length > 0 && <span className="review-count">({reviews.length})</span>}
             </h2>
 
@@ -125,10 +127,10 @@ const ReviewSection = ({ hotelId }) => {
 
                 {user && (
                     <div className="write-review-box">
-                        <h3>Оценете престоя си</h3>
+                        <h3>{t('writeReview')}</h3>
                         <form onSubmit={handleSubmitReview}>
                             <div className="rating-input">
-                                <label>Оценка:</label>
+                                <label>{t('yourRating')}:</label>
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <button
                                         key={star}
@@ -147,7 +149,7 @@ const ReviewSection = ({ hotelId }) => {
                                 required
                             />
                             <button type="submit" disabled={isSubmitting} className="btn-submit">
-                                {isSubmitting ? 'Изпращане...' : 'Публикувай мнение'}
+                                {isSubmitting ? t('loading') : t('submitReview')}
                             </button>
                         </form>
                     </div>
@@ -157,9 +159,9 @@ const ReviewSection = ({ hotelId }) => {
             {/* Reviews List */}
             <div className="reviews-list">
                 {loading ? (
-                    <div className="loading">Зареждане на мнения...</div>
+                    <div className="loading">{t('loading')}</div>
                 ) : reviews.length === 0 ? (
-                    <div className="no-reviews">Все още няма мнения за този хотел.</div>
+                    <div className="no-reviews">{t('noReviews')}</div>
                 ) : (
                     reviews.map((review) => (
                         <div key={review.id} className="review-card">
@@ -197,7 +199,7 @@ const ReviewSection = ({ hotelId }) => {
                                     onClick={() => handleDeleteReview(review.id)}
                                     className="btn-delete-review"
                                 >
-                                    Изтрий
+                                    {t('delete')}
                                 </button>
                             )}
                         </div>

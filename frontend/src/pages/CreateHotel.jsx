@@ -34,7 +34,7 @@ const CreateHotel = () => {
     const [success, setSuccess] = useState(false);
     const [uploading, setUploading] = useState(false);
 
-    // Популярни удобства
+    // Популярни удобства - keeping Bulgarian since these are specific amenity names
     const popularAmenities = [
         'WiFi', 'Басейн', 'Паркинг', 'Фитнес', 'Ресторант',
         'Спа', 'Климатик', 'Рум сървиз', 'Бар', 'Конферентна зала',
@@ -290,18 +290,18 @@ const CreateHotel = () => {
             <Header />
             <div className="create-hotel-container">
                 <div className="create-hotel-card">
-                    <h2>Създай нов хотел</h2>
-                    <p className="subtitle">Попълнете информацията за новия хотел</p>
+                    <h2>{t('createNewHotel')}</h2>
+                    <p className="subtitle">{t('fillHotelInfo')}</p>
 
                     {error && <div className="error-message">{error}</div>}
-                    {success && <div className="success-message">Хотелът беше създаден успешно!</div>}
-                    {uploading && <div className="uploading-message">📤 Качване на снимки...</div>}
+                    {success && <div className="success-message">{t('hotelCreatedSuccess')}</div>}
+                    {uploading && <div className="uploading-message">📤 {t('uploading')}</div>}
 
                     <form onSubmit={handleSubmit}>
                         {/* Location Picker - FIRST */}
                         <div className="form-section">
-                            <h3 className="section-title">📍 Местоположение на картата</h3>
-                            <p className="section-description">Изберете точното местоположение на хотела на картата - полетата за град, държава и адрес ще се попълнят автоматично</p>
+                            <h3 className="section-title">📍 {t('mapLocation')}</h3>
+                            <p className="section-description">{t('selectLocationDescription')}</p>
 
                             <LocationPicker
                                 onLocationSelect={(locationData) => {
@@ -432,17 +432,21 @@ const CreateHotel = () => {
                                 <div className="form-group">
                                     <label>Категория (Звезди) *</label>
                                     <div className="star-rating-select">
-                                        {[1, 2, 3, 4, 5].map((star) => (
+                                        {[0, 1, 2, 3, 4, 5].map((star) => (
                                             <button
                                                 key={star}
                                                 type="button"
-                                                className={`star-select-btn ${formData.starRating >= star ? 'active' : ''}`}
+                                                className={`star-select-btn ${formData.starRating === star ? 'selected' : ''} ${star === 0 ? 'zero-star' : ''}`}
                                                 onClick={() => setFormData({ ...formData, starRating: star })}
+                                                title={star === 0 ? 'Без категория' : `${star} звезд${star === 1 ? 'а' : 'и'}`}
                                             >
-                                                ★
+                                                {star === 0 ? '—' : '★'}
                                             </button>
                                         ))}
                                     </div>
+                                    <small className="rating-hint">
+                                        {formData.starRating === 0 ? 'Без категория' : `${formData.starRating} звезд${formData.starRating === 1 ? 'а' : 'и'}`}
+                                    </small>
                                     <input
                                         type="hidden"
                                         name="starRating"
@@ -626,7 +630,7 @@ const CreateHotel = () => {
                         </div>
 
                         <button type="submit" className="btn btn-primary btn-block" disabled={uploading}>
-                            {uploading ? '⏳ Качване...' : '✨ Създай хотел'}
+                            {uploading ? `⏳ ${t('uploading')}` : `✨ ${t('createHotelButton')}`}
                         </button>
                     </form>
                 </div>

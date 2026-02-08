@@ -257,6 +257,20 @@
     background-clip: text;
 }
 
+.price-row.original .strikethrough {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.price-row.discount {
+    color: #10b981;
+}
+
+.price-row.discount .savings {
+    font-weight: 600;
+    color: #10b981;
+}
+
 /* Book Button */
 .btn-book {
     width: 100%;

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import './Deals.css';
 
 const Deals = () => {
     const navigate = useNavigate();
+    const { convertAndFormat } = useCurrency();
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('discounted');
     const [deals, setDeals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,7 +41,7 @@ const Deals = () => {
     };
 
     const formatCountdown = (hours) => {
-        if (hours <= 0) return 'Изтекло';
+        if (hours <= 0) return t('expired');
         if (hours < 24) return `${hours}ч`;
         const days = Math.floor(hours / 24);
         const remainingHours = hours % 24;
@@ -49,10 +53,10 @@ const Deals = () => {
     };
 
     const tabs = [
-        { id: 'discounted', label: '🏷️ Отстъпки', icon: '🏷️' },
-        { id: 'last-minute', label: '⏰ Last Minute', icon: '⏰' },
-        { id: 'seasonal', label: '🎉 Сезонни', icon: '🎉' },
-        { id: 'packages', label: '💝 Пакети', icon: '💝' }
+        { id: 'discounted', label: `🏷️ ${t('discounts')}`, icon: '🏷️' },
+        { id: 'last-minute', label: `⏰ ${t('lastMinute')}`, icon: '⏰' },
+        { id: 'seasonal', label: `🎉 ${t('seasonal')}`, icon: '🎉' },
+        { id: 'packages', label: `💝 ${t('packages')}`, icon: '💝' }
     ];
 
     return (
@@ -62,9 +66,9 @@ const Deals = () => {
             {/* Hero Section */}
             <div className="deals-hero">
                 <div className="deals-hero-content">
-                    <h1 className="deals-title">🎁 Специални Оферти</h1>
+                    <h1 className="deals-title">🎁 {t('specialOffers')}</h1>
                     <p className="deals-subtitle">
-                        Открийте невероятни промоции и спестете повече
+                        {t('discoverDeals')}
                     </p>
                 </div>
             </div>
@@ -103,9 +107,9 @@ const Deals = () => {
                     <div className="deals-grid">
                         {deals.map(deal => (
                             <div
-                                key={deal.id}
+                                key={deal.id || deal.roomTypeId}
                                 className="deal-card"
-                                onClick={() => handleHotelClick(deal.id)}
+                                onClick={() => handleHotelClick(deal.id || deal.hotelId)}
                             >
                                 {/* Discount Badge */}
                                 <div className="discount-badge">
@@ -126,11 +130,12 @@ const Deals = () => {
                                     </div>
                                 )}
 
+
                                 {/* Image */}
                                 <div
                                     className="deal-image"
                                     style={{
-                                        backgroundImage: `url(${deal.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945'})`
+                                        backgroundImage: `url(${deal.imageUrl || deal.hotelImageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945'})`
                                     }}
                                 >
                                     <div className="deal-overlay"></div>
@@ -138,55 +143,128 @@ const Deals = () => {
 
                                 {/* Content */}
                                 <div className="deal-content">
-                                    <h3 className="deal-name">{deal.name}</h3>
-                                    <p className="deal-location">
-                                        📍 {deal.city}, {deal.country}
-                                    </p>
+                                    {activeTab === 'last-minute' ? (
+                                        // Room-specific layout for Last Minute
+                                        <>
+                                            <h3 className="deal-name">{deal.hotelName}</h3>
+                                            <p className="deal-location">
+                                                📍 {deal.hotelCity}, {deal.hotelCountry}
+                                            </p>
 
-                                    {/* Rating */}
-                                    {deal.rating > 0 && (
-                                        <div className="deal-rating">
-                                            ⭐ {deal.rating.toFixed(1)}
-                                        </div>
-                                    )}
+                                            {/* Room Type Info */}
+                                            <div className="room-type-info">
+                                                <h4 className="room-type-name">{deal.roomTypeName}</h4>
+                                                <p className="room-capacity">👥 {deal.capacity} души</p>
+                                            </div>
 
-                                    {/* Price */}
-                                    <div className="deal-price">
-                                        {activeTab === 'packages' ? (
-                                            <>
-                                                <div className="price-row">
-                                                    <span className="original-price">
-                                                        ${deal.originalPackagePrice?.toFixed(0)}
-                                                    </span>
-                                                    <span className="discounted-price">
-                                                        ${deal.discountedPackagePrice?.toFixed(0)}
-                                                    </span>
-                                                </div>
-                                                <p className="package-info">
-                                                    {deal.packageNights} нощувки • Спестете ${deal.saveAmount?.toFixed(0)}
+                                            {/* Urgency indicator */}
+                                            <div className="urgency-badge">
+                                                {deal.availableRoomsCount === 1 ? (
+                                                    <span className="critical">🔥 Последна стая!</span>
+                                                ) : (
+                                                    <span>⚠️ Само {deal.availableRoomsCount} стаи</span>
+                                                )}
+                                            </div>
+
+                                            {/* Check-in date */}
+                                            <p className="checkin-date">
+                                                📅 Настаняване: {new Date(deal.earliestAvailableDate).toLocaleDateString('bg-BG')}
+                                            </p>
+
+                                            {/* 5% discount note if automatic */}
+                                            {deal.discountPercentage === 5 && (
+                                                <p className="auto-discount-note">
+                                                    💡 Специална 5% отстъпка за първите 2 нощувки!
                                                 </p>
-                                            </>
-                                        ) : (
-                                            <>
+                                            )}
+
+                                            {/* Rating */}
+                                            {deal.hotelRating > 0 && (
+                                                <div className="deal-rating">
+                                                    ⭐ {deal.hotelRating.toFixed(1)}
+                                                </div>
+                                            )}
+
+                                            {/* Price */}
+                                            <div className="deal-price">
                                                 <div className="price-row">
                                                     <span className="original-price">
-                                                        ${deal.originalPrice?.toFixed(0)}
+                                                        {convertAndFormat(deal.originalPrice)}
                                                     </span>
                                                     <span className="discounted-price">
-                                                        ${deal.discountedPrice?.toFixed(0)}
+                                                        {convertAndFormat(deal.discountedPrice)}
                                                     </span>
                                                 </div>
                                                 <p className="price-label">
-                                                    на нощувка • Спестете ${deal.saveAmount?.toFixed(0)}
+                                                    на нощувка • Спестете {convertAndFormat(deal.saveAmount)}
                                                 </p>
-                                            </>
-                                        )}
-                                    </div>
+                                            </div>
 
-                                    {/* CTA */}
-                                    <button className="btn-book-deal">
-                                        Виж офертата →
-                                    </button>
+                                            {/* CTA */}
+                                            <button
+                                                className="btn-book-deal"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleHotelClick(deal.hotelId);
+                                                }}
+                                            >
+                                                Резервирай →
+                                            </button>
+                                        </>
+                                    ) : (
+                                        // Original layout for other tabs
+                                        <>
+                                            <h3 className="deal-name">{deal.name}</h3>
+                                            <p className="deal-location">
+                                                📍 {deal.city}, {deal.country}
+                                            </p>
+
+                                            {/* Rating */}
+                                            {deal.rating > 0 && (
+                                                <div className="deal-rating">
+                                                    ⭐ {deal.rating.toFixed(1)}
+                                                </div>
+                                            )}
+
+                                            {/* Price */}
+                                            <div className="deal-price">
+                                                {activeTab === 'packages' ? (
+                                                    <>
+                                                        <div className="price-row">
+                                                            <span className="original-price">
+                                                                ${deal.originalPackagePrice?.toFixed(0)}
+                                                            </span>
+                                                            <span className="discounted-price">
+                                                                ${deal.discountedPackagePrice?.toFixed(0)}
+                                                            </span>
+                                                        </div>
+                                                        <p className="package-info">
+                                                            {deal.packageNights} нощувки • Спестете ${deal.saveAmount?.toFixed(0)}
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="price-row">
+                                                            <span className="original-price">
+                                                                ${deal.originalPrice?.toFixed(0)}
+                                                            </span>
+                                                            <span className="discounted-price">
+                                                                ${deal.discountedPrice?.toFixed(0)}
+                                                            </span>
+                                                        </div>
+                                                        <p className="price-label">
+                                                            на нощувка • Спестете ${deal.saveAmount?.toFixed(0)}
+                                                        </p>
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* CTA */}
+                                            <button className="btn-book-deal">
+                                                Виж офертата →
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

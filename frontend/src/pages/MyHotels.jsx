@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
 import './MyHotels.css';
 
 const MyHotels = () => {
     const { user, isAdmin } = useAuth();
+    const { convertAndFormat } = useCurrency();
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [hotels, setHotels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -50,9 +54,9 @@ const MyHotels = () => {
 
             <div className="my-hotels-container">
                 <div className="page-header">
-                    <h1>🏨 Моите хотели</h1>
+                    <h1>🏨 {t('myHotels')}</h1>
                     <Link to="/create-hotel" className="btn-create">
-                        ➕ Добави нов хотел
+                        ➕ {t('addNewHotel')}
                     </Link>
                 </div>
 
@@ -65,10 +69,10 @@ const MyHotels = () => {
                     </div>
                 ) : hotels.length === 0 ? (
                     <div className="empty-state">
-                        <h2>Все още нямате хотели</h2>
-                        <p>Създайте първия си хотел, за да започнете да приемате резервации.</p>
+                        <h2>{t('noHotelsYet')}</h2>
+                        <p>{t('createFirstHotel')}</p>
                         <Link to="/create-hotel" className="btn-create-large">
-                            ➕ Създай хотел
+                            ➕ {t('create')} {t('hotels')}
                         </Link>
                     </div>
                 ) : (
@@ -81,9 +85,9 @@ const MyHotels = () => {
                                 >
                                     <div className="hotel-status">
                                         {hotel.isAvailable ? (
-                                            <span className="status-available">✓ Активен</span>
+                                            <span className="status-available">✓ {t('active')}</span>
                                         ) : (
-                                            <span className="status-unavailable">○ Неактивен</span>
+                                            <span className="status-unavailable">○ {t('inactive')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -91,7 +95,7 @@ const MyHotels = () => {
                                 <div className="hotel-content">
                                     <h3>{hotel.name}</h3>
                                     <p className="hotel-location">📍 {hotel.city}, {hotel.country}</p>
-                                    <p className="hotel-price">💰 {hotel.pricePerNight} лв/нощ</p>
+                                    <p className="hotel-price">💰 {convertAndFormat(hotel.pricePerNight)}/нощ</p>
 
                                     <div className="hotel-stats">
                                         <span>⭐ {hotel.rating?.toFixed(1) || '0.0'}</span>
@@ -102,13 +106,13 @@ const MyHotels = () => {
                                             to={`/manage-hotel/${hotel.id}`}
                                             className="btn-manage"
                                         >
-                                            ⚙️ Управление
+                                            ⚙️ {t('manage')}
                                         </Link>
                                         <Link
                                             to={`/hotel/${hotel.id}`}
                                             className="btn-view"
                                         >
-                                            👁️ Преглед
+                                            👁️ {t('view')}
                                         </Link>
                                     </div>
                                 </div>

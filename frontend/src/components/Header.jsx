@@ -88,27 +88,21 @@ const Header = () => {
           <ul className="nav-menu">
             <li><Link to="/" className="nav-link">{t('home')}</Link></li>
             <li><Link to="/hotels" className="nav-link">{t('hotels')}</Link></li>
-            <li><Link to="/deals" className="nav-link">🎁 Оферти</Link></li>
+            <li><Link to="/deals" className="nav-link">🎁 {t('deals')}</Link></li>
             <li><Link to="/about" className="nav-link">{t('about')}</Link></li>
             {isAdmin() && (
               <>
-                <li><Link to="/my-hotels" className="nav-link admin-link">🏨 Моите хотели</Link></li>
-                <li><Link to="/create-hotel" className="nav-link admin-link">➕ Създай хотел</Link></li>
+                <li><Link to="/my-hotels" className="nav-link admin-link">🏨 {t('myHotels')}</Link></li>
+                <li><Link to="/create-hotel" className="nav-link admin-link">➕ {t('createHotel')}</Link></li>
               </>
             )}
             {isSuperAdmin() && (
-              <li><Link to="/admin" className="nav-link super-admin-link">🛡️ Admin Panel</Link></li>
+              <li><Link to="/admin" className="nav-link super-admin-link">🛡️ {t('adminPanel')}</Link></li>
             )}
           </ul>
         </nav>
 
         <div className="header-actions">
-          <button onClick={toggleTheme} className="btn-icon">
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-          <button onClick={toggleLanguage} className="btn-icon">
-            {language === 'en' ? '🇧🇬' : '🇬🇧'}
-          </button>
           {user ? (
             <div className="user-menu" ref={dropdownRef}>
               <button onClick={toggleDropdown} className="user-dropdown-trigger">
@@ -177,16 +171,16 @@ const Header = () => {
           <ul className="mobile-nav-menu">
             <li><Link to="/" className="mobile-nav-link" onClick={closeMobileMenu}>{t('home')}</Link></li>
             <li><Link to="/hotels" className="mobile-nav-link" onClick={closeMobileMenu}>{t('hotels')}</Link></li>
-            <li><Link to="/deals" className="mobile-nav-link" onClick={closeMobileMenu}>🎁 Оферти</Link></li>
+            <li><Link to="/deals" className="mobile-nav-link" onClick={closeMobileMenu}>🎁 {t('deals')}</Link></li>
             <li><Link to="/about" className="mobile-nav-link" onClick={closeMobileMenu}>{t('about')}</Link></li>
             {isAdmin() && (
               <>
-                <li><Link to="/my-hotels" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>🏨 Моите хотели</Link></li>
-                <li><Link to="/create-hotel" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>➕ Създай хотел</Link></li>
+                <li><Link to="/my-hotels" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>🏨 {t('myHotels')}</Link></li>
+                <li><Link to="/create-hotel" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>➕ {t('createHotel')}</Link></li>
               </>
             )}
             {isSuperAdmin() && (
-              <li><Link to="/admin" className="mobile-nav-link super-admin-link" onClick={closeMobileMenu}>🛡️ Admin Panel</Link></li>
+              <li><Link to="/admin" className="mobile-nav-link super-admin-link" onClick={closeMobileMenu}>🛡️ {t('adminPanel')}</Link></li>
             )}
           </ul>
 

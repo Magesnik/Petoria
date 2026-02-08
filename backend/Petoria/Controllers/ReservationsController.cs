@@ -63,6 +63,17 @@ public class ReservationsController : ControllerBase
         public decimal PricePerNight { get; set; }
         public int NumberOfRooms { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public decimal TotalDiscount { get; set; }
+        public List<DayPriceBreakdown> Breakdown { get; set; } = new();
+    }
+
+    public class DayPriceBreakdown
+    {
+        public DateTime Date { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public int? DiscountPercentage { get; set; }
+        public decimal FinalPrice { get; set; }
     }
 
     // GET: api/reservations/my - Get current user's reservations
@@ -121,14 +132,55 @@ public class ReservationsController : ControllerBase
         }
 
         var numberOfNights = (int)(request.CheckOutDate.Date - request.CheckInDate.Date).TotalDays;
-        var totalPrice = roomType.PricePerNight * numberOfNights * request.NumberOfRooms;
+        
+        // Get discounts for the date range
+        var discounts = await _context.RoomDiscounts
+            .Where(d => d.RoomTypeId == request.RoomTypeId &&
+                        d.EndDate >= request.CheckInDate.Date &&
+                        d.StartDate <= request.CheckOutDate.Date)
+            .ToListAsync();
+
+        // Calculate price per day with discounts
+        var breakdown = new List<DayPriceBreakdown>();
+        decimal totalPrice = 0;
+        decimal originalTotal = 0;
+
+        for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
+        {
+            var discount = discounts
+                .Where(d => d.StartDate.Date <= date && d.EndDate.Date >= date)
+                .OrderByDescending(d => d.DiscountPercentage)
+                .FirstOrDefault();
+
+            var dayOriginal = roomType.PricePerNight;
+            var dayFinal = discount != null 
+                ? dayOriginal * (1 - discount.DiscountPercentage / 100m)
+                : dayOriginal;
+
+            breakdown.Add(new DayPriceBreakdown
+            {
+                Date = date,
+                OriginalPrice = dayOriginal,
+                DiscountPercentage = discount?.DiscountPercentage,
+                FinalPrice = dayFinal
+            });
+
+            originalTotal += dayOriginal;
+            totalPrice += dayFinal;
+        }
+
+        totalPrice *= request.NumberOfRooms;
+        originalTotal *= request.NumberOfRooms;
 
         return Ok(new PriceCalculationResponse
         {
             NumberOfNights = numberOfNights,
             PricePerNight = roomType.PricePerNight,
             NumberOfRooms = request.NumberOfRooms,
-            TotalPrice = totalPrice
+            TotalPrice = totalPrice,
+            OriginalPrice = originalTotal,
+            TotalDiscount = originalTotal - totalPrice,
+            Breakdown = breakdown
         });
     }
 
@@ -192,9 +244,31 @@ public class ReservationsController : ControllerBase
             }
         }
 
-        // Calculate total price
+        // Calculate total price with discounts
         var numberOfNights = (int)(request.CheckOutDate.Date - request.CheckInDate.Date).TotalDays;
-        var totalPrice = roomType.PricePerNight * numberOfNights * request.NumberOfRooms;
+        
+        // Get discounts for the date range
+        var discounts = await _context.RoomDiscounts
+            .Where(d => d.RoomTypeId == request.RoomTypeId &&
+                        d.EndDate >= request.CheckInDate.Date &&
+                        d.StartDate <= request.CheckOutDate.Date)
+            .ToListAsync();
+
+        decimal totalPrice = 0;
+        for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
+        {
+            var discount = discounts
+                .Where(d => d.StartDate.Date <= date && d.EndDate.Date >= date)
+                .OrderByDescending(d => d.DiscountPercentage)
+                .FirstOrDefault();
+
+            var dayPrice = discount != null 
+                ? roomType.PricePerNight * (1 - discount.DiscountPercentage / 100m)
+                : roomType.PricePerNight;
+
+            totalPrice += dayPrice;
+        }
+        totalPrice *= request.NumberOfRooms;
 
         // Create reservation
         var reservation = new Reservation

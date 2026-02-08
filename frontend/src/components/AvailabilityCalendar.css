@@ -132,6 +132,7 @@
     transition: all 0.2s ease;
     gap: 2px;
     min-height: 60px;
+    position: relative;
 }
 
 .day-cell.empty {
@@ -222,6 +223,37 @@
 
 .legend-color.blocked {
     background: rgba(100, 100, 100, 0.5);
+}
+
+/* Discounted day */
+.day-cell.discounted {
+    background: rgba(234, 179, 8, 0.2);
+    border-color: rgba(234, 179, 8, 0.4);
+}
+
+.day-cell.discounted .day-count {
+    color: #eab308;
+}
+
+.day-cell.discounted:not(.past):hover {
+    background: rgba(234, 179, 8, 0.3);
+}
+
+.discount-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.55rem;
+    background: linear-gradient(135deg, #eab308, #ca8a04);
+    color: #000;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 700;
+    z-index: 1;
+}
+
+.legend-color.discounted {
+    background: rgba(234, 179, 8, 0.5);
 }
 
 /* Bulk Edit Panel */

@@ -14,6 +14,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
     const [selectionEnd, setSelectionEnd] = useState(null);
     const [showBulkEdit, setShowBulkEdit] = useState(false);
     const [bulkEditCount, setBulkEditCount] = useState(0);
+    const [discountPercentage, setDiscountPercentage] = useState(0);
 
     useEffect(() => {
         if (roomTypes.length > 0 && !selectedRoomType) {
@@ -76,9 +77,10 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
             }
             setShowBulkEdit(true);
 
-            // Get current count for selected date range
+            // Get current count and discount for selected date range
             const avail = getAvailabilityForDate(selectionStart);
             setBulkEditCount(avail?.availableCount ?? selectedRoomType?.totalRooms ?? 0);
+            setDiscountPercentage(avail?.discountPercentage ?? 0);
         } else {
             // Reset selection
             setSelectionStart(date);
@@ -100,6 +102,8 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
 
         try {
             const token = localStorage.getItem('token');
+
+            // Update availability
             const response = await fetch(
                 `http://localhost:5150/api/hotels/${hotelId}/availability/bulk`,
                 {
@@ -119,13 +123,41 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
 
             if (!response.ok) throw new Error('Failed to update');
 
-            setSuccess('Наличността е обновена успешно!');
+            // If discount percentage is set, create/update discount
+            if (discountPercentage > 0) {
+                const discountResponse = await fetch(
+                    `http://localhost:5150/api/hotels/${hotelId}/discounts`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            roomTypeId: selectedRoomType.id,
+                            startDate: selectionStart.toISOString(),
+                            endDate: selectionEnd.toISOString(),
+                            discountPercentage: discountPercentage
+                        })
+                    }
+                );
+
+                if (!discountResponse.ok) {
+                    const errorData = await discountResponse.json();
+                    throw new Error(errorData.message || 'Failed to create discount');
+                }
+            }
+
+            setSuccess(discountPercentage > 0
+                ? 'Наличността и отстъпката са обновени успешно!'
+                : 'Наличността е обновена успешно!');
             setShowBulkEdit(false);
             setSelectionStart(null);
             setSelectionEnd(null);
+            setDiscountPercentage(0);
             fetchAvailability();
         } catch (err) {
-            setError('Грешка при обновяване');
+            setError(err.message || 'Грешка при обновяване');
         }
     };
 
@@ -271,6 +303,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
                     const isBlocked = avail?.isBlocked;
                     const availableCount = avail?.availableCount ?? selectedRoomType?.totalRooms ?? 0;
                     const isFull = availableCount === 0;
+                    const hasDiscount = avail?.discountPercentage > 0;
 
                     return (
                         <div
@@ -281,9 +314,13 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
                                 ${isBlocked ? 'blocked' : ''}
                                 ${isFull && !isBlocked ? 'full' : ''}
                                 ${availableCount > 0 && !isBlocked ? 'available' : ''}
+                                ${hasDiscount && availableCount > 0 && !isBlocked ? 'discounted' : ''}
                             `}
                             onClick={() => !isPast && handleDayClick(date)}
                         >
+                            {hasDiscount && !isPast && !isBlocked && (
+                                <span className="discount-badge">-{avail.discountPercentage}%</span>
+                            )}
                             <span className="day-number">{date.getDate()}</span>
                             {!isPast && selectedRoomType && (
                                 <span className="day-count">
@@ -300,6 +337,10 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
                 <div className="legend-item">
                     <span className="legend-color available"></span>
                     <span>Налични стаи</span>
+                </div>
+                <div className="legend-item">
+                    <span className="legend-color discounted"></span>
+                    <span>С отстъпка</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-color full"></span>
@@ -343,6 +384,32 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
                                 </button>
                             </div>
                             <small>Максимум: {selectedRoomType?.totalRooms} стаи</small>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Отстъпка (%):</label>
+                            <div className="count-selector">
+                                <button
+                                    onClick={() => setDiscountPercentage(Math.max(0, discountPercentage - 5))}
+                                    disabled={discountPercentage <= 0}
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    value={discountPercentage}
+                                    onChange={(e) => setDiscountPercentage(Math.min(99, Math.max(0, parseInt(e.target.value) || 0)))}
+                                    min="0"
+                                    max="99"
+                                />
+                                <button
+                                    onClick={() => setDiscountPercentage(Math.min(99, discountPercentage + 5))}
+                                    disabled={discountPercentage >= 99}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <small>0% = без отстъпка, максимум 99%</small>
                         </div>
 
                         <div className="bulk-actions">

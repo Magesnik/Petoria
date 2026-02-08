@@ -19,124 +19,250 @@ public class DealsController : ControllerBase
     [HttpGet("discounted")]
     public async Task<ActionResult<IEnumerable<object>>> GetDiscountedHotels()
     {
-        var hotels = await _context.Hotels
-            .Where(h => h.PricePerNight > 0)
-            .Select(h => new
+        var today = DateTime.UtcNow;
+
+        // Get hotels with active discounts
+        var hotelsWithActiveDiscounts = await _context.RoomTypes
+            .Include(rt => rt.Hotel)
+            .Include(rt => rt.Discounts)
+            .Where(rt => rt.Discounts.Any(d => 
+                d.StartDate <= today && 
+                d.EndDate >= today))
+            .Select(rt => new
             {
-                h.Id,
-                h.Name,
-                h.City,
-                h.Country,
-                h.Location,
-                h.ImageUrl,
-                h.Rating,
-                OriginalPrice = h.PricePerNight,
-                DiscountedPrice = h.PricePerNight * 0.75m, // 25% discount
-                DiscountPercentage = 25,
-                h.Description,
-                SaveAmount = h.PricePerNight * 0.25m
+                HotelId = rt.Hotel!.Id,
+                HotelName = rt.Hotel.Name,
+                HotelCity = rt.Hotel.City,
+                HotelCountry = rt.Hotel.Country,
+                HotelLocation = rt.Hotel.Location,
+                HotelImageUrl = rt.Hotel.ImageUrl,
+                HotelRating = rt.Hotel.Rating,
+                HotelDescription = rt.Hotel.Description,
+                RoomPrice = rt.PricePerNight,
+                MaxDiscount = rt.Discounts
+                    .Where(d => d.StartDate <= today && d.EndDate >= today)
+                    .OrderByDescending(d => d.DiscountPercentage)
+                    .Select(d => d.DiscountPercentage)
+                    .FirstOrDefault()
             })
-            .OrderByDescending(h => h.Rating)
-            .Take(12)
             .ToListAsync();
 
-        return Ok(hotels);
+        var result = hotelsWithActiveDiscounts
+            .GroupBy(x => x.HotelId)
+            .Select(g => new
+            {
+                Id = g.Key,
+                Name = g.First().HotelName,
+                City = g.First().HotelCity,
+                Country = g.First().HotelCountry,
+                Location = g.First().HotelLocation,
+                ImageUrl = g.First().HotelImageUrl,
+                Rating = g.First().HotelRating,
+                Description = g.First().HotelDescription,
+                MinPrice = g.Min(x => x.RoomPrice),
+                MaxDiscount = g.Max(x => x.MaxDiscount),
+                OriginalPrice = g.Min(x => x.RoomPrice),
+                DiscountedPrice = g.Min(x => x.RoomPrice) * (1 - g.Max(x => x.MaxDiscount) / 100m),
+                DiscountPercentage = g.Max(x => x.MaxDiscount),
+                SaveAmount = g.Min(x => x.RoomPrice) * (g.Max(x => x.MaxDiscount) / 100m)
+            })
+            .OrderByDescending(h => h.Rating)
+            .Take(12);
+
+        return Ok(result);
+    }
+
+    // DTO for Last Minute offers
+    public class LastMinuteOfferDto
+    {
+        public int HotelId { get; set; }
+        public string HotelName { get; set; } = string.Empty;
+        public string HotelCity { get; set; } = string.Empty;
+        public string HotelCountry { get; set; } = string.Empty;
+        public string HotelImageUrl { get; set; } = string.Empty;
+        public decimal HotelRating { get; set; }
+        
+        public int RoomTypeId { get; set; }
+        public string RoomTypeName { get; set; } = string.Empty;
+        public int Capacity { get; set; }
+        public string Description { get; set; } = string.Empty;
+        
+        public decimal OriginalPrice { get; set; }
+        public int DiscountPercentage { get; set; }
+        public decimal DiscountedPrice { get; set; }
+        public decimal SaveAmount { get; set; }
+        
+        public int AvailableRoomsCount { get; set; }
+        public DateTime EarliestAvailableDate { get; set; }
+        public int DaysUntilCheckIn { get; set; }
     }
 
     // GET: api/deals/last-minute
     [HttpGet("last-minute")]
-    public async Task<ActionResult<IEnumerable<object>>> GetLastMinuteDeals()
+    public async Task<ActionResult<IEnumerable<LastMinuteOfferDto>>> GetLastMinuteDeals()
     {
         var today = DateTime.UtcNow.Date;
-        var threeDaysFromNow = today.AddDays(3);
-
-        // Get hotels with availability in the next 72 hours
-        var hotelsWithAvailability = await _context.RoomTypes
+        var sevenDaysFromNow = today.AddDays(7);
+        
+        // Get room types with low availability (≤3 rooms) in next 7 days
+        var roomTypesWithLowAvailability = await _context.RoomTypes
             .Include(rt => rt.Hotel)
             .Include(rt => rt.Availabilities)
+            .Include(rt => rt.Discounts)
             .Where(rt => rt.Availabilities.Any(a => 
                 a.Date >= today && 
-                a.Date <= threeDaysFromNow && 
-                a.AvailableCount > 0 &&
+                a.Date <= sevenDaysFromNow && 
+                a.AvailableCount > 0 && 
+                a.AvailableCount <= 3 &&
                 !a.IsBlocked))
-            .Select(rt => rt.Hotel)
-            .Distinct()
-            .Select(h => new
-            {
-                h.Id,
-                h.Name,
-                h.City,
-                h.Country,
-                h.Location,
-                h.ImageUrl,
-                h.Rating,
-                OriginalPrice = h.PricePerNight,
-                DiscountedPrice = h.PricePerNight * 0.70m, // 30% off for last minute
-                DiscountPercentage = 30,
-                h.Description,
-                SaveAmount = h.PricePerNight * 0.30m,
-                HoursLeft = (int)(threeDaysFromNow - DateTime.UtcNow).TotalHours
-            })
-            .OrderBy(h => h.HoursLeft)
-            .Take(8)
             .ToListAsync();
 
-        return Ok(hotelsWithAvailability);
+        var result = new List<LastMinuteOfferDto>();
+        
+        foreach (var roomType in roomTypesWithLowAvailability)
+        {
+            // Get earliest available date
+            var earliestDate = roomType.Availabilities
+                .Where(a => a.Date >= today && a.AvailableCount > 0 && !a.IsBlocked)
+                .OrderBy(a => a.Date)
+                .FirstOrDefault()?.Date ?? today;
+
+            // Check for existing active discount
+            var activeDiscount = roomType.Discounts
+                .FirstOrDefault(d => d.StartDate <= earliestDate && d.EndDate >= earliestDate);
+
+            int discountPercentage;
+            decimal discountedPrice;
+            decimal saveAmount;
+
+            if (activeDiscount != null)
+            {
+                // Use existing discount
+                discountPercentage = activeDiscount.DiscountPercentage;
+                discountedPrice = roomType.PricePerNight * (1 - discountPercentage / 100m);
+                saveAmount = roomType.PricePerNight * (discountPercentage / 100m);
+            }
+            else
+            {
+                // Apply 5% last-minute discount (for first 2 nights)
+                discountPercentage = 5;
+                discountedPrice = roomType.PricePerNight * 0.95m;
+                saveAmount = roomType.PricePerNight * 0.05m;
+            }
+
+            // Get minimum available rooms count in the period
+            var minAvailable = roomType.Availabilities
+                .Where(a => a.Date >= today && a.Date <= sevenDaysFromNow && !a.IsBlocked)
+                .Min(a => (int?)a.AvailableCount) ?? 0;
+
+            result.Add(new LastMinuteOfferDto
+            {
+                HotelId = roomType.HotelId,
+                HotelName = roomType.Hotel?.Name ?? "",
+                HotelCity = roomType.Hotel?.City ?? "",
+                HotelCountry = roomType.Hotel?.Country ?? "",
+                HotelImageUrl = roomType.Hotel?.ImageUrl ?? "",
+                HotelRating = roomType.Hotel?.Rating ?? 0,
+                
+                RoomTypeId = roomType.Id,
+                RoomTypeName = roomType.Name,
+                Capacity = roomType.Capacity,
+                Description = roomType.Description ?? "",
+                
+                OriginalPrice = roomType.PricePerNight,
+                DiscountPercentage = discountPercentage,
+                DiscountedPrice = discountedPrice,
+                SaveAmount = saveAmount,
+                
+                AvailableRoomsCount = minAvailable,
+                EarliestAvailableDate = earliestDate,
+                DaysUntilCheckIn = (int)(earliestDate - today).TotalDays
+            });
+        }
+
+        // Sort by highest discount first, then by days until check-in
+        return Ok(result
+            .OrderByDescending(r => r.DiscountPercentage)
+            .ThenBy(r => r.DaysUntilCheckIn)
+            .ToList());
     }
 
     // GET: api/deals/seasonal
     [HttpGet("seasonal")]
     public async Task<ActionResult<IEnumerable<object>>> GetSeasonalDeals()
     {
-        var currentMonth = DateTime.UtcNow.Month;
-        decimal discountPercentage;
+        var today = DateTime.UtcNow;
+        var currentMonth = today.Month;
         string season;
 
-        // Determine season and discount
+        // Determine current season for display only
         if (currentMonth >= 6 && currentMonth <= 8)
         {
             season = "Summer";
-            discountPercentage = 0.20m; // 20% summer discount
         }
         else if (currentMonth >= 12 || currentMonth <= 2)
         {
             season = "Winter";
-            discountPercentage = 0.15m; // 15% winter discount
         }
         else if (currentMonth >= 3 && currentMonth <= 5)
         {
             season = "Spring";
-            discountPercentage = 0.18m; // 18% spring discount
         }
         else
         {
             season = "Autumn";
-            discountPercentage = 0.22m; // 22% autumn discount
         }
 
-        var hotels = await _context.Hotels
-            .Where(h => h.PricePerNight > 0)
-            .Select(h => new
+        // Get hotels with REAL active discounts created by admin
+        var hotelsWithActiveDiscounts = await _context.RoomTypes
+            .Include(rt => rt.Hotel)
+            .Include(rt => rt.Discounts)
+            .Where(rt => rt.Discounts.Any(d => 
+                d.StartDate <= today && 
+                d.EndDate >= today))
+            .Select(rt => new
             {
-                h.Id,
-                h.Name,
-                h.City,
-                h.Country,
-                h.Location,
-                h.ImageUrl,
-                h.Rating,
-                OriginalPrice = h.PricePerNight,
-                DiscountedPrice = h.PricePerNight * (1 - discountPercentage),
-                DiscountPercentage = (int)(discountPercentage * 100),
-                h.Description,
-                SaveAmount = h.PricePerNight * discountPercentage,
+                HotelId = rt.Hotel!.Id,
+                HotelName = rt.Hotel.Name,
+                HotelCity = rt.Hotel.City,
+                HotelCountry = rt.Hotel.Country,
+                HotelLocation = rt.Hotel.Location,
+                HotelImageUrl = rt.Hotel.ImageUrl,
+                HotelRating = rt.Hotel.Rating,
+                HotelDescription = rt.Hotel.Description,
+                RoomPrice = rt.PricePerNight,
+                MaxDiscount = rt.Discounts
+                    .Where(d => d.StartDate <= today && d.EndDate >= today)
+                    .OrderByDescending(d => d.DiscountPercentage)
+                    .Select(d => d.DiscountPercentage)
+                    .FirstOrDefault()
+            })
+            .ToListAsync();
+
+        var result = hotelsWithActiveDiscounts
+            .GroupBy(x => x.HotelId)
+            .Select(g => new
+            {
+                Id = g.Key,
+                Name = g.First().HotelName,
+                City = g.First().HotelCity,
+                Country = g.First().HotelCountry,
+                Location = g.First().HotelLocation,
+                ImageUrl = g.First().HotelImageUrl,
+                Rating = g.First().HotelRating,
+                Description = g.First().HotelDescription,
+                MinPrice = g.Min(x => x.RoomPrice),
+                MaxDiscount = g.Max(x => x.MaxDiscount),
+                OriginalPrice = g.Min(x => x.RoomPrice),
+                DiscountedPrice = g.Min(x => x.RoomPrice) * (1 - g.Max(x => x.MaxDiscount) / 100m),
+                DiscountPercentage = g.Max(x => x.MaxDiscount),
+                SaveAmount = g.Min(x => x.RoomPrice) * (g.Max(x => x.MaxDiscount) / 100m),
                 Season = season
             })
             .OrderByDescending(h => h.Rating)
-            .Take(10)
-            .ToListAsync();
+            .Take(12);
 
-        return Ok(hotels);
+        return Ok(result);
     }
 
     // GET: api/deals/packages

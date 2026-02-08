@@ -17,8 +17,7 @@ const Footer = () => {
                             (Petoria)<span>.</span>
                         </div>
                         <p className="footer-description">
-                            Открийте най-добрите хотели и настанявания за вашата следваща почивка.
-                            Резервирайте лесно и бързо с Petoria.
+                            {t('footerDescription')}
                         </p>
                         <div className="social-links">
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
@@ -37,27 +36,27 @@ const Footer = () => {
                     </div>
 
                     <div className="footer-column">
-                        <h3 className="footer-title">Навигация</h3>
+                        <h3 className="footer-title">{t('navigation')}</h3>
                         <ul className="footer-links">
-                            <li><Link to="/">Начало</Link></li>
-                            <li><Link to="/hotels">Хотели</Link></li>
-                            <li><Link to="/deals">🎁 Оферти</Link></li>
-                            <li><Link to="/about">За нас</Link></li>
+                            <li><Link to="/">{t('home')}</Link></li>
+                            <li><Link to="/hotels">{t('hotels')}</Link></li>
+                            <li><Link to="/deals">🎁 {t('deals')}</Link></li>
+                            <li><Link to="/about">{t('about')}</Link></li>
                         </ul>
                     </div>
 
                     <div className="footer-column">
-                        <h3 className="footer-title">Поддръжка</h3>
+                        <h3 className="footer-title">{t('supportMenu')}</h3>
                         <ul className="footer-links">
-                            <li><Link to="/support">Помощ</Link></li>
-                            <li><Link to="/favorites">Любими</Link></li>
-                            <li><Link to="/purchase-history">История</Link></li>
-                            <li><Link to="/settings">Настройки</Link></li>
+                            <li><Link to="/support">{t('help')}</Link></li>
+                            <li><Link to="/favorites">{t('favorites')}</Link></li>
+                            <li><Link to="/purchase-history">{t('history')}</Link></li>
+                            <li><Link to="/settings">{t('settings')}</Link></li>
                         </ul>
                     </div>
 
                     <div className="footer-column">
-                        <h3 className="footer-title">Контакти</h3>
+                        <h3 className="footer-title">{t('contacts')}</h3>
                         <ul className="footer-contact">
                             <li>
                                 <span className="contact-icon">📧</span>
@@ -69,7 +68,7 @@ const Footer = () => {
                             </li>
                             <li>
                                 <span className="contact-icon">📍</span>
-                                <span>София, България</span>
+                                <span>{t('location')}</span>
                             </li>
                         </ul>
                     </div>
@@ -78,12 +77,12 @@ const Footer = () => {
                 {/* Footer Bottom */}
                 <div className="footer-bottom">
                     <p className="copyright">
-                        © {currentYear} Petoria. Всички права запазени.
+                        © {currentYear} Petoria. {t('allRightsReserved')}.
                     </p>
                     <div className="footer-bottom-links">
-                        <Link to="/privacy">Поверителност</Link>
-                        <Link to="/terms">Условия за ползване</Link>
-                        <Link to="/cookies">Бисквитки</Link>
+                        <Link to="/privacy">{t('privacy')}</Link>
+                        <Link to="/terms">{t('terms')}</Link>
+                        <Link to="/cookies">{t('cookies')}</Link>
                     </div>
                 </div>
             </div>

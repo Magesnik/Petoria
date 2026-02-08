@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import Header from '../components/Header';
 import ReviewSection from '../components/ReviewSection';
 import BookingWidget from '../components/BookingWidget';
@@ -15,6 +16,7 @@ const HotelDetails = () => {
     const { t } = useLanguage();
     const { isFavorite, toggleFavorite } = useFavorites();
     const { user, isAdmin } = useAuth();
+    const { convertAndFormat } = useCurrency();
     const [hotel, setHotel] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -195,7 +197,7 @@ const HotelDetails = () => {
                             </div>
                             <div className="hotel-price-box">
                                 <span className="price-label">{t('from')}</span>
-                                <span className="price-amount">${hotel.pricePerNight}</span>
+                                <span className="price-amount">{convertAndFormat(hotel.pricePerNight)}</span>
                                 <span className="price-period">{t('perNight')}</span>
                             </div>
                         </div>

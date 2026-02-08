@@ -174,12 +174,12 @@ const Hotels = () => {
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="Search by hotel name, city, or location..."
+                            placeholder={t('searchPlaceholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                         <button type="submit" className="btn-search">
-                            🔍 Search
+                            🔍 {t('search')}
                         </button>
                     </form>
                 </div>
@@ -203,9 +203,9 @@ const Hotels = () => {
                     {/* Results Header with View Toggle */}
                     <div className="results-header">
                         <h2>
-                            {loading ? 'Loading...' : view === 'grid'
-                                ? `${hotels.length} Hotels Found`
-                                : `${mapHotels.length} Hotels on Map`}
+                            {loading ? t('loading') : view === 'grid'
+                                ? `${hotels.length} ${t('hotelsFound')}`
+                                : `${mapHotels.length} ${t('hotelsOnMap')}`}
                         </h2>
                         <div className="view-toggle">
                             <button
@@ -229,7 +229,7 @@ const Hotels = () => {
                     {loading && (
                         <div className="loading-state">
                             <div className="spinner"></div>
-                            <p>Loading hotels...</p>
+                            <p>{t('loading')}</p>
                         </div>
                     )}
 
@@ -246,10 +246,10 @@ const Hotels = () => {
                     {/* Empty State */}
                     {!loading && !error && view === 'grid' && hotels.length === 0 && (
                         <div className="empty-state">
-                            <h3>No hotels found</h3>
-                            <p>Try adjusting your filters or search criteria</p>
+                            <h3>{t('noHotelsFound')}</h3>
+                            <p>{t('tryAdjustingFilters')}</p>
                             <button onClick={handleClearFilters} className="btn-clear">
-                                Clear Filters
+                                {t('clearFilters')}
                             </button>
                         </div>
                     )}

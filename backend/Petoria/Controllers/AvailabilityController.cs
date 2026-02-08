@@ -27,6 +27,8 @@ public class AvailabilityController : ControllerBase
         public DateTime Date { get; set; }
         public int AvailableCount { get; set; }
         public bool IsBlocked { get; set; }
+        public int? DiscountPercentage { get; set; }
+        public decimal? DiscountedPrice { get; set; }
     }
 
     // DTO for bulk availability update
@@ -78,6 +80,13 @@ public class AvailabilityController : ControllerBase
                          ra.Date <= to.Date)
             .ToListAsync();
 
+        // Get active discounts for this date range
+        var discounts = await _context.RoomDiscounts
+            .Where(rd => roomTypeIds.Contains(rd.RoomTypeId) && 
+                         rd.EndDate >= from.Date && 
+                         rd.StartDate <= to.Date)
+            .ToListAsync();
+
         var result = new List<AvailabilityDto>();
 
         // Generate availability data for each date and room type
@@ -88,6 +97,12 @@ public class AvailabilityController : ControllerBase
                 var existingRecord = availabilityRecords
                     .FirstOrDefault(ra => ra.RoomTypeId == roomType.Id && ra.Date == date);
 
+                // Find active discount for this date and room type
+                var activeDiscount = discounts.FirstOrDefault(d => 
+                    d.RoomTypeId == roomType.Id && 
+                    date >= d.StartDate.Date && 
+                    date <= d.EndDate.Date);
+
                 result.Add(new AvailabilityDto
                 {
                     RoomTypeId = roomType.Id,
@@ -97,7 +112,11 @@ public class AvailabilityController : ControllerBase
                     Date = date,
                     // If no record exists, use TotalRooms as available count
                     AvailableCount = existingRecord?.AvailableCount ?? roomType.TotalRooms,
-                    IsBlocked = existingRecord?.IsBlocked ?? false
+                    IsBlocked = existingRecord?.IsBlocked ?? false,
+                    DiscountPercentage = activeDiscount?.DiscountPercentage,
+                    DiscountedPrice = activeDiscount != null 
+                        ? roomType.PricePerNight * (1 - activeDiscount.DiscountPercentage / 100m) 
+                        : null
                 });
             }
         }

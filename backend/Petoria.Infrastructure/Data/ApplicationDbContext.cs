@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<RoomType> RoomTypes { get; set; }
     public DbSet<RoomAvailability> RoomAvailabilities { get; set; }
     public DbSet<HotelReview> HotelReviews { get; set; }
+    public DbSet<RoomDiscount> RoomDiscounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -35,5 +36,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(rt => rt.HotelId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        // Configure RoomType -> RoomDiscounts relationship
+        builder.Entity<RoomDiscount>()
+            .HasOne(rd => rd.RoomType)
+            .WithMany(rt => rt.Discounts)
+            .HasForeignKey(rd => rd.RoomTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        // Add index for efficient discount queries
+        builder.Entity<RoomDiscount>()
+            .HasIndex(rd => new { rd.RoomTypeId, rd.StartDate, rd.EndDate });
     }
 }

@@ -1,11 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { useCurrency } from '../context/CurrencyContext';
 import Header from '../components/Header';
 import './Settings.css';
 
 const Settings = () => {
-    const { t } = useLanguage();
+    const { t, language, toggleLanguage } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
+    const { currency, changeCurrency, availableCurrencies } = useCurrency();
     const { user, login } = useAuth();
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
@@ -223,6 +227,78 @@ const Settings = () => {
                                 )}
                             </div>
                             {avatarMessage && <div className="info-message">{avatarMessage}</div>}
+                        </div>
+                    </div>
+
+                    {/* Preferences Section */}
+                    <div className="settings-section">
+                        <h2>{t('preferences') || 'Preferences'}</h2>
+
+                        <div className="preferences-grid">
+                            {/* Language Toggle */}
+                            <div className="preference-item">
+                                <div className="preference-info">
+                                    <span className="preference-icon">🌐</span>
+                                    <div>
+                                        <h3>{t('language') || 'Language'}</h3>
+                                        <p className="preference-description">
+                                            {language === 'en' ? 'English' : 'Български'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={toggleLanguage}
+                                    className="btn-toggle"
+                                >
+                                    {language === 'en' ? '🇧🇬 БГ' : '🇬🇧 EN'}
+                                </button>
+                            </div>
+
+                            {/* Theme Toggle */}
+                            <div className="preference-item">
+                                <div className="preference-info">
+                                    <span className="preference-icon">{theme === 'dark' ? '🌙' : '☀️'}</span>
+                                    <div>
+                                        <h3>{t('theme') || 'Theme'}</h3>
+                                        <p className="preference-description">
+                                            {theme === 'dark'
+                                                ? (t('darkMode') || 'Dark Mode')
+                                                : (t('lightMode') || 'Light Mode')
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={toggleTheme}
+                                    className="btn-toggle"
+                                >
+                                    {theme === 'dark' ? '☀️' : '🌙'}
+                                </button>
+                            </div>
+
+                            {/* Currency Selector */}
+                            <div className="preference-item">
+                                <div className="preference-info">
+                                    <span className="preference-icon">💱</span>
+                                    <div>
+                                        <h3>{t('currency') || 'Currency'}</h3>
+                                        <p className="preference-description">
+                                            {t('selectCurrency') || 'Select your preferred currency'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <select
+                                    value={currency}
+                                    onChange={(e) => changeCurrency(e.target.value)}
+                                    className="currency-select"
+                                >
+                                    {availableCurrencies.map(curr => (
+                                        <option key={curr} value={curr}>
+                                            {curr}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
 

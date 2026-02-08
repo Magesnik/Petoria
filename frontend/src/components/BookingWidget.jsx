@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useCurrency } from '../context/CurrencyContext';
 import DateRangeCalendar from './DateRangeCalendar';
 import './BookingWidget.css';
 
 const BookingWidget = ({ hotelId, onBookingComplete }) => {
     const { user } = useAuth();
     const { t } = useLanguage();
+    const { convertAndFormat } = useCurrency();
 
     // State for room types
     const [roomTypes, setRoomTypes] = useState([]);
@@ -240,7 +242,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                             <div className="room-type-name">{room.name}</div>
                             <div className="room-type-details">
                                 <span className="room-capacity">👥 {room.capacity} гости</span>
-                                <span className="room-price">{room.pricePerNight} лв/нощ</span>
+                                <span className="room-price">{convertAndFormat(room.pricePerNight)}/нощ</span>
                             </div>
                             {room.description && (
                                 <div className="room-type-description">{room.description}</div>
@@ -305,10 +307,22 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
             {/* Price Summary */}
             {priceInfo && (
                 <div className="booking-section price-summary">
+                    {priceInfo.totalDiscount > 0 && (
+                        <div className="price-row original">
+                            <span>Оригинална цена</span>
+                            <span className="strikethrough">{convertAndFormat(priceInfo.originalPrice)}</span>
+                        </div>
+                    )}
                     <div className="price-row">
-                        <span>{priceInfo.pricePerNight} лв × {priceInfo.numberOfNights} нощувки</span>
-                        <span>{priceInfo.pricePerNight * priceInfo.numberOfNights} лв</span>
+                        <span>{convertAndFormat(priceInfo.pricePerNight)} × {priceInfo.numberOfNights} нощувки</span>
+                        <span>{convertAndFormat(priceInfo.pricePerNight * priceInfo.numberOfNights)}</span>
                     </div>
+                    {priceInfo.totalDiscount > 0 && (
+                        <div className="price-row discount">
+                            <span>💰 Спестявате</span>
+                            <span className="savings">-{convertAndFormat(priceInfo.totalDiscount)}</span>
+                        </div>
+                    )}
                     {numberOfRooms > 1 && (
                         <div className="price-row">
                             <span>× {numberOfRooms} стаи</span>
@@ -317,7 +331,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                     )}
                     <div className="price-row total">
                         <span>Общо</span>
-                        <span className="total-price">{priceInfo.totalPrice} лв</span>
+                        <span className="total-price">{convertAndFormat(priceInfo.totalPrice)}</span>
                     </div>
                 </div>
             )}
@@ -329,7 +343,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                 disabled={!selectedRoomType || !checkInDate || !checkOutDate || bookingLoading || !user}
             >
                 {bookingLoading ? '⏳ Резервиране...' : (
-                    priceInfo ? `Резервирай за ${priceInfo.totalPrice} лв` : 'Резервирай'
+                    priceInfo ? `Резервирай за ${convertAndFormat(priceInfo.totalPrice)}` : 'Резервирай'
                 )}
             </button>
 

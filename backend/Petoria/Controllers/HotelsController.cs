@@ -81,8 +81,76 @@ public class HotelsController : ControllerBase
         // Only show available hotels
         query = query.Where(h => h.IsAvailable);
 
-        var hotels = await query.OrderByDescending(h => h.Rating).ToListAsync();
-        return Ok(hotels);
+        var today = DateTime.UtcNow;
+        
+        // Get hotels with room types and active discounts
+        var hotelsWithDiscounts = await query
+            .Select(h => new
+            {
+                Hotel = h,
+                MinRoomPrice = _context.RoomTypes
+                    .Where(rt => rt.HotelId == h.Id)
+                    .Select(rt => new {
+                        rt.PricePerNight,
+                        MaxDiscount = rt.Discounts
+                            .Where(d => d.StartDate <= today && d.EndDate >= today)
+                            .OrderByDescending(d => d.DiscountPercentage)
+                            .Select(d => (int?)d.DiscountPercentage)
+                            .FirstOrDefault()
+                    })
+                    .OrderBy(rt => rt.PricePerNight)
+                    .FirstOrDefault()
+            })
+            .OrderByDescending(h => h.Hotel.Rating)
+            .ToListAsync();
+
+        // Transform to include discount info
+        var result = hotelsWithDiscounts.Select(h =>
+        {
+            var hotel = h.Hotel;
+            decimal displayPrice = hotel.PricePerNight;
+            int? discountPercentage = null;
+            bool hasDiscount = false;
+
+            if (h.MinRoomPrice != null && h.MinRoomPrice.MaxDiscount.HasValue)
+            {
+                hasDiscount = true;
+                discountPercentage = h.MinRoomPrice.MaxDiscount.Value;
+                displayPrice = h.MinRoomPrice.PricePerNight * (1 - discountPercentage.Value / 100m);
+            }
+            else if (h.MinRoomPrice != null)
+            {
+                displayPrice = h.MinRoomPrice.PricePerNight;
+            }
+
+            return new
+            {
+                hotel.Id,
+                hotel.Name,
+                hotel.Description,
+                hotel.Location,
+                hotel.City,
+                hotel.Country,
+                hotel.Latitude,
+                hotel.Longitude,
+                OriginalPrice = hotel.PricePerNight,
+                DisplayPrice = displayPrice,
+                HasDiscount = hasDiscount,
+                DiscountPercentage = discountPercentage,
+                hotel.Rating,
+                hotel.StarRating,
+                hotel.ImageUrl,
+                hotel.Images,
+                hotel.Amenities,
+                hotel.RoomTypes,
+                hotel.IsAvailable,
+                hotel.CreatedById,
+                hotel.CreatedAt,
+                hotel.UpdatedAt
+            };
+        }).ToList();
+
+        return Ok(result);
     }
 
     // GET: api/hotels/5

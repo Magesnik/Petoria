@@ -147,6 +147,7 @@ const DateRangeCalendar = ({
                     const isInRange = isDateInRange(date);
                     const avail = getAvailabilityForDate(date);
                     const availableCount = avail?.availableCount ?? selectedRoomType?.totalRooms ?? 0;
+                    const hasDiscount = avail?.discountPercentage > 0;
 
                     return (
                         <div
@@ -158,9 +159,13 @@ const DateRangeCalendar = ({
                                 ${isCheckOut ? 'check-out' : ''}
                                 ${isInRange ? 'in-range' : ''}
                                 ${!isPast && !isBlocked ? 'available' : ''}
+                                ${hasDiscount && !isPast && !isBlocked ? 'discounted' : ''}
                             `}
                             onClick={() => handleDayClick(date)}
                         >
+                            {hasDiscount && !isPast && !isBlocked && (
+                                <span className="discount-badge">-{avail.discountPercentage}%</span>
+                            )}
                             <span className="day-number">{date.getDate()}</span>
                             {selectedRoomType && !isPast && !isBlocked && (
                                 <span className="availability-indicator">
@@ -177,6 +182,10 @@ const DateRangeCalendar = ({
                 <div className="legend-item">
                     <span className="legend-dot available"></span>
                     <span>Налично</span>
+                </div>
+                <div className="legend-item">
+                    <span className="legend-dot discounted"></span>
+                    <span>С отстъпка</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-dot selected"></span>

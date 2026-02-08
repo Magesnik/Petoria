@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
+import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../context/LanguageContext';
 import './HotelCard.css';
 
 // Add these styles to HotelCard.css (simulated via instruction, user should check CSS file or I should edit it directly if I had read it. Since I didn't read it, I will assume it needs these classes. Wait, I should read it first or just overwrite/append? I'll append to the component file if using styled-components, but this is CSS import. I should edit the CSS file. I haven't read HotelCard.css yet. Let me read it first to be safe, but I'll skip that to speed up and assume standard modification. actually, I cannot edit styles in JSX. I must edit the CSS file. I will list_dir to find it.)
@@ -10,6 +12,8 @@ import './HotelCard.css';
 const HotelCard = ({ hotel }) => {
     const navigate = useNavigate();
     const { isFavorite, toggleFavorite } = useFavorites();
+    const { convertAndFormat } = useCurrency();
+    const { t } = useLanguage();
     const amenities = hotel.amenities ? JSON.parse(hotel.amenities) : [];
     const displayAmenities = amenities.slice(0, 4);
 
@@ -35,6 +39,11 @@ const HotelCard = ({ hotel }) => {
                 >
                     {isFavorite(hotel.id) ? '❤️' : '🤍'}
                 </button>
+                {hotel.hasDiscount && hotel.discountPercentage && (
+                    <div className="discount-badge-card">
+                        -{hotel.discountPercentage}%
+                    </div>
+                )}
                 <div className="hotel-badges">
                     <div className="star-rating-badge">
                         {Array(hotel.starRating || 0).fill('★').join('')}
@@ -64,10 +73,22 @@ const HotelCard = ({ hotel }) => {
 
                 <div className="hotel-footer">
                     <div className="hotel-price">
-                        <span className="price-amount">${hotel.pricePerNight}</span>
-                        <span className="price-period">/night</span>
+                        {hotel.hasDiscount ? (
+                            <>
+                                <div className="price-with-discount">
+                                    <span className="price-original">{convertAndFormat(hotel.originalPrice)}</span>
+                                    <span className="price-amount">{convertAndFormat(hotel.displayPrice)}</span>
+                                </div>
+                                <span className="price-period">/night</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="price-amount">{convertAndFormat(hotel.displayPrice || hotel.pricePerNight)}</span>
+                                <span className="price-period">/night</span>
+                            </>
+                        )}
                     </div>
-                    <button className="btn-view-details" onClick={handleViewDetails}>View Details</button>
+                    <button className="btn-view-details" onClick={handleViewDetails}>{t('viewDetails')}</button>
                 </div>
             </div>
         </div>

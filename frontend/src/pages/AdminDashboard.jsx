@@ -119,7 +119,7 @@ const AdminDashboard = () => {
                 <Header />
                 <div className="admin-dashboard loading">
                     <div className="loading-spinner"></div>
-                    <p>Loading dashboard...</p>
+                    <p>{t('loadingDashboard')}</p>
                 </div>
             </>
         );
@@ -130,8 +130,8 @@ const AdminDashboard = () => {
             <Header />
             <div className="admin-dashboard">
                 <div className="dashboard-header">
-                    <h1>🛡️ Super Admin Dashboard</h1>
-                    <p>Manage users, view statistics, and control admin access</p>
+                    <h1>🛡️ {t('superAdminDashboard')}</h1>
+                    <p>{t('manageDashboard')}</p>
                 </div>
 
                 {error && (
@@ -147,49 +147,49 @@ const AdminDashboard = () => {
                             <div className="stat-icon">👥</div>
                             <div className="stat-info">
                                 <span className="stat-value">{stats.totalUsers}</span>
-                                <span className="stat-label">Total Users</span>
+                                <span className="stat-label">{t('totalUsers')}</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">🔐</div>
                             <div className="stat-info">
                                 <span className="stat-value">{stats.adminUsers}</span>
-                                <span className="stat-label">Admins</span>
+                                <span className="stat-label">{t('admins')}</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">🏨</div>
                             <div className="stat-info">
                                 <span className="stat-value">{stats.totalHotels}</span>
-                                <span className="stat-label">Hotels</span>
+                                <span className="stat-label">{t('hotels')}</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">❤️</div>
                             <div className="stat-info">
                                 <span className="stat-value">{stats.totalFavorites}</span>
-                                <span className="stat-label">Favorites</span>
+                                <span className="stat-label">{t('favorites')}</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">📅</div>
                             <div className="stat-info">
                                 <span className="stat-value">{stats.totalReservations}</span>
-                                <span className="stat-label">Reservations</span>
+                                <span className="stat-label">{t('reservations')}</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">💬</div>
                             <div className="stat-info">
                                 <span className="stat-value">{stats.totalComments}</span>
-                                <span className="stat-label">Comments</span>
+                                <span className="stat-label">{t('comments')}</span>
                             </div>
                         </div>
                         <div className="stat-card revenue">
                             <div className="stat-icon">💰</div>
                             <div className="stat-info">
                                 <span className="stat-value">${stats.totalRevenue?.toLocaleString() || 0}</span>
-                                <span className="stat-label">Total Revenue</span>
+                                <span className="stat-label">{t('totalRevenue')}</span>
                             </div>
                         </div>
                     </div>
@@ -198,10 +198,10 @@ const AdminDashboard = () => {
                 <div className="dashboard-content">
                     <div className="users-panel">
                         <div className="panel-header">
-                            <h2>👥 Users</h2>
+                            <h2>👥 {t('users')}</h2>
                             <input
                                 type="text"
-                                placeholder="Search users..."
+                                placeholder={t('searchUsers')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="search-input"
@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                     {userDetails && (
                         <div className="details-panel">
                             <div className="panel-header">
-                                <h2>User Details</h2>
+                                <h2>{t('userDetails')}</h2>
                                 <button className="close-btn" onClick={() => { setSelectedUser(null); setUserDetails(null); }}>×</button>
                             </div>
                             <div className="user-profile">
@@ -268,11 +268,11 @@ const AdminDashboard = () => {
                                         <>
                                             {userDetails.roles?.includes('Admin') ? (
                                                 <button className="btn-demote" onClick={() => demoteUser(userDetails.id)}>
-                                                    Remove Admin
+                                                    {t('removeAdmin')}
                                                 </button>
                                             ) : (
                                                 <button className="btn-promote" onClick={() => promoteUser(userDetails.id)}>
-                                                    Promote to Admin
+                                                    {t('promoteToAdmin')}
                                                 </button>
                                             )}
                                         </>
@@ -281,11 +281,11 @@ const AdminDashboard = () => {
                             </div>
 
                             <div className="details-section">
-                                <h4>💰 Total Spent: ${userDetails.totalSpent?.toLocaleString() || 0}</h4>
+                                <h4>💰 {t('totalSpent')}: ${userDetails.totalSpent?.toLocaleString() || 0}</h4>
                             </div>
 
                             <div className="details-section">
-                                <h4>❤️ Favorites ({userDetails.favorites?.length || 0})</h4>
+                                <h4>❤️ {t('favorites')} ({userDetails.favorites?.length || 0})</h4>
                                 <div className="items-list">
                                     {userDetails.favorites?.length > 0 ? (
                                         userDetails.favorites.map(f => (
@@ -298,13 +298,13 @@ const AdminDashboard = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="empty-message">No favorites yet</p>
+                                        <p className="empty-message">{t('noFavorites')}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div className="details-section">
-                                <h4>📅 Reservations ({userDetails.reservations?.length || 0})</h4>
+                                <h4>📅 {t('reservations')} ({userDetails.reservations?.length || 0})</h4>
                                 <div className="items-list">
                                     {userDetails.reservations?.length > 0 ? (
                                         userDetails.reservations.map(r => (
@@ -321,13 +321,13 @@ const AdminDashboard = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="empty-message">No reservations yet</p>
+                                        <p className="empty-message">{t('noReservations')}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div className="details-section">
-                                <h4>🏨 Hotels Created ({userDetails.hotelsCreated?.length || 0})</h4>
+                                <h4>🏨 {t('hotelsCreated')} ({userDetails.hotelsCreated?.length || 0})</h4>
                                 <div className="items-list">
                                     {userDetails.hotelsCreated?.length > 0 ? (
                                         userDetails.hotelsCreated.map(h => (
@@ -340,13 +340,13 @@ const AdminDashboard = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="empty-message">No hotels created</p>
+                                        <p className="empty-message">{t('noHotelsCreated')}</p>
                                     )}
                                 </div>
                             </div>
 
                             <div className="details-section">
-                                <h4>💬 Comments ({userDetails.comments?.length || 0})</h4>
+                                <h4>💬 {t('comments')} ({userDetails.comments?.length || 0})</h4>
                                 <div className="items-list">
                                     {userDetails.comments?.length > 0 ? (
                                         userDetails.comments.map(c => (
@@ -366,7 +366,7 @@ const AdminDashboard = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="empty-message">No comments yet</p>
+                                        <p className="empty-message">{t('noComments')}</p>
                                     )}
                                 </div>
                             </div>

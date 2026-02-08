@@ -36,24 +36,24 @@ const Support = () => {
 
     const faqs = [
         {
-            question: 'How do I make a booking?',
-            answer: 'Browse our hotels, select your preferred accommodation, choose dates, and click "Book Now". Follow the checkout process to complete your reservation.',
+            question: t('faq1Q'),
+            answer: t('faq1A'),
         },
         {
-            question: 'Can I cancel my booking?',
-            answer: 'Cancellation policies vary by hotel. Check the specific hotel\'s cancellation policy before booking. You can manage your bookings from the Purchase History page.',
+            question: t('faq2Q'),
+            answer: t('faq2A'),
         },
         {
-            question: 'How do I change my account settings?',
-            answer: 'Click on your name in the header, then select "Settings" from the dropdown menu. You can update your profile information and change your password there.',
+            question: t('faq3Q'),
+            answer: t('faq3A'),
         },
         {
-            question: 'What payment methods do you accept?',
-            answer: 'We accept all major credit cards (Visa, MasterCard, American Express) and PayPal for secure online payments.',
+            question: t('faq4Q'),
+            answer: t('faq4A'),
         },
         {
-            question: 'How can I contact a hotel directly?',
-            answer: 'Visit the hotel details page and scroll down to find the contact information section with phone number and email address.',
+            question: t('faq5Q'),
+            answer: t('faq5A'),
         },
     ];
 
@@ -80,7 +80,7 @@ const Support = () => {
                                     value={formData.subject}
                                     onChange={handleChange}
                                     required
-                                    placeholder="What can we help you with?"
+                                    placeholder={t('subject')}
                                 />
                             </div>
                             <div className="form-group">
@@ -92,7 +92,7 @@ const Support = () => {
                                     onChange={handleChange}
                                     required
                                     rows="6"
-                                    placeholder="Please describe your question or issue in detail..."
+                                    placeholder={t('yourMessage')}
                                 />
                             </div>
                             {submitMessage && <div className="success-message">{submitMessage}</div>}
@@ -126,18 +126,18 @@ const Support = () => {
                     <div className="contact-cards">
                         <div className="contact-card">
                             <div className="contact-icon">📧</div>
-                            <h3>Email</h3>
+                            <h3>{t('email')}</h3>
                             <p>support@petoria.com</p>
                         </div>
                         <div className="contact-card">
                             <div className="contact-icon">📞</div>
-                            <h3>Phone</h3>
+                            <h3>{t('phone')}</h3>
                             <p>+1 (555) 123-4567</p>
                         </div>
                         <div className="contact-card">
                             <div className="contact-icon">💬</div>
-                            <h3>Live Chat</h3>
-                            <p>Available 24/7</p>
+                            <h3>{t('liveChat')}</h3>
+                            <p>{t('available24_7')}</p>
                         </div>
                     </div>
                 </div>

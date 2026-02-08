@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -28,28 +29,30 @@ function App() {
         <LanguageProvider>
           <AuthProvider>
             <FavoritesProvider>
-              <Router>
-                <div className="App">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/hotels" element={<Hotels />} />
-                    <Route path="/hotels/:id" element={<HotelDetails />} />
-                    <Route path="/deals" element={<Deals />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/create-hotel" element={<CreateHotel />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/favorites" element={<Favorites />} />
-                    <Route path="/purchase-history" element={<PurchaseHistory />} />
-                    <Route path="/support" element={<Support />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/my-hotels" element={<MyHotels />} />
-                    <Route path="/manage-hotel/:id" element={<ManageHotel />} />
-                    <Route path="/hotel/:id" element={<HotelDetails />} />
-                  </Routes>
-                </div>
-              </Router>
+              <CurrencyProvider>
+                <Router>
+                  <div className="App">
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/hotels" element={<Hotels />} />
+                      <Route path="/hotels/:id" element={<HotelDetails />} />
+                      <Route path="/deals" element={<Deals />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/create-hotel" element={<CreateHotel />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/favorites" element={<Favorites />} />
+                      <Route path="/purchase-history" element={<PurchaseHistory />} />
+                      <Route path="/support" element={<Support />} />
+                      <Route path="/admin" element={<AdminDashboard />} />
+                      <Route path="/my-hotels" element={<MyHotels />} />
+                      <Route path="/manage-hotel/:id" element={<ManageHotel />} />
+                      <Route path="/hotel/:id" element={<HotelDetails />} />
+                    </Routes>
+                  </div>
+                </Router>
+              </CurrencyProvider>
             </FavoritesProvider>
           </AuthProvider>
         </LanguageProvider>

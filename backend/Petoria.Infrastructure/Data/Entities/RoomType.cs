@@ -41,4 +41,7 @@ public class RoomType
 
     // Navigation property for availability records
     public ICollection<RoomAvailability> Availabilities { get; set; } = new List<RoomAvailability>();
+    
+    // Navigation property for discounts
+    public ICollection<RoomDiscount> Discounts { get; set; } = new List<RoomDiscount>();
 }
