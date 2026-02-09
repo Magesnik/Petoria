@@ -290,6 +290,10 @@
     color: var(--text-light);
 }
 
+[data-theme='dark'] .preference-info h3 {
+    color: var(--text-light);
+}
+
 [data-theme='dark'] .form-group label {
     color: var(--text-light);
 }

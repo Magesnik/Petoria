@@ -1,6 +1,6 @@
 .my-hotels-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding-top: var(--header-height, 80px);
 }
 
@@ -99,7 +99,7 @@
     gap: 1.5rem;
 }
 
-.hotel-card {
+.my-hotels-page .hotel-card {
     background: rgba(30, 35, 60, 0.8);
     border-radius: 16px;
     overflow: hidden;
@@ -107,7 +107,7 @@
     transition: all 0.3s ease;
 }
 
-.hotel-card:hover {
+.my-hotels-page .hotel-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border-color: rgba(102, 126, 234, 0.3);

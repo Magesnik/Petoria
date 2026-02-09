@@ -332,16 +332,13 @@ const translations = {
         roomAdded: 'Room added successfully!',
         confirmDelete: 'Are you sure you want to delete this room?',
         roomDeleted: 'Room deleted successfully!',
-        errorDeleting: 'Error deleting',
-        addRoom: 'Add Room',
-        saveChanges: 'Save Changes',
+
         // BookingWidget Details
         bookNowHeader: 'Book Now',
         roomTypeLabel: 'Room Type',
         guests: 'guests',
         selectDatesLabel: 'Select Dates',
-        checkIn: 'Check-in',
-        checkOut: 'Check-out',
+
         numberOfRooms: 'Number of Rooms',
         availableRooms: 'Available',
         roomsOfType: 'rooms of this type',
@@ -382,7 +379,7 @@ const translations = {
         lastRoom: 'Last room!',
         people: 'people',
         checkInColon: 'Check-in:',
-        bookNow: 'Book →',
+        bookNowArrow: 'Book →',
         // CreateHotel - Map & Coordinates
         clickMapToSelect: 'Click on the map to select the hotel location',
         selectLocationOrEnterCoords: 'Select location on map or enter coordinates manually',
@@ -399,11 +396,11 @@ const translations = {
         photos: 'Photos',
         roomTypes: 'Room Types',
         // CreateHotel - Form Labels
-        hotelName: 'Hotel Name',
+
         descriptionLabel: 'Description',
         locationAddress: 'Location (Address)',
         charactersCount: 'characters',
-        starRating: 'Star Rating',
+
         star: 'star',
         noCategory: 'No category',
         starsCount: 'stars',
@@ -648,7 +645,7 @@ const translations = {
         totalAmount: 'Обща сума',
         viewHotel: 'Виж хотел',
         cancelReservation: 'Отмени',
-        nights: 'нощи',
+        nights: 'нощувки',
         rooms: 'стаи',
         room: 'стая',
         // Create Hotel
@@ -753,15 +750,12 @@ const translations = {
         roomAdded: 'Стаята е добавена успешно!',
         confirmDelete: 'Сигурни ли сте, че искате да изтриете тази стая?',
         roomDeleted: 'Стаята е изтрита успешно!',
-        errorDeleting: 'Грешка при изтриване',
-        addRoom: 'Добави стая',
-        saveChanges: 'Запази промените',
+
         bookNowHeader: 'Резервирай сега',
         roomTypeLabel: 'Тип стая',
         guests: 'гости',
         selectDatesLabel: 'Изберете дати',
-        checkIn: 'Настаняване',
-        checkOut: 'Напускане',
+
         numberOfRooms: 'Брой стаи',
         availableRooms: 'Налични',
         roomsOfType: 'стаи от този тип',
@@ -798,7 +792,7 @@ const translations = {
         lastRoom: 'Последна стая!',
         people: 'души',
         checkInColon: 'Настаняване:',
-        bookNow: 'Резервирай →',
+        bookNowArrow: 'Резервирай →',
         clickMapToSelect: 'Кликнете на картата за избор на местоположението на хотела',
         selectLocationOrEnterCoords: 'Изберете местоположение на картата или въведете координати ръчно',
         latitude: 'Географска ширина (Latitude)',
@@ -812,11 +806,11 @@ const translations = {
         basicInformation: 'Основна информация',
         photos: 'Снимки',
         roomTypes: 'Типове стаи',
-        hotelName: 'Име на хотела',
+
         descriptionLabel: 'Описание',
         locationAddress: 'Локация (Адрес)',
         charactersCount: 'символа',
-        starRating: 'Категория (Звезди)',
+
         star: 'звезда',
         noCategory: 'Без категория',
         starsCount: 'звезди',
@@ -841,9 +835,7 @@ const translations = {
         roomTypeExample: '(напр. Единична, Двойна, Апартамент)',
         addMoreRoomType: '+ Добави още тип стая',
         // Purchase History specific
-        nights: 'нощувки',
-        room: 'стая',
-        rooms: 'стаи',
+
         confirmCancelReservation: 'Сигурни ли сте, че искате да отмените тази резервация?',
         errorFetchingReservations: 'Грешка при зареждане на резервациите',
         errorCancellingReservation: 'Грешка при отмяна на резервацията',

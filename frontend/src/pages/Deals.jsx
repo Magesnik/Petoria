@@ -208,7 +208,7 @@ const Deals = () => {
                                                     handleHotelClick(deal.hotelId);
                                                 }}
                                             >
-                                                {t('bookNow')}
+                                                {t('bookNowArrow') || t('bookNow')}
                                             </button>
                                         </>
                                     ) : (

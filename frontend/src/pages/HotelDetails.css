@@ -332,7 +332,9 @@
 
 .price-label {
     font-size: 0.9rem;
-    opacity: 0.9;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    font-weight: 500;
 }
 
 .price-amount {
@@ -340,11 +342,14 @@
     font-weight: 700;
     line-height: 1;
     margin: 0.25rem 0;
+    color: #ffffff !important;
 }
 
 .price-period {
     font-size: 1rem;
-    opacity: 0.9;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    font-weight: 500;
 }
 
 /* Description */
