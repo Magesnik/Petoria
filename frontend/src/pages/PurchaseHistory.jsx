@@ -7,7 +7,7 @@ import Header from '../components/Header';
 import './PurchaseHistory.css';
 
 const PurchaseHistory = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { user } = useAuth();
     const { convertAndFormat } = useCurrency();
     const navigate = useNavigate();
@@ -38,14 +38,14 @@ const PurchaseHistory = () => {
             setReservations(data);
         } catch (err) {
             console.error('Error fetching reservations:', err);
-            setError('Грешка при зареждане на резервациите');
+            setError(t('errorFetchingReservations'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleCancelReservation = async (reservationId) => {
-        if (!window.confirm('Сигурни ли сте, че искате да отмените тази резервация?')) {
+        if (!window.confirm(t('confirmCancelReservation'))) {
             return;
         }
 
@@ -64,7 +64,7 @@ const PurchaseHistory = () => {
             fetchReservations();
         } catch (err) {
             console.error('Error cancelling reservation:', err);
-            setError('Грешка при отмяна на резервацията');
+            setError(t('errorCancellingReservation'));
         }
     };
 
@@ -86,20 +86,20 @@ const PurchaseHistory = () => {
     const getStatusLabel = (status) => {
         switch (status?.toLowerCase()) {
             case 'confirmed':
-                return 'Потвърдена';
+                return t('statusConfirmed');
             case 'pending':
-                return 'Изчакваща';
+                return t('statusPending');
             case 'cancelled':
-                return 'Отменена';
+                return t('statusCancelled');
             case 'completed':
-                return 'Завършена';
+                return t('statusCompleted');
             default:
                 return status;
         }
     };
 
     const formatDate = (dateStr) => {
-        return new Date(dateStr).toLocaleDateString('bg-BG', {
+        return new Date(dateStr).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US', {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
@@ -180,8 +180,8 @@ const PurchaseHistory = () => {
                                     <div className="reservation-summary">
                                         <div className="price-breakdown">
                                             <span className="price-detail">
-                                                {convertAndFormat(reservation.pricePerNight)} × {reservation.numberOfNights} нощи
-                                                {reservation.numberOfRooms > 1 && ` × ${reservation.numberOfRooms} стаи`}
+                                                {convertAndFormat(reservation.pricePerNight)} × {reservation.numberOfNights} {t('nights')}
+                                                {reservation.numberOfRooms > 1 && ` × ${reservation.numberOfRooms} ${reservation.numberOfRooms === 1 ? t('room') : t('rooms')}`}
                                             </span>
                                         </div>
                                         <div className="total-price">

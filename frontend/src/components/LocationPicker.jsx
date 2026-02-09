@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useLanguage } from '../context/LanguageContext';
 import './LocationPicker.css';
 
 // Fix for default marker icon
@@ -44,6 +45,7 @@ const MapViewController = ({ center }) => {
 };
 
 const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null }) => {
+    const { t } = useLanguage();
     // Default to Sofia, Bulgaria if no initial coordinates
     const defaultCenter = [42.6977, 23.3219];
     const [position, setPosition] = useState(
@@ -152,19 +154,19 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
     return (
         <div className="location-picker">
             <div className="location-picker-instructions">
-                <p>📍 Кликнете на картата за избор на местоположението на хотела</p>
+                <p>📍 {t('clickMapToSelect')}</p>
                 {loading && (
                     <div className="geocoding-loading">
-                        ⏳ Зареждане на адрес...
+                        ⏳ {t('loadingAddress')}
                     </div>
                 )}
                 {position && !loading && (
                     <div className="coordinates-display">
                         <span className="coordinate">
-                            <strong>Lat:</strong> {position[0].toFixed(6)}
+                            <strong>{t('lat')}:</strong> {position[0].toFixed(6)}
                         </span>
                         <span className="coordinate">
-                            <strong>Lng:</strong> {position[1].toFixed(6)}
+                            <strong>{t('lng')}:</strong> {position[1].toFixed(6)}
                         </span>
                     </div>
                 )}
@@ -172,17 +174,17 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
                     <div className="address-display">
                         {addressInfo.address && (
                             <span className="address-item">
-                                <strong>📍 Адрес:</strong> {addressInfo.address}
+                                <strong>📍 {t('addressLabel')}:</strong> {addressInfo.address}
                             </span>
                         )}
                         {addressInfo.city && (
                             <span className="address-item">
-                                <strong>🏙️ Град:</strong> {addressInfo.city}
+                                <strong>🏙️ {t('cityLabel')}:</strong> {addressInfo.city}
                             </span>
                         )}
                         {addressInfo.country && (
                             <span className="address-item">
-                                <strong>🌍 Държава:</strong> {addressInfo.country}
+                                <strong>🌍 {t('countryLabel')}:</strong> {addressInfo.country}
                             </span>
                         )}
                     </div>
@@ -216,7 +218,7 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
 
             {!position && (
                 <div className="location-hint">
-                    Изберете местоположение на картата или въведете координати ръчно
+                    {t('selectLocationOrEnterCoords')}
                 </div>
             )}
         </div>

@@ -7,7 +7,7 @@ import './AdminDashboard.css';
 
 const AdminDashboard = () => {
     const { user, isSuperAdmin } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [stats, setStats] = useState(null);
@@ -16,6 +16,16 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState(null);
+
+    const getStatusLabel = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'confirmed': return t('statusConfirmed');
+            case 'pending': return t('statusPending');
+            case 'cancelled': return t('statusCancelled');
+            case 'completed': return t('statusCompleted');
+            default: return status;
+        }
+    };
 
     useEffect(() => {
         if (!isSuperAdmin()) {
@@ -313,9 +323,9 @@ const AdminDashboard = () => {
                                                 <div className="item-info">
                                                     <span className="item-name">{r.hotelName}</span>
                                                     <span className="item-dates">
-                                                        {new Date(r.checkInDate).toLocaleDateString()} - {new Date(r.checkOutDate).toLocaleDateString()}
+                                                        {new Date(r.checkInDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')} - {new Date(r.checkOutDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
                                                     </span>
-                                                    <span className={`item-status status-${r.status.toLowerCase()}`}>{r.status}</span>
+                                                    <span className={`item-status status-${r.status.toLowerCase()}`}>{getStatusLabel(r.status)}</span>
                                                 </div>
                                                 <span className="item-price">${r.totalPrice}</span>
                                             </div>
@@ -353,9 +363,9 @@ const AdminDashboard = () => {
                                             <div key={c.id} className="item-card comment">
                                                 <div className="comment-content">
                                                     <span className="comment-text">{c.text}</span>
-                                                    <span className="comment-hotel">On: {c.hotelName}</span>
+                                                    <span className="comment-hotel">{t('onHotel')}: {c.hotelName}</span>
                                                     <span className="comment-date">
-                                                        {new Date(c.createdAt).toLocaleDateString()}
+                                                        {new Date(c.createdAt).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
                                                     </span>
                                                 </div>
                                                 <div className="comment-stats">

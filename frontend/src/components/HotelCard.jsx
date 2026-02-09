@@ -79,12 +79,12 @@ const HotelCard = ({ hotel }) => {
                                     <span className="price-original">{convertAndFormat(hotel.originalPrice)}</span>
                                     <span className="price-amount">{convertAndFormat(hotel.displayPrice)}</span>
                                 </div>
-                                <span className="price-period">/night</span>
+                                <span className="price-period">{t('perNight')}</span>
                             </>
                         ) : (
                             <>
                                 <span className="price-amount">{convertAndFormat(hotel.displayPrice || hotel.pricePerNight)}</span>
-                                <span className="price-period">/night</span>
+                                <span className="price-period">{t('perNight')}</span>
                             </>
                         )}
                     </div>

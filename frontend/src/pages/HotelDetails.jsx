@@ -22,6 +22,13 @@ const HotelDetails = () => {
     const [error, setError] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+    // DEBUG: Log translations
+    console.log('🔍 HotelDetails Translation Debug:', {
+        aboutHotel: t('aboutHotel'),
+        amenities: t('amenities'),
+        language: t('home') // Test another key to see current language
+    });
+
     useEffect(() => {
         fetchHotelDetails();
     }, [id]);

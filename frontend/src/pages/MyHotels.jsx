@@ -95,7 +95,7 @@ const MyHotels = () => {
                                 <div className="hotel-content">
                                     <h3>{hotel.name}</h3>
                                     <p className="hotel-location">📍 {hotel.city}, {hotel.country}</p>
-                                    <p className="hotel-price">💰 {convertAndFormat(hotel.pricePerNight)}/нощ</p>
+                                    <p className="hotel-price">💰 {convertAndFormat(hotel.pricePerNight)}{t('perNight')}</p>
 
                                     <div className="hotel-stats">
                                         <span>⭐ {hotel.rating?.toFixed(1) || '0.0'}</span>

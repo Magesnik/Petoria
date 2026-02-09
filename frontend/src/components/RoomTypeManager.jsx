@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import './RoomTypeManager.css';
 
 const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -40,7 +42,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
             }
         } catch (err) {
             console.error('Error fetching room types:', err);
-            setError('Грешка при зареждане на стаите');
+            setError(t('errorLoadingRooms'));
         } finally {
             setLoading(false);
         }
@@ -52,7 +54,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         setSuccess('');
 
         if (!formData.name || !formData.pricePerNight) {
-            setError('Моля, попълнете име и цена');
+            setError(t('fillNameAndPrice'));
             return;
         }
 
@@ -80,10 +82,10 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.message || 'Грешка при запазване');
+                throw new Error(data.message || t('errorSaving'));
             }
 
-            setSuccess(editingId ? 'Стаята е обновена успешно!' : 'Стаята е добавена успешно!');
+            setSuccess(editingId ? t('roomUpdated') : t('roomAdded'));
             resetForm();
             fetchRoomTypes();
         } catch (err) {
@@ -105,7 +107,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Сигурни ли сте, че искате да изтриете тази стая?')) {
+        if (!window.confirm(t('confirmDelete'))) {
             return;
         }
 
@@ -120,10 +122,10 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
             if (!response.ok) throw new Error('Failed to delete');
 
-            setSuccess('Стаята е изтрита успешно!');
+            setSuccess(t('roomDeleted'));
             fetchRoomTypes();
         } catch (err) {
-            setError('Грешка при изтриване');
+            setError(t('errorDeleting'));
         }
     };
 
@@ -155,29 +157,29 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.message || 'Грешка');
+                throw new Error(data.message || t('error'));
             }
 
-            setSuccess('Наличността е инициализирана за следващите 90 дни!');
+            setSuccess(t('availabilityInitialized'));
         } catch (err) {
             setError(err.message);
         }
     };
 
     if (loading) {
-        return <div className="room-manager loading">Зареждане...</div>;
+        return <div className="room-manager loading">{t('loading')}</div>;
     }
 
     return (
         <div className="room-manager">
             <div className="room-manager-header">
-                <h3>🛏️ Управление на стаи</h3>
+                <h3>🛏️ {t('roomManagement')}</h3>
                 {roomTypes.length > 0 && (
                     <button
                         className="btn-initialize"
                         onClick={handleInitializeAvailability}
                     >
-                        📅 Инициализирай наличност
+                        📅 {t('initializeAvailability')}
                     </button>
                 )}
             </div>
@@ -222,11 +224,11 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
             {/* Add/Edit Form */}
             <form onSubmit={handleSubmit} className="room-form">
-                <h4>{isEditing ? '✏️ Редактирай стая' : '➕ Добави нов тип стая'}</h4>
+                <h4>{isEditing ? `✏️ ${t('editRoom')}` : `➕ ${t('addNewRoomType')}`}</h4>
 
                 <div className="form-grid">
                     <div className="form-group">
-                        <label>Име на стаята *</label>
+                        <label>{t('roomName')} *</label>
                         <input
                             type="text"
                             value={formData.name}
@@ -237,7 +239,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
                     </div>
 
                     <div className="form-group">
-                        <label>Цена на нощувка (лв) *</label>
+                        <label>{t('pricePerNightLabel')} (лв) *</label>
                         <input
                             type="number"
                             value={formData.pricePerNight}
@@ -250,7 +252,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
                     </div>
 
                     <div className="form-group">
-                        <label>Капацитет (гости)</label>
+                        <label>{t('capacityLabel')}</label>
                         <input
                             type="number"
                             value={formData.capacity}
@@ -261,7 +263,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
                     </div>
 
                     <div className="form-group">
-                        <label>Брой стаи</label>
+                        <label>{t('totalRoomsLabel')}</label>
                         <input
                             type="number"
                             value={formData.totalRooms}
@@ -273,7 +275,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
                 </div>
 
                 <div className="form-group full-width">
-                    <label>Описание</label>
+                    <label>{t('description')}</label>
                     <textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -285,11 +287,11 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
                 <div className="form-actions">
                     {isEditing && (
                         <button type="button" className="btn-cancel" onClick={resetForm}>
-                            Отказ
+                            {t('cancel')}
                         </button>
                     )}
                     <button type="submit" className="btn-save">
-                        {isEditing ? '💾 Запази промените' : '➕ Добави стая'}
+                        {isEditing ? `💾 ${t('saveChanges')}` : `➕ ${t('addRoom')}`}
                     </button>
                 </div>
             </form>

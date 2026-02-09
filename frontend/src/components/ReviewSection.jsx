@@ -122,7 +122,7 @@ const ReviewSection = ({ hotelId }) => {
                         {'★'.repeat(Math.round(averageRating))}
                         {'☆'.repeat(5 - Math.round(averageRating))}
                     </div>
-                    <span className="rating-text">средна оценка</span>
+                    <span className="rating-text">{t('averageRating')}</span>
                 </div>
 
                 {user && (
@@ -145,7 +145,7 @@ const ReviewSection = ({ hotelId }) => {
                             <textarea
                                 value={userReview.reviewText}
                                 onChange={(e) => setUserReview({ ...userReview, reviewText: e.target.value })}
-                                placeholder="Споделете впечатленията си..."
+                                placeholder={t('shareYourExperience')}
                                 required
                             />
                             <button type="submit" disabled={isSubmitting} className="btn-submit">

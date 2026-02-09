@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './DateRangeCalendar.css';
 
 const DateRangeCalendar = ({
@@ -9,6 +10,7 @@ const DateRangeCalendar = ({
     onDateChange,
     availability = []
 }) => {
+    const { t } = useLanguage();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectionMode, setSelectionMode] = useState('checkIn'); // 'checkIn' or 'checkOut'
 
@@ -85,8 +87,11 @@ const DateRangeCalendar = ({
     };
 
     const formatMonth = (date) => {
-        const months = ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни',
-            'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
+        const months = [
+            t('monthJan'), t('monthFeb'), t('monthMar'), t('monthApr'),
+            t('monthMay'), t('monthJun'), t('monthJul'), t('monthAug'),
+            t('monthSep'), t('monthOct'), t('monthNov'), t('monthDec')
+        ];
         return `${months[date.getMonth()]} ${date.getFullYear()}`;
     };
 
@@ -104,7 +109,7 @@ const DateRangeCalendar = ({
                     className={`date-box ${selectionMode === 'checkIn' ? 'active' : ''} ${checkInDate ? 'filled' : ''}`}
                     onClick={() => setSelectionMode('checkIn')}
                 >
-                    <span className="date-label">Настаняване</span>
+                    <span className="date-label">{t('checkIn')}</span>
                     <span className="date-value">{formatDate(checkInDate)}</span>
                 </div>
                 <div className="date-separator">→</div>
@@ -112,7 +117,7 @@ const DateRangeCalendar = ({
                     className={`date-box ${selectionMode === 'checkOut' ? 'active' : ''} ${checkOutDate ? 'filled' : ''}`}
                     onClick={() => setSelectionMode('checkOut')}
                 >
-                    <span className="date-label">Напускане</span>
+                    <span className="date-label">{t('checkOut')}</span>
                     <span className="date-value">{formatDate(checkOutDate)}</span>
                 </div>
             </div>
@@ -126,13 +131,13 @@ const DateRangeCalendar = ({
 
             {/* Calendar Grid */}
             <div className="calendar-grid">
-                <div className="day-header">Нд</div>
-                <div className="day-header">Пн</div>
-                <div className="day-header">Вт</div>
-                <div className="day-header">Ср</div>
-                <div className="day-header">Чт</div>
-                <div className="day-header">Пт</div>
-                <div className="day-header">Сб</div>
+                <div className="day-header">{t('weekdaySun')}</div>
+                <div className="day-header">{t('weekdayMon')}</div>
+                <div className="day-header">{t('weekdayTue')}</div>
+                <div className="day-header">{t('weekdayWed')}</div>
+                <div className="day-header">{t('weekdayThu')}</div>
+                <div className="day-header">{t('weekdayFri')}</div>
+                <div className="day-header">{t('weekdaySat')}</div>
 
                 {getDaysInMonth().map((date, index) => {
                     if (!date) {
@@ -181,26 +186,26 @@ const DateRangeCalendar = ({
             <div className="calendar-legend">
                 <div className="legend-item">
                     <span className="legend-dot available"></span>
-                    <span>Налично</span>
+                    <span>{t('legendAvailable')}</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-dot discounted"></span>
-                    <span>С отстъпка</span>
+                    <span>{t('legendDiscounted')}</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-dot selected"></span>
-                    <span>Избрано</span>
+                    <span>{t('legendSelected')}</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-dot blocked"></span>
-                    <span>Заето</span>
+                    <span>{t('legendBlocked')}</span>
                 </div>
             </div>
 
             {/* Instructions */}
             <p className="calendar-hint">
                 {!checkInDate
-                    ? '👆 Изберете дата на настаняване'
+                    ? `👆 ${t('selectCheckInDate')}`
                     : !checkOutDate
                         ? '👆 Изберете дата на напускане'
                         : '✓ Датите са избрани'

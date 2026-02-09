@@ -167,8 +167,8 @@ const Hotels = () => {
             {/* Hero Section with Search */}
             <section className="hotels-hero">
                 <div className="hero-content">
-                    <h1>Find Your Perfect Stay</h1>
-                    <p>Discover amazing hotels with the best amenities and prices</p>
+                    <h1>{t('findPerfectStay')}</h1>
+                    <p>{t('discoverAmazing')}</p>
 
                     <form className="search-box" onSubmit={handleSearch}>
                         <input

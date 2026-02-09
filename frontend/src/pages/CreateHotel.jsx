@@ -320,7 +320,7 @@ const CreateHotel = () => {
 
                             <div className="form-row" style={{ marginTop: '15px' }}>
                                 <div className="form-group">
-                                    <label>Географска ширина (Latitude)</label>
+                                    <label>{t('latitude')}</label>
                                     <input
                                         type="number"
                                         value={formData.latitude || ''}
@@ -331,7 +331,7 @@ const CreateHotel = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Географска дължина (Longitude)</label>
+                                    <label>{t('longitude')}</label>
                                     <input
                                         type="number"
                                         value={formData.longitude || ''}
@@ -346,11 +346,11 @@ const CreateHotel = () => {
 
                         {/* Basic Info */}
                         <div className="form-section">
-                            <h3 className="section-title">📋 Основна информация</h3>
+                            <h3 className="section-title">📋 {t('basicInformation')}</h3>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Име на хотела *</label>
+                                    <label>{t('hotelName')} *</label>
                                     <input
                                         type="text"
                                         name="name"
@@ -358,11 +358,11 @@ const CreateHotel = () => {
                                         onChange={handleChange}
                                         required
                                         maxLength="200"
-                                        placeholder="Hotel Paradise"
+                                        placeholder={t('hotelNamePlaceholder')}
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Град *</label>
+                                    <label>{t('city')} *</label>
                                     <input
                                         type="text"
                                         name="city"
@@ -370,27 +370,27 @@ const CreateHotel = () => {
                                         onChange={handleChange}
                                         required
                                         maxLength="100"
-                                        placeholder="София"
+                                        placeholder={t('cityPlaceholder')}
                                     />
                                 </div>
                             </div>
 
                             <div className="form-group">
-                                <label>Описание</label>
+                                <label>{t('descriptionLabel')}</label>
                                 <textarea
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
                                     rows="4"
                                     maxLength="2000"
-                                    placeholder="Опишете хотела, неговите особености и предимства..."
+                                    placeholder={t('descriptionPlaceholder')}
                                 />
-                                <small>{formData.description.length}/2000 символа</small>
+                                <small>{formData.description.length}/2000 {t('charactersCount')}</small>
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Локация (Адрес) *</label>
+                                    <label>{t('locationAddress')} *</label>
                                     <input
                                         type="text"
                                         name="location"
@@ -398,11 +398,11 @@ const CreateHotel = () => {
                                         onChange={handleChange}
                                         required
                                         maxLength="300"
-                                        placeholder="ул. Витоша 123"
+                                        placeholder={t('addressPlaceholder')}
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Държава *</label>
+                                    <label>{t('country')} *</label>
                                     <input
                                         type="text"
                                         name="country"
@@ -410,14 +410,14 @@ const CreateHotel = () => {
                                         onChange={handleChange}
                                         required
                                         maxLength="100"
-                                        placeholder="България"
+                                        placeholder={t('countryPlaceholder')}
                                     />
                                 </div>
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label>Цена на нощувка (лв) *</label>
+                                    <label>{t('pricePerNight')} (BGN) *</label>
                                     <input
                                         type="number"
                                         name="pricePerNight"
@@ -430,7 +430,7 @@ const CreateHotel = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label>Категория (Звезди) *</label>
+                                    <label>{t('starRating')} *</label>
                                     <div className="star-rating-select">
                                         {[0, 1, 2, 3, 4, 5].map((star) => (
                                             <button
@@ -438,14 +438,14 @@ const CreateHotel = () => {
                                                 type="button"
                                                 className={`star-select-btn ${formData.starRating === star ? 'selected' : ''} ${star === 0 ? 'zero-star' : ''}`}
                                                 onClick={() => setFormData({ ...formData, starRating: star })}
-                                                title={star === 0 ? 'Без категория' : `${star} звезд${star === 1 ? 'а' : 'и'}`}
+                                                title={star === 0 ? t('noCategory') : `${star} ${star === 1 ? t('star') : t('starsCount')}`}
                                             >
                                                 {star === 0 ? '—' : '★'}
                                             </button>
                                         ))}
                                     </div>
                                     <small className="rating-hint">
-                                        {formData.starRating === 0 ? 'Без категория' : `${formData.starRating} звезд${formData.starRating === 1 ? 'а' : 'и'}`}
+                                        {formData.starRating === 0 ? t('noCategory') : `${formData.starRating} ${formData.starRating === 1 ? t('star') : t('starsCount')}`}
                                     </small>
                                     <input
                                         type="hidden"
@@ -459,10 +459,10 @@ const CreateHotel = () => {
 
                         {/* Images */}
                         <div className="form-section">
-                            <h3 className="section-title">🖼️ Снимки</h3>
+                            <h3 className="section-title">🖼️ {t('photos')}</h3>
 
                             <div className="form-group">
-                                <label>Основна снимка *</label>
+                                <label>{t('mainPhoto')} *</label>
                                 <div className="file-input-wrapper">
                                     <input
                                         type="file"
@@ -472,15 +472,15 @@ const CreateHotel = () => {
                                         id="main-image"
                                     />
                                     <label htmlFor="main-image" className="file-label">
-                                        📁 Избери файл
+                                        📁 {t('chooseFile')}
                                     </label>
-                                    <span className="file-hint">или </span>
+                                    <span className="file-hint">{t('orText')} </span>
                                     <input
                                         type="url"
                                         name="imageUrl"
                                         value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
                                         onChange={handleChange}
-                                        placeholder="въведи URL"
+                                        placeholder={t('enterURL')}
                                         className="url-input"
                                     />
                                 </div>
@@ -496,7 +496,7 @@ const CreateHotel = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Допълнителни снимки</label>
+                                <label>{t('additionalPhotos')}</label>
                                 <div className="dynamic-list">
                                     {imageFiles.map((file, index) => (
                                         <div key={index} className="dynamic-item">
@@ -515,7 +515,7 @@ const CreateHotel = () => {
                                                     type="url"
                                                     value={images[index] || ''}
                                                     onChange={(e) => updateImage(index, e.target.value)}
-                                                    placeholder={`URL на снимка ${index + 1}`}
+                                                    placeholder={`${t('photoURL')} ${index + 1}`}
                                                     className="url-input"
                                                 />
                                             </div>
@@ -537,15 +537,15 @@ const CreateHotel = () => {
                                     ))}
                                 </div>
                                 <button type="button" className="btn-add" onClick={addImageField}>
-                                    + Добави още снимка
+                                    {t('addMorePhoto')}
                                 </button>
                             </div>
                         </div>
 
                         {/* Amenities */}
                         <div className="form-section">
-                            <h3 className="section-title">⭐ Удобства</h3>
-                            <p className="section-description">Изберете удобствата, които предлага хотелът</p>
+                            <h3 className="section-title">⭐ {t('amenities')}</h3>
+                            <p className="section-description">{t('selectAmenities')}</p>
 
                             <div className="amenities-grid">
                                 {popularAmenities.map((amenity) => (
@@ -567,17 +567,17 @@ const CreateHotel = () => {
                                     type="text"
                                     value={customAmenity}
                                     onChange={(e) => setCustomAmenity(e.target.value)}
-                                    placeholder="Добави свое удобство..."
+                                    placeholder={t('addCustomAmenity')}
                                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomAmenity())}
                                 />
                                 <button type="button" onClick={addCustomAmenity} className="btn-add-amenity">
-                                    + Добави
+                                    {t('addButton')}
                                 </button>
                             </div>
 
                             {amenities.length > 0 && (
                                 <div className="selected-amenities">
-                                    <h4>Избрани удобства:</h4>
+                                    <h4>{t('selectedAmenities')}</h4>
                                     <div className="selected-tags">
                                         {amenities.map((amenity, index) => (
                                             <span key={index} className="selected-tag">
@@ -593,7 +593,7 @@ const CreateHotel = () => {
                                         ))}
                                     </div>
                                     <div className="selected-count">
-                                        Общо: {amenities.length} удобства
+                                        {t('totalAmenities').replace('{count}', amenities.length)}
                                     </div>
                                 </div>
                             )}
@@ -601,7 +601,7 @@ const CreateHotel = () => {
 
                         {/* Room Types */}
                         <div className="form-section">
-                            <h3 className="section-title">🛏️ Типове стаи</h3>
+                            <h3 className="section-title">🛏️ {t('roomTypes')}</h3>
 
                             <div className="dynamic-list">
                                 {roomTypes.map((roomType, index) => (
@@ -610,7 +610,7 @@ const CreateHotel = () => {
                                             type="text"
                                             value={roomType}
                                             onChange={(e) => updateRoomType(index, e.target.value)}
-                                            placeholder={`Тип стая ${index + 1} (напр. Единична, Двойна, Апартамент)`}
+                                            placeholder={`${t('roomTypeLabel')} ${index + 1} ${t('roomTypeExample')}`}
                                         />
                                         {roomTypes.length > 1 && (
                                             <button
@@ -625,7 +625,7 @@ const CreateHotel = () => {
                                 ))}
                             </div>
                             <button type="button" className="btn-add" onClick={addRoomType}>
-                                + Добави още тип стая
+                                {t('addMoreRoomType')}
                             </button>
                         </div>
 

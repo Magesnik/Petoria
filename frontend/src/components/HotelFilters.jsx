@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import './HotelFilters.css';
 
 const HotelFilters = ({
@@ -10,6 +11,7 @@ const HotelFilters = ({
     priceRange,
     onClearFilters
 }) => {
+    const { t } = useLanguage();
     const [citySearch, setCitySearch] = useState('');
     const [countrySearch, setCountrySearch] = useState('');
     const [amenitySearch, setAmenitySearch] = useState('');
@@ -77,15 +79,15 @@ const HotelFilters = ({
     return (
         <div className="hotel-filters">
             <div className="filters-header">
-                <h3>Filters</h3>
+                <h3>{t('filters')}</h3>
                 <button className="btn-clear-filters" onClick={onClearFilters}>
-                    Clear All
+                    {t('clearAll')}
                 </button>
             </div>
 
             {/* Price Range Slider */}
             <div className="filter-section">
-                <label className="filter-label">Price Range (per night)</label>
+                <label className="filter-label">{t('priceRangePerNight')}</label>
                 <div className="price-slider-container">
                     {/* Editable Price Inputs */}
                     <div className="price-inputs-row">
@@ -166,13 +168,13 @@ const HotelFilters = ({
 
             {/* Country Filter with Search */}
             <div className="filter-section">
-                <label className="filter-label">Country</label>
+                <label className="filter-label">{t('country')}</label>
                 <div className="searchable-select">
                     <div className="search-input-wrapper">
                         <input
                             type="text"
                             className="filter-search-input"
-                            placeholder="Search countries..."
+                            placeholder={t('searchCountries')}
                             value={countrySearch}
                             onChange={(e) => {
                                 setCountrySearch(e.target.value);
@@ -193,7 +195,7 @@ const HotelFilters = ({
                                 className={`dropdown-item ${!filters.country ? 'active' : ''}`}
                                 onClick={() => handleCountrySelect('')}
                             >
-                                All Countries
+                                {t('allCountries')}
                             </div>
                             {filteredCountries.map((country, index) => (
                                 <div
@@ -211,13 +213,13 @@ const HotelFilters = ({
 
             {/* City Filter with Search */}
             <div className="filter-section">
-                <label className="filter-label">City</label>
+                <label className="filter-label">{t('city')}</label>
                 <div className="searchable-select">
                     <div className="search-input-wrapper">
                         <input
                             type="text"
                             className="filter-search-input"
-                            placeholder="Search cities..."
+                            placeholder={t('searchCities')}
                             value={citySearch}
                             onChange={(e) => {
                                 setCitySearch(e.target.value);
@@ -238,7 +240,7 @@ const HotelFilters = ({
                                 className={`dropdown-item ${!filters.city ? 'active' : ''}`}
                                 onClick={() => handleCitySelect('')}
                             >
-                                All Cities
+                                {t('allCities')}
                             </div>
                             {filteredCities.map((city, index) => (
                                 <div
@@ -256,7 +258,7 @@ const HotelFilters = ({
 
             {/* Rating Filter */}
             <div className="filter-section">
-                <label className="filter-label">Minimum Rating</label>
+                <label className="filter-label">{t('minRating')}</label>
                 <div className="rating-options">
                     {[5, 4, 3, 2, 1].map((rating) => (
                         <button
@@ -273,16 +275,16 @@ const HotelFilters = ({
             {/* Amenities Filter with Search */}
             <div className="filter-section">
                 <label className="filter-label">
-                    Amenities
+                    {t('amenities')}
                     {filters.amenities?.length > 0 && (
-                        <span className="selected-count">({filters.amenities.length} selected)</span>
+                        <span className="selected-count">{t('selectedCount').replace('{count}', filters.amenities.length)}</span>
                     )}
                 </label>
                 <div className="amenities-search">
                     <input
                         type="text"
                         className="filter-search-input"
-                        placeholder="Search amenities..."
+                        placeholder={t('searchAmenities')}
                         value={amenitySearch}
                         onChange={(e) => setAmenitySearch(e.target.value)}
                     />
@@ -300,7 +302,7 @@ const HotelFilters = ({
                             </label>
                         ))
                     ) : (
-                        <p className="no-results">No amenities found</p>
+                        <p className="no-results">{t('noAmenitiesFound')}</p>
                     )}
                 </div>
             </div>

@@ -154,13 +154,13 @@ const Deals = () => {
                                             {/* Room Type Info */}
                                             <div className="room-type-info">
                                                 <h4 className="room-type-name">{deal.roomTypeName}</h4>
-                                                <p className="room-capacity">👥 {deal.capacity} души</p>
+                                                <p className="room-capacity">👥 {deal.capacity} {t('people')}</p>
                                             </div>
 
                                             {/* Urgency indicator */}
                                             <div className="urgency-badge">
                                                 {deal.availableRoomsCount === 1 ? (
-                                                    <span className="critical">🔥 Последна стая!</span>
+                                                    <span className="critical">🔥 {t('lastRoom')}</span>
                                                 ) : (
                                                     <span>⚠️ Само {deal.availableRoomsCount} стаи</span>
                                                 )}
@@ -168,7 +168,7 @@ const Deals = () => {
 
                                             {/* Check-in date */}
                                             <p className="checkin-date">
-                                                📅 Настаняване: {new Date(deal.earliestAvailableDate).toLocaleDateString('bg-BG')}
+                                                📅 {t('checkInColon')} {new Date(deal.earliestAvailableDate).toLocaleDateString('bg-BG')}
                                             </p>
 
                                             {/* 5% discount note if automatic */}
@@ -196,7 +196,7 @@ const Deals = () => {
                                                     </span>
                                                 </div>
                                                 <p className="price-label">
-                                                    на нощувка • Спестете {convertAndFormat(deal.saveAmount)}
+                                                    {t('perNightSave')} {convertAndFormat(deal.saveAmount)}
                                                 </p>
                                             </div>
 
@@ -208,7 +208,7 @@ const Deals = () => {
                                                     handleHotelClick(deal.hotelId);
                                                 }}
                                             >
-                                                Резервирай →
+                                                {t('bookNow')}
                                             </button>
                                         </>
                                     ) : (
@@ -239,7 +239,7 @@ const Deals = () => {
                                                             </span>
                                                         </div>
                                                         <p className="package-info">
-                                                            {deal.packageNights} нощувки • Спестете ${deal.saveAmount?.toFixed(0)}
+                                                            {deal.packageNights} {t('nightsSave')} ${deal.saveAmount?.toFixed(0)}
                                                         </p>
                                                     </>
                                                 ) : (
@@ -253,7 +253,7 @@ const Deals = () => {
                                                             </span>
                                                         </div>
                                                         <p className="price-label">
-                                                            на нощувка • Спестете ${deal.saveAmount?.toFixed(0)}
+                                                            {t('perNightSave')} ${deal.saveAmount?.toFixed(0)}
                                                         </p>
                                                     </>
                                                 )}
@@ -261,7 +261,7 @@ const Deals = () => {
 
                                             {/* CTA */}
                                             <button className="btn-book-deal">
-                                                Виж офертата →
+                                                {t('viewDeal')}
                                             </button>
                                         </>
                                     )}

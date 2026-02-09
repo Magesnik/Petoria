@@ -35,8 +35,8 @@ const Home = () => {
                     <div className="card">
                         <div className="card-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')" }}></div>
                         <div className="card-content">
-                            <h3>Maldives</h3>
-                            <p>Experience the ultimate luxury in overwater bungalows.</p>
+                            <h3>{t('destMaldives')}</h3>
+                            <p>{t('destMaldivesDesc')}</p>
                             <div className="card-price">{t('from')} $250/{t('night')}</div>
                         </div>
                     </div>
@@ -44,8 +44,8 @@ const Home = () => {
                     <div className="card">
                         <div className="card-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')" }}></div>
                         <div className="card-content">
-                            <h3>Santorini, Greece</h3>
-                            <p>Breathtaking views and white-washed architecture.</p>
+                            <h3>{t('destSantorini')}</h3>
+                            <p>{t('destSantoriniDesc')}</p>
                             <div className="card-price">{t('from')} $180/{t('night')}</div>
                         </div>
                     </div>
@@ -53,8 +53,8 @@ const Home = () => {
                     <div className="card">
                         <div className="card-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')" }}></div>
                         <div className="card-content">
-                            <h3>Bali, Indonesia</h3>
-                            <p>Tropical paradise with rich culture and stunning beaches.</p>
+                            <h3>{t('destBali')}</h3>
+                            <p>{t('destBaliDesc')}</p>
                             <div className="card-price">{t('from')} $120/{t('night')}</div>
                         </div>
                     </div>

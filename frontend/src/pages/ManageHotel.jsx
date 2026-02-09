@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
 import RoomTypeManager from '../components/RoomTypeManager';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
@@ -10,6 +11,7 @@ const ManageHotel = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, isAdmin } = useAuth();
+    const { t } = useLanguage();
 
     const [hotel, setHotel] = useState(null);
     const [roomTypes, setRoomTypes] = useState([]);
@@ -59,7 +61,7 @@ const ManageHotel = () => {
                 isAvailable: data.isAvailable
             });
         } catch (err) {
-            setError('Грешка при зареждане на хотела');
+            setError(t('errorLoadingHotel'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -104,11 +106,11 @@ const ManageHotel = () => {
 
             if (!response.ok) throw new Error('Failed to update');
 
-            setSuccess('Хотелът е обновен успешно!');
+            setSuccess(t('savedSuccessfully'));
             setIsEditing(false);
             fetchHotel();
         } catch (err) {
-            setError('Грешка при запазване');
+            setError(t('errorSaving'));
         }
     };
 
@@ -124,7 +126,7 @@ const ManageHotel = () => {
                 <Header />
                 <div className="loading-state">
                     <div className="spinner"></div>
-                    <p>Зареждане...</p>
+                    <p>{t('loading')}</p>
                 </div>
             </div>
         );
@@ -150,12 +152,12 @@ const ManageHotel = () => {
                 {/* Header */}
                 <div className="manage-header">
                     <div className="header-left">
-                        <Link to="/my-hotels" className="btn-back">← Назад</Link>
+                        <Link to="/my-hotels" className="btn-back">← {t('back')}</Link>
                         <h1>{hotel.name}</h1>
                         <p className="hotel-location-text">📍 {hotel.city}, {hotel.country}</p>
                     </div>
                     <Link to={`/hotel/${id}`} className="btn-preview">
-                        👁️ Преглед на страницата
+                        👁️ {t('viewPage')}
                     </Link>
                 </div>
 
@@ -168,19 +170,19 @@ const ManageHotel = () => {
                         className={`tab ${activeTab === 'info' ? 'active' : ''}`}
                         onClick={() => setActiveTab('info')}
                     >
-                        📋 Информация
+                        📋 {t('infoTab')}
                     </button>
                     <button
                         className={`tab ${activeTab === 'rooms' ? 'active' : ''}`}
                         onClick={() => setActiveTab('rooms')}
                     >
-                        🛏️ Стаи ({roomTypes.length})
+                        🛏️ {t('roomsTab')} ({roomTypes.length})
                     </button>
                     <button
                         className={`tab ${activeTab === 'availability' ? 'active' : ''}`}
                         onClick={() => setActiveTab('availability')}
                     >
-                        📅 Наличност
+                        📅 {t('availabilityTab')}
                     </button>
                 </div>
 
@@ -193,45 +195,45 @@ const ManageHotel = () => {
                                 <div className="info-view">
                                     <div className="info-grid">
                                         <div className="info-item">
-                                            <label>Име на хотела</label>
+                                            <label>{t('hotelName')}</label>
                                             <p>{hotel.name}</p>
                                         </div>
                                         <div className="info-item">
-                                            <label>Град</label>
+                                            <label>{t('city')}</label>
                                             <p>{hotel.city}</p>
                                         </div>
                                         <div className="info-item">
-                                            <label>Държава</label>
+                                            <label>{t('country')}</label>
                                             <p>{hotel.country}</p>
                                         </div>
                                         <div className="info-item">
-                                            <label>Адрес</label>
+                                            <label>{t('address')}</label>
                                             <p>{hotel.location}</p>
                                         </div>
                                         <div className="info-item">
-                                            <label>Базова цена</label>
+                                            <label>{t('basePrice')}</label>
                                             <p>{hotel.pricePerNight} лв/нощ</p>
                                         </div>
                                         <div className="info-item">
-                                            <label>Статус</label>
+                                            <label>{t('status')}</label>
                                             <p className={hotel.isAvailable ? 'status-active' : 'status-inactive'}>
-                                                {hotel.isAvailable ? '✓ Активен' : '○ Неактивен'}
+                                                {hotel.isAvailable ? `✓ ${t('active')}` : `○ ${t('inactive')}`}
                                             </p>
                                         </div>
                                         <div className="info-item full-width">
-                                            <label>Описание</label>
-                                            <p>{hotel.description || 'Няма описание'}</p>
+                                            <label>{t('description')}</label>
+                                            <p>{hotel.description || t('noDescription')}</p>
                                         </div>
                                     </div>
                                     <button className="btn-edit" onClick={() => setIsEditing(true)}>
-                                        ✏️ Редактирай
+                                        ✏️ {t('edit')}
                                     </button>
                                 </div>
                             ) : (
                                 <div className="info-edit">
                                     <div className="edit-grid">
                                         <div className="form-group">
-                                            <label>Име на хотела</label>
+                                            <label>{t('hotelName')}</label>
                                             <input
                                                 type="text"
                                                 value={editData.name}
@@ -239,7 +241,7 @@ const ManageHotel = () => {
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label>Град</label>
+                                            <label>{t('city')}</label>
                                             <input
                                                 type="text"
                                                 value={editData.city}
@@ -247,7 +249,7 @@ const ManageHotel = () => {
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label>Държава</label>
+                                            <label>{t('country')}</label>
                                             <input
                                                 type="text"
                                                 value={editData.country}
@@ -255,7 +257,7 @@ const ManageHotel = () => {
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label>Адрес</label>
+                                            <label>{t('address')}</label>
                                             <input
                                                 type="text"
                                                 value={editData.location}
@@ -263,7 +265,7 @@ const ManageHotel = () => {
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label>Базова цена (лв)</label>
+                                            <label>{t('basePrice')} (лв)</label>
                                             <input
                                                 type="number"
                                                 value={editData.pricePerNight}
@@ -271,17 +273,17 @@ const ManageHotel = () => {
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label>Статус</label>
+                                            <label>{t('status')}</label>
                                             <select
                                                 value={editData.isAvailable}
                                                 onChange={(e) => setEditData({ ...editData, isAvailable: e.target.value === 'true' })}
                                             >
-                                                <option value="true">Активен</option>
-                                                <option value="false">Неактивен</option>
+                                                <option value="true">{t('active')}</option>
+                                                <option value="false">{t('inactive')}</option>
                                             </select>
                                         </div>
                                         <div className="form-group full-width">
-                                            <label>Описание</label>
+                                            <label>{t('description')}</label>
                                             <textarea
                                                 value={editData.description}
                                                 onChange={(e) => setEditData({ ...editData, description: e.target.value })}
@@ -291,10 +293,10 @@ const ManageHotel = () => {
                                     </div>
                                     <div className="edit-actions">
                                         <button className="btn-cancel" onClick={() => setIsEditing(false)}>
-                                            Отказ
+                                            ❌ {t('cancel')}
                                         </button>
                                         <button className="btn-save" onClick={handleSaveEdit}>
-                                            💾 Запази
+                                            ✅ {t('save')}
                                         </button>
                                     </div>
                                 </div>

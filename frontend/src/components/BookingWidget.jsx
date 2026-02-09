@@ -70,7 +70,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
             }
         } catch (err) {
             console.error('Error fetching room types:', err);
-            setError('Грешка при зареждане на типовете стаи');
+            setError(t('errorLoadingRoomTypes'));
         } finally {
             setLoading(false);
         }
@@ -132,12 +132,12 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
 
     const handleBooking = async () => {
         if (!user) {
-            setError('Моля, влезте в акаунта си, за да направите резервация');
+            setError(t('pleaseLoginToBook'));
             return;
         }
 
         if (!selectedRoomType || !checkInDate || !checkOutDate) {
-            setError('Моля, изберете тип стая и дати');
+            setError(t('selectRoomAndDates'));
             return;
         }
 
@@ -168,7 +168,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                 throw new Error(data.message || 'Грешка при резервация');
             }
 
-            setSuccess('Резервацията е успешна! ✓');
+            setSuccess(t('bookingSuccessful'));
 
             // Clear form
             setCheckInDate('');
@@ -214,9 +214,9 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
     if (roomTypes.length === 0) {
         return (
             <div className="booking-widget no-rooms">
-                <h3>📅 Резервация</h3>
+                <h3>📅 {t('reservation')}</h3>
                 <p className="no-rooms-message">
-                    Този хотел все още няма конфигурирани типове стаи.
+                    {t('noRoomsConfigured')}
                 </p>
             </div>
         );
@@ -224,14 +224,14 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
 
     return (
         <div className="booking-widget">
-            <h3>📅 Резервирай сега</h3>
+            <h3>📅 {t('bookNowHeader')}</h3>
 
             {error && <div className="booking-error">{error}</div>}
             {success && <div className="booking-success">{success}</div>}
 
             {/* Room Type Selection */}
             <div className="booking-section">
-                <label>Тип стая</label>
+                <label>{t('roomTypeLabel')}</label>
                 <div className="room-type-grid">
                     {roomTypes.map(room => (
                         <div
@@ -241,8 +241,8 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                         >
                             <div className="room-type-name">{room.name}</div>
                             <div className="room-type-details">
-                                <span className="room-capacity">👥 {room.capacity} гости</span>
-                                <span className="room-price">{convertAndFormat(room.pricePerNight)}/нощ</span>
+                                <span className="room-capacity">👥 {room.capacity} {t('guests')}</span>
+                                <span className="room-price">{convertAndFormat(room.pricePerNight)}/{t('perNight')}</span>
                             </div>
                             {room.description && (
                                 <div className="room-type-description">{room.description}</div>
@@ -254,7 +254,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
 
             {/* Date Selection - Visual Calendar */}
             <div className="booking-section">
-                <label>Изберете дати</label>
+                <label>{t('selectDatesLabel')}</label>
                 <DateRangeCalendar
                     hotelId={hotelId}
                     selectedRoomType={selectedRoomType}
@@ -271,7 +271,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
             {/* Number of Rooms */}
             {selectedRoomType && (
                 <div className="booking-section">
-                    <label>Брой стаи</label>
+                    <label>{t('numberOfRooms')}</label>
                     <div className="rooms-selector">
                         <button
                             type="button"
