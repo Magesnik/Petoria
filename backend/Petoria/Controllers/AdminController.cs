@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Admin;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -23,10 +24,10 @@ public class AdminController : ControllerBase
 
     // GET: api/admin/users
     [HttpGet("users")]
-    public async Task<ActionResult> GetAllUsers()
+    public async Task<ActionResult<IEnumerable<UserStatsResponseDto>>> GetAllUsers()
     {
         var users = await _userManager.Users.ToListAsync();
-        var userStats = new List<object>();
+        var userStats = new List<UserStatsResponseDto>();
 
         foreach (var user in users)
         {
@@ -39,19 +40,19 @@ public class AdminController : ControllerBase
             var hotelsCreated = await _context.Hotels.CountAsync(h => h.CreatedById == user.Id);
             var commentsCount = await _context.Comments.CountAsync(c => c.UserId == user.Id && c.ParentCommentId == null);
 
-            userStats.Add(new
+            userStats.Add(new UserStatsResponseDto
             {
-                id = user.Id,
-                email = user.Email,
-                firstName = user.FirstName,
-                lastName = user.LastName,
-                avatarUrl = user.AvatarUrl,
-                roles = roles,
-                favoritesCount,
-                reservationsCount,
-                totalSpent,
-                hotelsCreated,
-                commentsCount
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                AvatarUrl = user.AvatarUrl,
+                Roles = roles.ToList(),
+                FavoritesCount = favoritesCount,
+                ReservationsCount = reservationsCount,
+                TotalSpent = totalSpent,
+                HotelsCreated = hotelsCreated,
+                CommentsCount = commentsCount
             });
         }
 
@@ -60,7 +61,7 @@ public class AdminController : ControllerBase
 
     // GET: api/admin/users/{id}
     [HttpGet("users/{id}")]
-    public async Task<ActionResult> GetUserDetails(string id)
+    public async Task<ActionResult<UserDetailsResponseDto>> GetUserDetails(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
@@ -74,15 +75,15 @@ public class AdminController : ControllerBase
         var favorites = await _context.Favorites
             .Where(f => f.UserId == id)
             .Include(f => f.Hotel)
-            .Select(f => new
+            .Select(f => new UserFavoriteDto
             {
-                id = f.Id,
-                hotelId = f.HotelId,
-                hotelName = f.Hotel!.Name,
-                hotelCity = f.Hotel.City,
-                hotelCountry = f.Hotel.Country,
-                hotelImageUrl = f.Hotel.ImageUrl,
-                createdAt = f.CreatedAt
+                Id = f.Id,
+                HotelId = f.HotelId,
+                HotelName = f.Hotel!.Name,
+                HotelCity = f.Hotel.City,
+                HotelCountry = f.Hotel.Country,
+                HotelImageUrl = f.Hotel.ImageUrl,
+                CreatedAt = f.CreatedAt
             })
             .ToListAsync();
 
@@ -91,32 +92,32 @@ public class AdminController : ControllerBase
             .Where(r => r.UserId == id)
             .Include(r => r.Hotel)
             .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new
+            .Select(r => new UserReservationDto
             {
-                id = r.Id,
-                hotelId = r.HotelId,
-                hotelName = r.Hotel!.Name,
-                hotelCity = r.Hotel.City,
-                hotelImageUrl = r.Hotel.ImageUrl,
-                checkInDate = r.CheckInDate,
-                checkOutDate = r.CheckOutDate,
-                totalPrice = r.TotalPrice,
-                status = r.Status,
-                createdAt = r.CreatedAt
+                Id = r.Id,
+                HotelId = r.HotelId,
+                HotelName = r.Hotel!.Name,
+                HotelCity = r.Hotel.City,
+                HotelImageUrl = r.Hotel.ImageUrl,
+                CheckInDate = r.CheckInDate,
+                CheckOutDate = r.CheckOutDate,
+                TotalPrice = r.TotalPrice,
+                Status = r.Status,
+                CreatedAt = r.CreatedAt
             })
             .ToListAsync();
 
         // Get hotels created by user
         var hotelsCreated = await _context.Hotels
             .Where(h => h.CreatedById == id)
-            .Select(h => new
+            .Select(h => new UserHotelDto
             {
-                id = h.Id,
-                name = h.Name,
-                city = h.City,
-                country = h.Country,
-                imageUrl = h.ImageUrl,
-                createdAt = h.CreatedAt
+                Id = h.Id,
+                Name = h.Name,
+                City = h.City,
+                Country = h.Country,
+                ImageUrl = h.ImageUrl,
+                CreatedAt = h.CreatedAt
             })
             .ToListAsync();
 
@@ -127,16 +128,16 @@ public class AdminController : ControllerBase
             .Include(c => c.Ratings)
             .Include(c => c.Replies)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new
+            .Select(c => new UserCommentDto
             {
-                id = c.Id,
-                text = c.Text,
-                hotelId = c.HotelId,
-                hotelName = c.Hotel!.Name,
-                createdAt = c.CreatedAt,
-                likesCount = c.Ratings.Count(r => r.IsLike),
-                dislikesCount = c.Ratings.Count(r => !r.IsLike),
-                repliesCount = c.Replies.Count
+                Id = c.Id,
+                Text = c.Text,
+                HotelId = c.HotelId,
+                HotelName = c.Hotel!.Name,
+                CreatedAt = c.CreatedAt,
+                LikesCount = c.Ratings.Count(r => r.IsLike),
+                DislikesCount = c.Ratings.Count(r => !r.IsLike),
+                RepliesCount = c.Replies.Count
             })
             .ToListAsync();
 
@@ -144,19 +145,20 @@ public class AdminController : ControllerBase
             .Where(r => r.UserId == id && r.Status == "Completed")
             .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
 
-        return Ok(new
+        // Map Entity → Response DTO
+        return Ok(new UserDetailsResponseDto
         {
-            id = user.Id,
-            email = user.Email,
-            firstName = user.FirstName,
-            lastName = user.LastName,
-            avatarUrl = user.AvatarUrl,
-            roles = roles,
-            totalSpent,
-            favorites,
-            reservations,
-            hotelsCreated,
-            comments
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            AvatarUrl = user.AvatarUrl,
+            Roles = roles.ToList(),
+            TotalSpent = totalSpent,
+            Favorites = favorites,
+            Reservations = reservations,
+            HotelsCreated = hotelsCreated,
+            Comments = comments
         });
     }
 
@@ -218,7 +220,7 @@ public class AdminController : ControllerBase
 
     // GET: api/admin/stats
     [HttpGet("stats")]
-    public async Task<ActionResult> GetDashboardStats()
+    public async Task<ActionResult<DashboardStatsResponseDto>> GetDashboardStats()
     {
         var totalUsers = await _userManager.Users.CountAsync();
         var adminUsers = (await _userManager.GetUsersInRoleAsync("Admin")).Count;
@@ -231,16 +233,16 @@ public class AdminController : ControllerBase
         var totalHotels = await _context.Hotels.CountAsync();
         var totalComments = await _context.Comments.CountAsync();
 
-        return Ok(new
+        return Ok(new DashboardStatsResponseDto
         {
-            totalUsers,
-            adminUsers = adminUsers - superAdminUsers, // Exclude super admins from admin count
-            superAdminUsers,
-            totalFavorites,
-            totalReservations,
-            totalRevenue,
-            totalHotels,
-            totalComments
+            TotalUsers = totalUsers,
+            AdminUsers = adminUsers - superAdminUsers, // Exclude super admins from admin count
+            SuperAdminUsers = superAdminUsers,
+            TotalFavorites = totalFavorites,
+            TotalReservations = totalReservations,
+            TotalRevenue = totalRevenue,
+            TotalHotels = totalHotels,
+            TotalComments = totalComments
         });
     }
 }

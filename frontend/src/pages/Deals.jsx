@@ -53,10 +53,10 @@ const Deals = () => {
     };
 
     const tabs = [
-        { id: 'discounted', label: `🏷️ ${t('discounts')}`, icon: '🏷️' },
-        { id: 'last-minute', label: `⏰ ${t('lastMinute')}`, icon: '⏰' },
-        { id: 'seasonal', label: `🎉 ${t('seasonal')}`, icon: '🎉' },
-        { id: 'packages', label: `💝 ${t('packages')}`, icon: '💝' }
+        { id: 'discounted', label: t('discounts'), icon: '🏷️' },
+        { id: 'last-minute', label: t('lastMinute'), icon: '⏰' },
+        { id: 'seasonal', label: t('seasonal'), icon: '🎉' },
+        { id: 'packages', label: t('packages'), icon: '💝' }
     ];
 
     return (
@@ -66,7 +66,7 @@ const Deals = () => {
             {/* Hero Section */}
             <div className="deals-hero">
                 <div className="deals-hero-content">
-                    <h1 className="deals-title">🎁 {t('specialOffers')}</h1>
+                    <h1 className="deals-title">{t('specialOffers')}</h1>
                     <p className="deals-subtitle">
                         {t('discoverDeals')}
                     </p>

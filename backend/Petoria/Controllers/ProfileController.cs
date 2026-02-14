@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Petoria.DTOs.Profile;
 using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
@@ -21,7 +22,7 @@ public class ProfileController : ControllerBase
 
     // GET: api/profile
     [HttpGet]
-    public async Task<ActionResult> GetProfile()
+    public async Task<ActionResult<ProfileResponseDto>> GetProfile()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -35,19 +36,20 @@ public class ProfileController : ControllerBase
             return NotFound();
         }
 
-        return Ok(new
+        // Map Entity → Response DTO
+        return Ok(new ProfileResponseDto
         {
-            id = user.Id,
-            email = user.Email,
-            firstName = user.FirstName,
-            lastName = user.LastName,
-            avatarUrl = user.AvatarUrl
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            AvatarUrl = user.AvatarUrl
         });
     }
 
     // PUT: api/profile
     [HttpPut]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -61,6 +63,7 @@ public class ProfileController : ControllerBase
             return NotFound();
         }
 
+        // Map DTO → Entity (update)
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
 
@@ -70,16 +73,17 @@ public class ProfileController : ControllerBase
             return BadRequest(result.Errors);
         }
 
+        // Map Entity → Response DTO
         return Ok(new
         {
             message = "Profile updated successfully",
-            user = new
+            user = new ProfileResponseDto
             {
-                id = user.Id,
-                email = user.Email,
-                firstName = user.FirstName,
-                lastName = user.LastName,
-                avatarUrl = user.AvatarUrl
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                AvatarUrl = user.AvatarUrl
             }
         });
     }
@@ -212,10 +216,4 @@ public class ProfileController : ControllerBase
             return StatusCode(500, new { message = "Error deleting avatar", error = ex.Message });
         }
     }
-}
-
-public class UpdateProfileRequest
-{
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
 }

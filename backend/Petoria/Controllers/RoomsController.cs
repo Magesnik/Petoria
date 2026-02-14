@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Room;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -19,7 +20,7 @@ public class RoomsController : ControllerBase
 
     // GET: api/hotels/5/rooms
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RoomType>>> GetRoomTypes(int hotelId)
+    public async Task<ActionResult<IEnumerable<RoomTypeResponseDto>>> GetRoomTypes(int hotelId)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)
@@ -30,6 +31,19 @@ public class RoomsController : ControllerBase
         var roomTypes = await _context.RoomTypes
             .Where(rt => rt.HotelId == hotelId)
             .OrderBy(rt => rt.PricePerNight)
+            .Select(rt => new RoomTypeResponseDto
+            {
+                Id = rt.Id,
+                HotelId = rt.HotelId,
+                Name = rt.Name,
+                Description = rt.Description,
+                PricePerNight = rt.PricePerNight,
+                Capacity = rt.Capacity,
+                TotalRooms = rt.TotalRooms,
+                ImageUrl = rt.ImageUrl,
+                CreatedAt = rt.CreatedAt,
+                UpdatedAt = rt.UpdatedAt
+            })
             .ToListAsync();
 
         return Ok(roomTypes);
@@ -37,7 +51,7 @@ public class RoomsController : ControllerBase
 
     // GET: api/hotels/5/rooms/1
     [HttpGet("{id}")]
-    public async Task<ActionResult<RoomType>> GetRoomType(int hotelId, int id)
+    public async Task<ActionResult<RoomTypeResponseDto>> GetRoomType(int hotelId, int id)
     {
         var roomType = await _context.RoomTypes
             .FirstOrDefaultAsync(rt => rt.Id == id && rt.HotelId == hotelId);
@@ -47,13 +61,25 @@ public class RoomsController : ControllerBase
             return NotFound();
         }
 
-        return Ok(roomType);
+        return Ok(new RoomTypeResponseDto
+        {
+            Id = roomType.Id,
+            HotelId = roomType.HotelId,
+            Name = roomType.Name,
+            Description = roomType.Description,
+            PricePerNight = roomType.PricePerNight,
+            Capacity = roomType.Capacity,
+            TotalRooms = roomType.TotalRooms,
+            ImageUrl = roomType.ImageUrl,
+            CreatedAt = roomType.CreatedAt,
+            UpdatedAt = roomType.UpdatedAt
+        });
     }
 
     // POST: api/hotels/5/rooms
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<RoomType>> CreateRoomType(int hotelId, RoomType roomType)
+    public async Task<ActionResult<RoomTypeResponseDto>> CreateRoomType(int hotelId, CreateRoomTypeDto dto)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)
@@ -70,26 +96,46 @@ public class RoomsController : ControllerBase
             return Forbid("You can only add rooms to hotels that you created");
         }
 
-        roomType.HotelId = hotelId;
-        roomType.CreatedAt = DateTime.UtcNow;
-        roomType.UpdatedAt = DateTime.UtcNow;
+        // Map DTO → Entity
+        var roomType = new RoomType
+        {
+            HotelId = hotelId,
+            Name = dto.Name,
+            Description = dto.Description,
+            PricePerNight = dto.PricePerNight,
+            Capacity = dto.Capacity,
+            TotalRooms = dto.TotalRooms,
+            ImageUrl = dto.ImageUrl,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
 
         _context.RoomTypes.Add(roomType);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetRoomType), new { hotelId, id = roomType.Id }, roomType);
+        // Map Entity → Response DTO
+        var response = new RoomTypeResponseDto
+        {
+            Id = roomType.Id,
+            HotelId = roomType.HotelId,
+            Name = roomType.Name,
+            Description = roomType.Description,
+            PricePerNight = roomType.PricePerNight,
+            Capacity = roomType.Capacity,
+            TotalRooms = roomType.TotalRooms,
+            ImageUrl = roomType.ImageUrl,
+            CreatedAt = roomType.CreatedAt,
+            UpdatedAt = roomType.UpdatedAt
+        };
+
+        return CreatedAtAction(nameof(GetRoomType), new { hotelId, id = roomType.Id }, response);
     }
 
     // PUT: api/hotels/5/rooms/1
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateRoomType(int hotelId, int id, RoomType roomType)
+    public async Task<IActionResult> UpdateRoomType(int hotelId, int id, UpdateRoomTypeDto dto)
     {
-        if (id != roomType.Id)
-        {
-            return BadRequest();
-        }
-
         var existingRoom = await _context.RoomTypes
             .Include(rt => rt.Hotel)
             .FirstOrDefaultAsync(rt => rt.Id == id && rt.HotelId == hotelId);
@@ -108,12 +154,13 @@ public class RoomsController : ControllerBase
             return Forbid("You can only edit rooms in hotels that you created");
         }
 
-        existingRoom.Name = roomType.Name;
-        existingRoom.Description = roomType.Description;
-        existingRoom.PricePerNight = roomType.PricePerNight;
-        existingRoom.Capacity = roomType.Capacity;
-        existingRoom.TotalRooms = roomType.TotalRooms;
-        existingRoom.ImageUrl = roomType.ImageUrl;
+        // Map DTO → Entity (update)
+        existingRoom.Name = dto.Name;
+        existingRoom.Description = dto.Description;
+        existingRoom.PricePerNight = dto.PricePerNight;
+        existingRoom.Capacity = dto.Capacity;
+        existingRoom.TotalRooms = dto.TotalRooms;
+        existingRoom.ImageUrl = dto.ImageUrl;
         existingRoom.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

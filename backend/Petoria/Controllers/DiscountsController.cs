@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Discount;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 using System.Security.Claims;
@@ -20,22 +21,22 @@ public class DiscountsController : ControllerBase
 
     // GET: api/hotels/{hotelId}/discounts
     [HttpGet("hotels/{hotelId}/discounts")]
-    public async Task<ActionResult<IEnumerable<object>>> GetHotelDiscounts(int hotelId)
+    public async Task<ActionResult<IEnumerable<DiscountResponseDto>>> GetHotelDiscounts(int hotelId)
     {
         var discounts = await _context.RoomDiscounts
             .Include(rd => rd.RoomType)
             .Where(rd => rd.RoomType!.HotelId == hotelId)
             .OrderByDescending(rd => rd.StartDate)
-            .Select(rd => new
+            .Select(rd => new DiscountResponseDto
             {
-                rd.Id,
-                rd.RoomTypeId,
+                Id = rd.Id,
+                RoomTypeId = rd.RoomTypeId,
                 RoomTypeName = rd.RoomType!.Name,
-                rd.StartDate,
-                rd.EndDate,
-                rd.DiscountPercentage,
-                rd.CreatedAt,
-                rd.UpdatedAt,
+                StartDate = rd.StartDate,
+                EndDate = rd.EndDate,
+                DiscountPercentage = rd.DiscountPercentage,
+                CreatedAt = rd.CreatedAt,
+                UpdatedAt = rd.UpdatedAt,
                 IsActive = rd.StartDate <= DateTime.UtcNow && rd.EndDate >= DateTime.UtcNow,
                 IsExpired = rd.EndDate < DateTime.UtcNow
             })
@@ -46,15 +47,29 @@ public class DiscountsController : ControllerBase
 
     // GET: api/rooms/{roomTypeId}/active-discount
     [HttpGet("rooms/{roomTypeId}/active-discount")]
-    public async Task<ActionResult<object>> GetActiveDiscount(int roomTypeId, [FromQuery] DateTime? date)
+    public async Task<ActionResult<DiscountResponseDto>> GetActiveDiscount(int roomTypeId, [FromQuery] DateTime? date)
     {
         var checkDate = date ?? DateTime.UtcNow;
 
         var discount = await _context.RoomDiscounts
+            .Include(rd => rd.RoomType)
             .Where(rd => rd.RoomTypeId == roomTypeId &&
                         rd.StartDate <= checkDate &&
                         rd.EndDate >= checkDate)
             .OrderByDescending(rd => rd.DiscountPercentage)
+            .Select(rd => new DiscountResponseDto
+            {
+                Id = rd.Id,
+                RoomTypeId = rd.RoomTypeId,
+                RoomTypeName = rd.RoomType!.Name,
+                StartDate = rd.StartDate,
+                EndDate = rd.EndDate,
+                DiscountPercentage = rd.DiscountPercentage,
+                CreatedAt = rd.CreatedAt,
+                UpdatedAt = rd.UpdatedAt,
+                IsActive = true,
+                IsExpired = false
+            })
             .FirstOrDefaultAsync();
 
         if (discount == null)
@@ -62,19 +77,13 @@ public class DiscountsController : ControllerBase
             return NotFound(new { message = "No active discount found" });
         }
 
-        return Ok(new
-        {
-            discount.Id,
-            discount.DiscountPercentage,
-            discount.StartDate,
-            discount.EndDate
-        });
+        return Ok(discount);
     }
 
     // POST: api/hotels/{hotelId}/discounts
     [Authorize]
     [HttpPost("hotels/{hotelId}/discounts")]
-    public async Task<ActionResult<object>> CreateDiscount(int hotelId, [FromBody] CreateDiscountDto dto)
+    public async Task<ActionResult<DiscountResponseDto>> CreateDiscount(int hotelId, [FromBody] CreateDiscountDto dto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -110,7 +119,7 @@ public class DiscountsController : ControllerBase
             return BadRequest(new { message = "End date must be after start date" });
         }
 
-        // Create discount
+        // Map DTO → Entity
         var discount = new RoomDiscount
         {
             RoomTypeId = dto.RoomTypeId,
@@ -124,16 +133,19 @@ public class DiscountsController : ControllerBase
         _context.RoomDiscounts.Add(discount);
         await _context.SaveChangesAsync();
 
-        return Ok(new
+        // Map Entity → Response DTO
+        return Ok(new DiscountResponseDto
         {
-            discount.Id,
-            discount.RoomTypeId,
+            Id = discount.Id,
+            RoomTypeId = discount.RoomTypeId,
             RoomTypeName = roomType.Name,
-            discount.StartDate,
-            discount.EndDate,
-            discount.DiscountPercentage,
-            discount.CreatedAt,
-            discount.UpdatedAt
+            StartDate = discount.StartDate,
+            EndDate = discount.EndDate,
+            DiscountPercentage = discount.DiscountPercentage,
+            CreatedAt = discount.CreatedAt,
+            UpdatedAt = discount.UpdatedAt,
+            IsActive = discount.StartDate <= DateTime.UtcNow && discount.EndDate >= DateTime.UtcNow,
+            IsExpired = false
         });
     }
 
@@ -171,7 +183,7 @@ public class DiscountsController : ControllerBase
             return BadRequest(new { message = "End date must be after start date" });
         }
 
-        // Update discount
+        // Map DTO → Entity (update)
         discount.StartDate = dto.StartDate;
         discount.EndDate = dto.EndDate;
         discount.DiscountPercentage = dto.DiscountPercentage;
@@ -215,20 +227,4 @@ public class DiscountsController : ControllerBase
 
         return NoContent();
     }
-}
-
-// DTOs
-public class CreateDiscountDto
-{
-    public int RoomTypeId { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public int DiscountPercentage { get; set; }
-}
-
-public class UpdateDiscountDto
-{
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public int DiscountPercentage { get; set; }
 }

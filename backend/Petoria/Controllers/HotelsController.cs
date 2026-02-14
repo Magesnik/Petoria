@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Hotel;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -19,7 +20,7 @@ public class HotelsController : ControllerBase
 
     // GET: api/hotels
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Hotel>>> GetHotels(
+    public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetHotels(
         [FromQuery] string? search,
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
@@ -104,7 +105,7 @@ public class HotelsController : ControllerBase
             .OrderByDescending(h => h.Hotel.Rating)
             .ToListAsync();
 
-        // Transform to include discount info
+        // Transform to HotelResponseDto
         var result = hotelsWithDiscounts.Select(h =>
         {
             var hotel = h.Hotel;
@@ -123,30 +124,30 @@ public class HotelsController : ControllerBase
                 displayPrice = h.MinRoomPrice.PricePerNight;
             }
 
-            return new
+            return new HotelResponseDto
             {
-                hotel.Id,
-                hotel.Name,
-                hotel.Description,
-                hotel.Location,
-                hotel.City,
-                hotel.Country,
-                hotel.Latitude,
-                hotel.Longitude,
+                Id = hotel.Id,
+                Name = hotel.Name,
+                Description = hotel.Description,
+                Location = hotel.Location,
+                City = hotel.City,
+                Country = hotel.Country,
+                Latitude = hotel.Latitude,
+                Longitude = hotel.Longitude,
                 OriginalPrice = hotel.PricePerNight,
                 DisplayPrice = displayPrice,
                 HasDiscount = hasDiscount,
                 DiscountPercentage = discountPercentage,
-                hotel.Rating,
-                hotel.StarRating,
-                hotel.ImageUrl,
-                hotel.Images,
-                hotel.Amenities,
-                hotel.RoomTypes,
-                hotel.IsAvailable,
-                hotel.CreatedById,
-                hotel.CreatedAt,
-                hotel.UpdatedAt
+                Rating = hotel.Rating,
+                StarRating = hotel.StarRating,
+                ImageUrl = hotel.ImageUrl,
+                Images = hotel.Images,
+                Amenities = hotel.Amenities,
+                RoomTypes = hotel.RoomTypes,
+                IsAvailable = hotel.IsAvailable,
+                CreatedById = hotel.CreatedById,
+                CreatedAt = hotel.CreatedAt,
+                UpdatedAt = hotel.UpdatedAt
             };
         }).ToList();
 
@@ -155,7 +156,7 @@ public class HotelsController : ControllerBase
 
     // GET: api/hotels/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Hotel>> GetHotel(int id)
+    public async Task<ActionResult<HotelResponseDto>> GetHotel(int id)
     {
         var hotel = await _context.Hotels.FindAsync(id);
 
@@ -164,13 +165,37 @@ public class HotelsController : ControllerBase
             return NotFound();
         }
 
-        return Ok(hotel);
+        return Ok(new HotelResponseDto
+        {
+            Id = hotel.Id,
+            Name = hotel.Name,
+            Description = hotel.Description,
+            Location = hotel.Location,
+            City = hotel.City,
+            Country = hotel.Country,
+            Latitude = hotel.Latitude,
+            Longitude = hotel.Longitude,
+            OriginalPrice = hotel.PricePerNight,
+            DisplayPrice = hotel.PricePerNight,
+            HasDiscount = false,
+            DiscountPercentage = null,
+            Rating = hotel.Rating,
+            StarRating = hotel.StarRating,
+            ImageUrl = hotel.ImageUrl,
+            Images = hotel.Images,
+            Amenities = hotel.Amenities,
+            RoomTypes = hotel.RoomTypes,
+            IsAvailable = hotel.IsAvailable,
+            CreatedById = hotel.CreatedById,
+            CreatedAt = hotel.CreatedAt,
+            UpdatedAt = hotel.UpdatedAt
+        });
     }
 
     // GET: api/hotels/my - Get hotels created by current user
     [HttpGet("my")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<IEnumerable<Hotel>>> GetMyHotels()
+    public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetMyHotels()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         
@@ -182,6 +207,31 @@ public class HotelsController : ControllerBase
         var hotels = await _context.Hotels
             .Where(h => h.CreatedById == userId)
             .OrderByDescending(h => h.CreatedAt)
+            .Select(h => new HotelResponseDto
+            {
+                Id = h.Id,
+                Name = h.Name,
+                Description = h.Description,
+                Location = h.Location,
+                City = h.City,
+                Country = h.Country,
+                Latitude = h.Latitude,
+                Longitude = h.Longitude,
+                OriginalPrice = h.PricePerNight,
+                DisplayPrice = h.PricePerNight,
+                HasDiscount = false,
+                DiscountPercentage = null,
+                Rating = h.Rating,
+                StarRating = h.StarRating,
+                ImageUrl = h.ImageUrl,
+                Images = h.Images,
+                Amenities = h.Amenities,
+                RoomTypes = h.RoomTypes,
+                IsAvailable = h.IsAvailable,
+                CreatedById = h.CreatedById,
+                CreatedAt = h.CreatedAt,
+                UpdatedAt = h.UpdatedAt
+            })
             .ToListAsync();
 
         return Ok(hotels);
@@ -267,7 +317,7 @@ public class HotelsController : ControllerBase
 
     // GET: api/hotels/map
     [HttpGet("map")]
-    public async Task<ActionResult<IEnumerable<object>>> GetHotelsForMap(
+    public async Task<ActionResult<IEnumerable<HotelMapResponseDto>>> GetHotelsForMap(
         [FromQuery] string? search,
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
@@ -324,20 +374,20 @@ public class HotelsController : ControllerBase
         // Only show available hotels
         query = query.Where(h => h.IsAvailable);
 
-        // Return only necessary data for map markers (excluding heavy fields)
+        // Return only necessary data for map markers
         var hotels = await query
-            .Select(h => new
+            .Select(h => new HotelMapResponseDto
             {
-                h.Id,
-                h.Name,
-                h.City,
-                h.Country,
-                h.Latitude,
-                h.Longitude,
-                h.PricePerNight,
-                h.Rating,
-                h.StarRating,
-                h.ImageUrl
+                Id = h.Id,
+                Name = h.Name,
+                City = h.City,
+                Country = h.Country,
+                Latitude = h.Latitude,
+                Longitude = h.Longitude,
+                PricePerNight = h.PricePerNight,
+                Rating = h.Rating,
+                StarRating = h.StarRating,
+                ImageUrl = h.ImageUrl
             })
             .ToListAsync();
 
@@ -347,46 +397,77 @@ public class HotelsController : ControllerBase
     // POST: api/hotels
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<Hotel>> CreateHotel(Hotel hotel)
+    public async Task<ActionResult<HotelResponseDto>> CreateHotel(CreateHotelDto dto)
     {
         try
         {
             // Get the current user's ID from claims
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             
-            // Log for debugging
-            Console.WriteLine($"User ID from claims: {userId}");
-            Console.WriteLine($"User claims count: {User.Claims.Count()}");
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
-            }
-            
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized(new { message = "User ID not found in token", claims = User.Claims.Select(c => new { c.Type, c.Value }) });
+                return Unauthorized(new { message = "User ID not found in token" });
             }
 
-            hotel.CreatedById = userId;
-            hotel.CreatedAt = DateTime.UtcNow;
-            hotel.UpdatedAt = DateTime.UtcNow;
-
-            Console.WriteLine($"About to save hotel with CreatedById: {hotel.CreatedById}");
+            // Map DTO → Entity
+            var hotel = new Hotel
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Location = dto.Location,
+                City = dto.City,
+                Country = dto.Country,
+                Latitude = dto.Latitude,
+                Longitude = dto.Longitude,
+                PricePerNight = dto.PricePerNight,
+                StarRating = dto.StarRating,
+                ImageUrl = dto.ImageUrl,
+                Images = dto.Images,
+                Amenities = dto.Amenities,
+                RoomTypes = dto.RoomTypes,
+                IsAvailable = dto.IsAvailable,
+                CreatedById = userId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
             _context.Hotels.Add(hotel);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetHotel), new { id = hotel.Id }, hotel);
+            // Map Entity → Response DTO
+            var response = new HotelResponseDto
+            {
+                Id = hotel.Id,
+                Name = hotel.Name,
+                Description = hotel.Description,
+                Location = hotel.Location,
+                City = hotel.City,
+                Country = hotel.Country,
+                Latitude = hotel.Latitude,
+                Longitude = hotel.Longitude,
+                OriginalPrice = hotel.PricePerNight,
+                DisplayPrice = hotel.PricePerNight,
+                HasDiscount = false,
+                DiscountPercentage = null,
+                Rating = hotel.Rating,
+                StarRating = hotel.StarRating,
+                ImageUrl = hotel.ImageUrl,
+                Images = hotel.Images,
+                Amenities = hotel.Amenities,
+                RoomTypes = hotel.RoomTypes,
+                IsAvailable = hotel.IsAvailable,
+                CreatedById = hotel.CreatedById,
+                CreatedAt = hotel.CreatedAt,
+                UpdatedAt = hotel.UpdatedAt
+            };
+
+            return CreatedAtAction(nameof(GetHotel), new { id = hotel.Id }, response);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error creating hotel: {ex.Message}");
-            Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             return StatusCode(500, new { 
                 message = ex.Message, 
-                innerException = ex.InnerException?.Message,
-                stackTrace = ex.StackTrace 
+                innerException = ex.InnerException?.Message
             });
         }
     }
@@ -394,13 +475,8 @@ public class HotelsController : ControllerBase
     // PUT: api/hotels/5
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateHotel(int id, Hotel hotel)
+    public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto)
     {
-        if (id != hotel.Id)
-        {
-            return BadRequest();
-        }
-
         var existingHotel = await _context.Hotels.FindAsync(id);
         if (existingHotel == null)
         {
@@ -416,21 +492,20 @@ public class HotelsController : ControllerBase
             return Forbid("You can only edit hotels that you created");
         }
 
-        // Update the existing hotel properties
-        existingHotel.Name = hotel.Name;
-        existingHotel.Description = hotel.Description;
-        existingHotel.Location = hotel.Location;
-        existingHotel.City = hotel.City;
-        existingHotel.Country = hotel.Country;
-        existingHotel.Latitude = hotel.Latitude;
-        existingHotel.Longitude = hotel.Longitude;
-        existingHotel.PricePerNight = hotel.PricePerNight;
-        existingHotel.Rating = hotel.Rating;
-        existingHotel.ImageUrl = hotel.ImageUrl;
-        existingHotel.Images = hotel.Images;
-        existingHotel.Amenities = hotel.Amenities;
-        existingHotel.RoomTypes = hotel.RoomTypes;
-        existingHotel.IsAvailable = hotel.IsAvailable;
+        // Map DTO → Entity (update)
+        existingHotel.Name = dto.Name;
+        existingHotel.Description = dto.Description;
+        existingHotel.Location = dto.Location;
+        existingHotel.City = dto.City;
+        existingHotel.Country = dto.Country;
+        existingHotel.Latitude = dto.Latitude;
+        existingHotel.Longitude = dto.Longitude;
+        existingHotel.PricePerNight = dto.PricePerNight;
+        existingHotel.ImageUrl = dto.ImageUrl;
+        existingHotel.Images = dto.Images;
+        existingHotel.Amenities = dto.Amenities;
+        existingHotel.RoomTypes = dto.RoomTypes;
+        existingHotel.IsAvailable = dto.IsAvailable;
         existingHotel.UpdatedAt = DateTime.UtcNow;
 
         try

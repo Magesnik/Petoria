@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Deals;
 using Petoria.Infrastructure.Data;
 
 namespace Petoria.Controllers;
@@ -17,7 +18,7 @@ public class DealsController : ControllerBase
 
     // GET: api/deals/discounted
     [HttpGet("discounted")]
-    public async Task<ActionResult<IEnumerable<object>>> GetDiscountedHotels()
+    public async Task<ActionResult<IEnumerable<DiscountedHotelResponseDto>>> GetDiscountedHotels()
     {
         var today = DateTime.UtcNow;
 
@@ -49,7 +50,7 @@ public class DealsController : ControllerBase
 
         var result = hotelsWithActiveDiscounts
             .GroupBy(x => x.HotelId)
-            .Select(g => new
+            .Select(g => new DiscountedHotelResponseDto
             {
                 Id = g.Key,
                 Name = g.First().HotelName,
@@ -72,34 +73,9 @@ public class DealsController : ControllerBase
         return Ok(result);
     }
 
-    // DTO for Last Minute offers
-    public class LastMinuteOfferDto
-    {
-        public int HotelId { get; set; }
-        public string HotelName { get; set; } = string.Empty;
-        public string HotelCity { get; set; } = string.Empty;
-        public string HotelCountry { get; set; } = string.Empty;
-        public string HotelImageUrl { get; set; } = string.Empty;
-        public decimal HotelRating { get; set; }
-        
-        public int RoomTypeId { get; set; }
-        public string RoomTypeName { get; set; } = string.Empty;
-        public int Capacity { get; set; }
-        public string Description { get; set; } = string.Empty;
-        
-        public decimal OriginalPrice { get; set; }
-        public int DiscountPercentage { get; set; }
-        public decimal DiscountedPrice { get; set; }
-        public decimal SaveAmount { get; set; }
-        
-        public int AvailableRoomsCount { get; set; }
-        public DateTime EarliestAvailableDate { get; set; }
-        public int DaysUntilCheckIn { get; set; }
-    }
-
     // GET: api/deals/last-minute
     [HttpGet("last-minute")]
-    public async Task<ActionResult<IEnumerable<LastMinuteOfferDto>>> GetLastMinuteDeals()
+    public async Task<ActionResult<IEnumerable<LastMinuteOfferResponseDto>>> GetLastMinuteDeals()
     {
         var today = DateTime.UtcNow.Date;
         var sevenDaysFromNow = today.AddDays(7);
@@ -117,7 +93,7 @@ public class DealsController : ControllerBase
                 !a.IsBlocked))
             .ToListAsync();
 
-        var result = new List<LastMinuteOfferDto>();
+        var result = new List<LastMinuteOfferResponseDto>();
         
         foreach (var roomType in roomTypesWithLowAvailability)
         {
@@ -155,7 +131,7 @@ public class DealsController : ControllerBase
                 .Where(a => a.Date >= today && a.Date <= sevenDaysFromNow && !a.IsBlocked)
                 .Min(a => (int?)a.AvailableCount) ?? 0;
 
-            result.Add(new LastMinuteOfferDto
+            result.Add(new LastMinuteOfferResponseDto
             {
                 HotelId = roomType.HotelId,
                 HotelName = roomType.Hotel?.Name ?? "",
@@ -189,7 +165,7 @@ public class DealsController : ControllerBase
 
     // GET: api/deals/seasonal
     [HttpGet("seasonal")]
-    public async Task<ActionResult<IEnumerable<object>>> GetSeasonalDeals()
+    public async Task<ActionResult<IEnumerable<SeasonalDealResponseDto>>> GetSeasonalDeals()
     {
         var today = DateTime.UtcNow;
         var currentMonth = today.Month;
@@ -241,7 +217,7 @@ public class DealsController : ControllerBase
 
         var result = hotelsWithActiveDiscounts
             .GroupBy(x => x.HotelId)
-            .Select(g => new
+            .Select(g => new SeasonalDealResponseDto
             {
                 Id = g.Key,
                 Name = g.First().HotelName,
@@ -267,20 +243,20 @@ public class DealsController : ControllerBase
 
     // GET: api/deals/packages
     [HttpGet("packages")]
-    public async Task<ActionResult<IEnumerable<object>>> GetPackageDeals()
+    public async Task<ActionResult<IEnumerable<PackageDealResponseDto>>> GetPackageDeals()
     {
         var hotels = await _context.Hotels
             .Where(h => h.PricePerNight > 0)
-            .Select(h => new
+            .Select(h => new PackageDealResponseDto
             {
-                h.Id,
-                h.Name,
-                h.City,
-                h.Country,
-                h.Location,
-                h.ImageUrl,
-                h.Rating,
-                h.Description,
+                Id = h.Id,
+                Name = h.Name,
+                City = h.City,
+                Country = h.Country,
+                Location = h.Location,
+                ImageUrl = h.ImageUrl,
+                Rating = h.Rating,
+                Description = h.Description,
                 PricePerNight = h.PricePerNight,
                 // 7 nights package with 15% discount
                 PackageNights = 7,

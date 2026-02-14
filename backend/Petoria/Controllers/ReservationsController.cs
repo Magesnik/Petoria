@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Reservation;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -17,69 +18,10 @@ public class ReservationsController : ControllerBase
         _context = context;
     }
 
-    // DTO for creating reservation
-    public class CreateReservationRequest
-    {
-        public int HotelId { get; set; }
-        public int RoomTypeId { get; set; }
-        public DateTime CheckInDate { get; set; }
-        public DateTime CheckOutDate { get; set; }
-        public int NumberOfRooms { get; set; } = 1;
-        public string? Notes { get; set; }
-    }
-
-    // DTO for reservation response
-    public class ReservationResponse
-    {
-        public int Id { get; set; }
-        public int HotelId { get; set; }
-        public string HotelName { get; set; } = string.Empty;
-        public string HotelImageUrl { get; set; } = string.Empty;
-        public int RoomTypeId { get; set; }
-        public string RoomTypeName { get; set; } = string.Empty;
-        public DateTime CheckInDate { get; set; }
-        public DateTime CheckOutDate { get; set; }
-        public int NumberOfRooms { get; set; }
-        public int NumberOfNights { get; set; }
-        public decimal PricePerNight { get; set; }
-        public decimal TotalPrice { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public string? Notes { get; set; }
-        public DateTime CreatedAt { get; set; }
-    }
-
-    // DTO for price calculation
-    public class PriceCalculationRequest
-    {
-        public int RoomTypeId { get; set; }
-        public DateTime CheckInDate { get; set; }
-        public DateTime CheckOutDate { get; set; }
-        public int NumberOfRooms { get; set; } = 1;
-    }
-
-    public class PriceCalculationResponse
-    {
-        public int NumberOfNights { get; set; }
-        public decimal PricePerNight { get; set; }
-        public int NumberOfRooms { get; set; }
-        public decimal TotalPrice { get; set; }
-        public decimal OriginalPrice { get; set; }
-        public decimal TotalDiscount { get; set; }
-        public List<DayPriceBreakdown> Breakdown { get; set; } = new();
-    }
-
-    public class DayPriceBreakdown
-    {
-        public DateTime Date { get; set; }
-        public decimal OriginalPrice { get; set; }
-        public int? DiscountPercentage { get; set; }
-        public decimal FinalPrice { get; set; }
-    }
-
     // GET: api/reservations/my - Get current user's reservations
     [HttpGet("my")]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<ReservationResponse>>> GetMyReservations()
+    public async Task<ActionResult<IEnumerable<ReservationResponseDto>>> GetMyReservations()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         
@@ -93,7 +35,7 @@ public class ReservationsController : ControllerBase
             .Include(r => r.RoomType)
             .Where(r => r.UserId == userId)
             .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new ReservationResponse
+            .Select(r => new ReservationResponseDto
             {
                 Id = r.Id,
                 HotelId = r.HotelId,
@@ -118,7 +60,7 @@ public class ReservationsController : ControllerBase
 
     // POST: api/reservations/calculate - Calculate price without creating reservation
     [HttpPost("calculate")]
-    public async Task<ActionResult<PriceCalculationResponse>> CalculatePrice(PriceCalculationRequest request)
+    public async Task<ActionResult<PriceCalculationResponseDto>> CalculatePrice(PriceCalculationRequestDto request)
     {
         var roomType = await _context.RoomTypes.FindAsync(request.RoomTypeId);
         if (roomType == null)
@@ -141,7 +83,7 @@ public class ReservationsController : ControllerBase
             .ToListAsync();
 
         // Calculate price per day with discounts
-        var breakdown = new List<DayPriceBreakdown>();
+        var breakdown = new List<DayPriceBreakdownDto>();
         decimal totalPrice = 0;
         decimal originalTotal = 0;
 
@@ -157,7 +99,7 @@ public class ReservationsController : ControllerBase
                 ? dayOriginal * (1 - discount.DiscountPercentage / 100m)
                 : dayOriginal;
 
-            breakdown.Add(new DayPriceBreakdown
+            breakdown.Add(new DayPriceBreakdownDto
             {
                 Date = date,
                 OriginalPrice = dayOriginal,
@@ -172,7 +114,7 @@ public class ReservationsController : ControllerBase
         totalPrice *= request.NumberOfRooms;
         originalTotal *= request.NumberOfRooms;
 
-        return Ok(new PriceCalculationResponse
+        return Ok(new PriceCalculationResponseDto
         {
             NumberOfNights = numberOfNights,
             PricePerNight = roomType.PricePerNight,
@@ -187,7 +129,7 @@ public class ReservationsController : ControllerBase
     // POST: api/reservations - Create a new reservation
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<ReservationResponse>> CreateReservation(CreateReservationRequest request)
+    public async Task<ActionResult<ReservationResponseDto>> CreateReservation(CreateReservationDto request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         
@@ -270,7 +212,7 @@ public class ReservationsController : ControllerBase
         }
         totalPrice *= request.NumberOfRooms;
 
-        // Create reservation
+        // Create reservation — Map DTO → Entity
         var reservation = new Reservation
         {
             UserId = userId,
@@ -316,8 +258,8 @@ public class ReservationsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        // Return response
-        return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, new ReservationResponse
+        // Return response — Map Entity → Response DTO
+        return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, new ReservationResponseDto
         {
             Id = reservation.Id,
             HotelId = reservation.HotelId,
@@ -340,7 +282,7 @@ public class ReservationsController : ControllerBase
     // GET: api/reservations/5 - Get a specific reservation
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<ActionResult<ReservationResponse>> GetReservation(int id)
+    public async Task<ActionResult<ReservationResponseDto>> GetReservation(int id)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
@@ -361,7 +303,7 @@ public class ReservationsController : ControllerBase
             return Forbid();
         }
 
-        return Ok(new ReservationResponse
+        return Ok(new ReservationResponseDto
         {
             Id = reservation.Id,
             HotelId = reservation.HotelId,

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Comment;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -17,9 +18,38 @@ public class CommentsController : ControllerBase
         _context = context;
     }
 
+    /// <summary>
+    /// Помощен метод за map-ване на Comment Entity → CommentResponseDto.
+    /// </summary>
+    private CommentResponseDto MapToCommentResponse(Comment c, string? currentUserId, bool includeReplies = false)
+    {
+        var dto = new CommentResponseDto
+        {
+            Id = c.Id,
+            Text = c.Text,
+            UserId = c.UserId,
+            FirstName = c.User?.FirstName,
+            LastName = c.User?.LastName,
+            AvatarUrl = c.User?.AvatarUrl,
+            CreatedAt = c.CreatedAt,
+            UpdatedAt = c.UpdatedAt,
+            LikesCount = c.Ratings?.Count(r => r.IsLike) ?? 0,
+            DislikesCount = c.Ratings?.Count(r => !r.IsLike) ?? 0,
+            UserRating = currentUserId != null ? c.Ratings?.FirstOrDefault(r => r.UserId == currentUserId)?.IsLike : null,
+            RepliesCount = c.Replies?.Count ?? 0
+        };
+
+        if (includeReplies && c.Replies != null)
+        {
+            dto.Replies = c.Replies.Select(r => MapToCommentResponse(r, currentUserId, false)).ToList();
+        }
+
+        return dto;
+    }
+
     // GET: api/hotels/{hotelId}/comments
     [HttpGet("~/api/hotels/{hotelId}/comments")]
-    public async Task<ActionResult> GetHotelComments(int hotelId)
+    public async Task<ActionResult<IEnumerable<CommentResponseDto>>> GetHotelComments(int hotelId)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
@@ -34,35 +64,7 @@ public class CommentsController : ControllerBase
             .OrderByDescending(c => c.Ratings.Count(r => r.IsLike) - c.Ratings.Count(r => !r.IsLike)) // Sort by net likes
             .ToListAsync();
 
-        var result = comments.Select(c => new
-        {
-            id = c.Id,
-            text = c.Text,
-            userId = c.UserId,
-            firstName = c.User.FirstName,
-            lastName = c.User.LastName,
-            avatarUrl = c.User.AvatarUrl,
-            createdAt = c.CreatedAt,
-            updatedAt = c.UpdatedAt,
-            likesCount = c.Ratings.Count(r => r.IsLike),
-            dislikesCount = c.Ratings.Count(r => !r.IsLike),
-            userRating = userId != null ? c.Ratings.FirstOrDefault(r => r.UserId == userId)?.IsLike : null,
-            repliesCount = c.Replies.Count,
-            replies = c.Replies.Select(r => new
-            {
-                id = r.Id,
-                text = r.Text,
-                userId = r.UserId,
-                firstName = r.User.FirstName,
-                lastName = r.User.LastName,
-                avatarUrl = r.User.AvatarUrl,
-                createdAt = r.CreatedAt,
-                updatedAt = r.UpdatedAt,
-                likesCount = r.Ratings.Count(rt => rt.IsLike),
-                dislikesCount = r.Ratings.Count(rt => !rt.IsLike),
-                userRating = userId != null ? r.Ratings.FirstOrDefault(rt => rt.UserId == userId)?.IsLike : null
-            }).ToList()
-        });
+        var result = comments.Select(c => MapToCommentResponse(c, userId, includeReplies: true));
 
         return Ok(result);
     }
@@ -70,7 +72,7 @@ public class CommentsController : ControllerBase
     // POST: api/comments
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult> CreateComment([FromBody] CreateCommentRequest request)
+    public async Task<ActionResult<CommentResponseDto>> CreateComment([FromBody] CreateCommentDto request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -95,6 +97,7 @@ public class CommentsController : ControllerBase
             }
         }
 
+        // Map DTO → Entity
         var comment = new Comment
         {
             HotelId = request.HotelId,
@@ -111,26 +114,27 @@ public class CommentsController : ControllerBase
         // Reload with user info
         await _context.Entry(comment).Reference(c => c.User).LoadAsync();
 
-        return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, new
+        // Map Entity → Response DTO
+        return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, new CommentResponseDto
         {
-            id = comment.Id,
-            text = comment.Text,
-            userId = comment.UserId,
-            firstName = comment.User.FirstName,
-            lastName = comment.User.LastName,
-            avatarUrl = comment.User.AvatarUrl,
-            createdAt = comment.CreatedAt,
-            updatedAt = comment.UpdatedAt,
-            likesCount = 0,
-            dislikesCount = 0,
-            userRating = (bool?)null,
-            repliesCount = 0
+            Id = comment.Id,
+            Text = comment.Text,
+            UserId = comment.UserId,
+            FirstName = comment.User?.FirstName,
+            LastName = comment.User?.LastName,
+            AvatarUrl = comment.User?.AvatarUrl,
+            CreatedAt = comment.CreatedAt,
+            UpdatedAt = comment.UpdatedAt,
+            LikesCount = 0,
+            DislikesCount = 0,
+            UserRating = null,
+            RepliesCount = 0
         });
     }
 
     // GET: api/comments/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetComment(int id)
+    public async Task<ActionResult<CommentResponseDto>> GetComment(int id)
     {
         var comment = await _context.Comments
             .Include(c => c.User)
@@ -144,26 +148,13 @@ public class CommentsController : ControllerBase
 
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-        return Ok(new
-        {
-            id = comment.Id,
-            text = comment.Text,
-            userId = comment.UserId,
-            firstName = comment.User.FirstName,
-            lastName = comment.User.LastName,
-            avatarUrl = comment.User.AvatarUrl,
-            createdAt = comment.CreatedAt,
-            updatedAt = comment.UpdatedAt,
-            likesCount = comment.Ratings.Count(r => r.IsLike),
-            dislikesCount = comment.Ratings.Count(r => !r.IsLike),
-            userRating = userId != null ? comment.Ratings.FirstOrDefault(r => r.UserId == userId)?.IsLike : null
-        });
+        return Ok(MapToCommentResponse(comment, userId));
     }
 
     // PUT: api/comments/{id}
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateComment(int id, [FromBody] UpdateCommentRequest request)
+    public async Task<IActionResult> UpdateComment(int id, [FromBody] UpdateCommentDto request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -183,6 +174,7 @@ public class CommentsController : ControllerBase
             return Forbid();
         }
 
+        // Map DTO → Entity (update)
         comment.Text = request.Text;
         comment.UpdatedAt = DateTime.UtcNow;
 
@@ -238,7 +230,7 @@ public class CommentsController : ControllerBase
     // POST: api/comments/{id}/rate
     [HttpPost("{id}/rate")]
     [Authorize]
-    public async Task<IActionResult> RateComment(int id, [FromBody] RateCommentRequest request)
+    public async Task<IActionResult> RateComment(int id, [FromBody] RateCommentDto request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -302,7 +294,7 @@ public class CommentsController : ControllerBase
 
     // GET: api/comments/{id}/replies
     [HttpGet("{id}/replies")]
-    public async Task<ActionResult> GetCommentReplies(int id)
+    public async Task<ActionResult<IEnumerable<CommentResponseDto>>> GetCommentReplies(int id)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
@@ -313,38 +305,8 @@ public class CommentsController : ControllerBase
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
 
-        var result = replies.Select(r => new
-        {
-            id = r.Id,
-            text = r.Text,
-            userId = r.UserId,
-            firstName = r.User.FirstName,
-            lastName = r.User.LastName,
-            avatarUrl = r.User.AvatarUrl,
-            createdAt = r.CreatedAt,
-            updatedAt = r.UpdatedAt,
-            likesCount = r.Ratings.Count(rt => rt.IsLike),
-            dislikesCount = r.Ratings.Count(rt => !rt.IsLike),
-            userRating = userId != null ? r.Ratings.FirstOrDefault(rt => rt.UserId == userId)?.IsLike : null
-        });
+        var result = replies.Select(r => MapToCommentResponse(r, userId));
 
         return Ok(result);
     }
-}
-
-public class CreateCommentRequest
-{
-    public int HotelId { get; set; }
-    public string Text { get; set; } = string.Empty;
-    public int? ParentCommentId { get; set; }
-}
-
-public class UpdateCommentRequest
-{
-    public string Text { get; set; } = string.Empty;
-}
-
-public class RateCommentRequest
-{
-    public bool IsLike { get; set; }
 }

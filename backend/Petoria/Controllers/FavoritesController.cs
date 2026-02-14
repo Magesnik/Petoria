@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Favorite;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 using System.Security.Claims;
@@ -21,7 +22,7 @@ public class FavoritesController : ControllerBase
 
     // GET: api/favorites
     [HttpGet]
-    public async Task<ActionResult> GetUserFavorites()
+    public async Task<ActionResult<IEnumerable<FavoriteResponseDto>>> GetUserFavorites()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -32,17 +33,17 @@ public class FavoritesController : ControllerBase
         var favorites = await _context.Favorites
             .Where(f => f.UserId == userId)
             .Include(f => f.Hotel)
-            .Select(f => new
+            .Select(f => new FavoriteResponseDto
             {
-                id = f.Id,
-                hotelId = f.HotelId,
-                hotelName = f.Hotel!.Name,
-                hotelCity = f.Hotel.City,
-                hotelCountry = f.Hotel.Country,
-                hotelImageUrl = f.Hotel.ImageUrl,
-                hotelPricePerNight = f.Hotel.PricePerNight,
-                hotelRating = f.Hotel.Rating,
-                createdAt = f.CreatedAt
+                Id = f.Id,
+                HotelId = f.HotelId,
+                HotelName = f.Hotel!.Name,
+                HotelCity = f.Hotel.City,
+                HotelCountry = f.Hotel.Country,
+                HotelImageUrl = f.Hotel.ImageUrl,
+                HotelPricePerNight = f.Hotel.PricePerNight,
+                HotelRating = f.Hotel.Rating,
+                CreatedAt = f.CreatedAt
             })
             .ToListAsync();
 
@@ -51,7 +52,7 @@ public class FavoritesController : ControllerBase
 
     // GET: api/favorites/ids
     [HttpGet("ids")]
-    public async Task<ActionResult> GetUserFavoriteIds()
+    public async Task<ActionResult<IEnumerable<int>>> GetUserFavoriteIds()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))

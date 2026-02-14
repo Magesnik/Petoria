@@ -40,7 +40,7 @@ const Footer = () => {
                         <ul className="footer-links">
                             <li><Link to="/">{t('home')}</Link></li>
                             <li><Link to="/hotels">{t('hotels')}</Link></li>
-                            <li><Link to="/deals">🎁 {t('deals')}</Link></li>
+                            <li><Link to="/deals">{t('deals')}</Link></li>
                             <li><Link to="/about">{t('about')}</Link></li>
                         </ul>
                     </div>

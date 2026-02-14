@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Availability;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -17,41 +18,9 @@ public class AvailabilityController : ControllerBase
         _context = context;
     }
 
-    // DTO for availability response
-    public class AvailabilityDto
-    {
-        public int RoomTypeId { get; set; }
-        public string RoomTypeName { get; set; } = string.Empty;
-        public decimal PricePerNight { get; set; }
-        public int Capacity { get; set; }
-        public DateTime Date { get; set; }
-        public int AvailableCount { get; set; }
-        public bool IsBlocked { get; set; }
-        public int? DiscountPercentage { get; set; }
-        public decimal? DiscountedPrice { get; set; }
-    }
-
-    // DTO for bulk availability update
-    public class BulkAvailabilityRequest
-    {
-        public int RoomTypeId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public int AvailableCount { get; set; }
-    }
-
-    // DTO for blocking dates
-    public class BlockDatesRequest
-    {
-        public int? RoomTypeId { get; set; }  // null = all room types
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public bool IsBlocked { get; set; }
-    }
-
     // GET: api/hotels/5/availability?from=2026-01-25&to=2026-02-25
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AvailabilityDto>>> GetAvailability(
+    public async Task<ActionResult<IEnumerable<AvailabilityResponseDto>>> GetAvailability(
         int hotelId,
         [FromQuery] DateTime from,
         [FromQuery] DateTime to)
@@ -69,7 +38,7 @@ public class AvailabilityController : ControllerBase
 
         if (!roomTypes.Any())
         {
-            return Ok(new List<AvailabilityDto>());
+            return Ok(new List<AvailabilityResponseDto>());
         }
 
         // Get existing availability records
@@ -87,7 +56,7 @@ public class AvailabilityController : ControllerBase
                          rd.StartDate <= to.Date)
             .ToListAsync();
 
-        var result = new List<AvailabilityDto>();
+        var result = new List<AvailabilityResponseDto>();
 
         // Generate availability data for each date and room type
         for (var date = from.Date; date <= to.Date; date = date.AddDays(1))
@@ -103,7 +72,7 @@ public class AvailabilityController : ControllerBase
                     date >= d.StartDate.Date && 
                     date <= d.EndDate.Date);
 
-                result.Add(new AvailabilityDto
+                result.Add(new AvailabilityResponseDto
                 {
                     RoomTypeId = roomType.Id,
                     RoomTypeName = roomType.Name,
@@ -127,7 +96,7 @@ public class AvailabilityController : ControllerBase
     // POST: api/hotels/5/availability/bulk - Set availability for a date range
     [HttpPost("bulk")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> SetBulkAvailability(int hotelId, BulkAvailabilityRequest request)
+    public async Task<IActionResult> SetBulkAvailability(int hotelId, BulkAvailabilityRequestDto request)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)
@@ -186,7 +155,7 @@ public class AvailabilityController : ControllerBase
     // PUT: api/hotels/5/availability/block - Block or unblock dates
     [HttpPut("block")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> BlockDates(int hotelId, BlockDatesRequest request)
+    public async Task<IActionResult> BlockDates(int hotelId, BlockDatesRequestDto request)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)

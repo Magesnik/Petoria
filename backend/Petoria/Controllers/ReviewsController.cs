@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.DTOs.Review;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 using System.Security.Claims;
@@ -20,24 +21,24 @@ public class ReviewsController : ControllerBase
 
     // GET: api/hotels/{hotelId}/reviews
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetReviews(int hotelId)
+    public async Task<ActionResult<IEnumerable<ReviewResponseDto>>> GetReviews(int hotelId)
     {
         var reviews = await _context.HotelReviews
             .Where(r => r.HotelId == hotelId)
             .Include(r => r.User)
             .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new
+            .Select(r => new ReviewResponseDto
             {
-                r.Id,
-                r.Rating,
-                r.ReviewText,
-                r.CreatedAt,
-                User = new
+                Id = r.Id,
+                Rating = r.Rating,
+                ReviewText = r.ReviewText,
+                CreatedAt = r.CreatedAt,
+                User = new ReviewUserDto
                 {
-                    r.User.Id,
-                    r.User.FirstName,
-                    r.User.LastName,
-                    r.User.AvatarUrl
+                    Id = r.User.Id,
+                    FirstName = r.User.FirstName,
+                    LastName = r.User.LastName,
+                    AvatarUrl = r.User.AvatarUrl
                 }
             })
             .ToListAsync();
@@ -48,7 +49,7 @@ public class ReviewsController : ControllerBase
     // POST: api/hotels/{hotelId}/reviews
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<HotelReview>> PostReview(int hotelId, [FromBody] ReviewDto reviewDto)
+    public async Task<ActionResult> PostReview(int hotelId, [FromBody] CreateReviewDto dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
@@ -68,20 +69,20 @@ public class ReviewsController : ControllerBase
 
         if (existingReview != null)
         {
-            // Update existing review
-            existingReview.Rating = reviewDto.Rating;
-            existingReview.ReviewText = reviewDto.ReviewText;
+            // Update existing review — Map DTO → Entity (update)
+            existingReview.Rating = dto.Rating;
+            existingReview.ReviewText = dto.ReviewText;
             existingReview.UpdatedAt = DateTime.UtcNow;
         }
         else
         {
-            // Create new review
+            // Create new review — Map DTO → Entity
             var review = new HotelReview
             {
                 HotelId = hotelId,
                 UserId = userId,
-                Rating = reviewDto.Rating,
-                ReviewText = reviewDto.ReviewText,
+                Rating = dto.Rating,
+                ReviewText = dto.ReviewText,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -147,10 +148,4 @@ public class ReviewsController : ControllerBase
 
         await _context.SaveChangesAsync();
     }
-}
-
-public class ReviewDto
-{
-    public int Rating { get; set; }
-    public string ReviewText { get; set; } = string.Empty;
 }

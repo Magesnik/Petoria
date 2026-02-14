@@ -141,7 +141,8 @@
 }
 
 [data-theme="dark"] .featured {
-    background-color: #020c1b;
+    background: #020c1b;
+    background-image: none;
 }
 
 .section-title {
