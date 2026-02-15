@@ -12,6 +12,7 @@ const MyHotels = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
     const [hotels, setHotels] = useState([]);
+    const [unreadCounts, setUnreadCounts] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -36,11 +37,35 @@ const MyHotels = () => {
 
             const data = await response.json();
             setHotels(data);
+
+            // Fetch unread message counts
+            fetchUnreadCounts(token);
         } catch (err) {
             setError('Грешка при зареждане на хотелите');
             console.error(err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUnreadCounts = async (token) => {
+        try {
+            const response = await fetch('http://localhost:5150/api/hotels/my/messages/unread-counts', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const counts = {};
+                data.forEach(item => {
+                    counts[item.hotelId] = item.unreadCount;
+                });
+                setUnreadCounts(counts);
+            }
+        } catch (err) {
+            console.error('Error fetching unread counts:', err);
         }
     };
 
@@ -90,6 +115,11 @@ const MyHotels = () => {
                                             <span className="status-unavailable">○ {t('inactive')}</span>
                                         )}
                                     </div>
+                                    {unreadCounts[hotel.id] > 0 && (
+                                        <Link to={`/hotel/${hotel.id}/messages`} className="notification-badge">
+                                            🔔 {unreadCounts[hotel.id]}
+                                        </Link>
+                                    )}
                                 </div>
 
                                 <div className="hotel-content">

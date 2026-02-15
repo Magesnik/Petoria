@@ -206,7 +206,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
         return (
             <div className="booking-widget loading">
                 <div className="spinner"></div>
-                <p>Зареждане...</p>
+                <p>{t('loading')}</p>
             </div>
         );
     }
@@ -290,7 +290,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                         </button>
                     </div>
                     <small className="rooms-available">
-                        Налични: {selectedRoomType.totalRooms} стаи от този тип
+                        {t('availableColon')} {selectedRoomType.totalRooms} {t('roomsOfType')}
                     </small>
                 </div>
             )}
@@ -299,7 +299,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
             {checkInDate && checkOutDate && selectedRoomType && (
                 <div className="booking-section availability-section">
                     <div className={`availability-badge ${priceInfo ? 'available' : 'checking'}`}>
-                        {priceInfo ? '✓ Налично' : '⏳ Проверка...'}
+                        {priceInfo ? `✓ ${t('available')}` : `⏳ ${t('checking')}`}
                     </div>
                 </div>
             )}
@@ -309,28 +309,28 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                 <div className="booking-section price-summary">
                     {priceInfo.totalDiscount > 0 && (
                         <div className="price-row original">
-                            <span>Оригинална цена</span>
+                            <span>{t('originalPrice')}</span>
                             <span className="strikethrough">{convertAndFormat(priceInfo.originalPrice)}</span>
                         </div>
                     )}
                     <div className="price-row">
-                        <span>{convertAndFormat(priceInfo.pricePerNight)} × {priceInfo.numberOfNights} нощувки</span>
+                        <span>{convertAndFormat(priceInfo.pricePerNight)} × {priceInfo.numberOfNights} {t('nights')}</span>
                         <span>{convertAndFormat(priceInfo.pricePerNight * priceInfo.numberOfNights)}</span>
                     </div>
                     {priceInfo.totalDiscount > 0 && (
                         <div className="price-row discount">
-                            <span>💰 Спестявате</span>
+                            <span>💰 {t('youSave')}</span>
                             <span className="savings">-{convertAndFormat(priceInfo.totalDiscount)}</span>
                         </div>
                     )}
                     {numberOfRooms > 1 && (
                         <div className="price-row">
-                            <span>× {numberOfRooms} стаи</span>
+                            <span>× {numberOfRooms} {t('rooms')}</span>
                             <span></span>
                         </div>
                     )}
                     <div className="price-row total">
-                        <span>Общо</span>
+                        <span>{t('total')}</span>
                         <span className="total-price">{convertAndFormat(priceInfo.totalPrice)}</span>
                     </div>
                 </div>
@@ -342,14 +342,14 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                 onClick={handleBooking}
                 disabled={!selectedRoomType || !checkInDate || !checkOutDate || bookingLoading || !user}
             >
-                {bookingLoading ? '⏳ Резервиране...' : (
-                    priceInfo ? `Резервирай за ${convertAndFormat(priceInfo.totalPrice)}` : 'Резервирай'
+                {bookingLoading ? `⏳ ${t('booking')}` : (
+                    priceInfo ? `${t('bookFor')} ${convertAndFormat(priceInfo.totalPrice)}` : t('book')
                 )}
             </button>
 
             {!user && (
                 <p className="login-reminder">
-                    ⚠️ Трябва да влезете в акаунта си, за да направите резервация
+                    ⚠️ {t('loginToBookWarning')}
                 </p>
             )}
         </div>

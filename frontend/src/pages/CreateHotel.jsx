@@ -19,7 +19,6 @@ const CreateHotel = () => {
         country: '',
         latitude: null,
         longitude: null,
-        pricePerNight: '',
         starRating: 3,
         imageUrl: ''
     });
@@ -29,10 +28,10 @@ const CreateHotel = () => {
     const [imagePreviews, setImagePreviews] = useState([null]);
     const [amenities, setAmenities] = useState([]);
     const [customAmenity, setCustomAmenity] = useState('');
-    const [roomTypes, setRoomTypes] = useState(['']);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [hoveredStar, setHoveredStar] = useState(null);
 
     // Популярни удобства - keeping Bulgarian since these are specific amenity names
     const popularAmenities = [
@@ -166,21 +165,6 @@ const CreateHotel = () => {
         setAmenities(amenities.filter(a => a !== amenity));
     };
 
-    // Room type management
-    const addRoomType = () => {
-        setRoomTypes([...roomTypes, '']);
-    };
-
-    const removeRoomType = (index) => {
-        setRoomTypes(roomTypes.filter((_, i) => i !== index));
-    };
-
-    const updateRoomType = (index, value) => {
-        const newRoomTypes = [...roomTypes];
-        newRoomTypes[index] = value;
-        setRoomTypes(newRoomTypes);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -201,9 +185,6 @@ const CreateHotel = () => {
                 }
             }
 
-            // Filter out empty room types
-            const filteredRoomTypes = roomTypes.filter(rt => rt.trim() !== '');
-
             // Build hotel data
             const hotelData = {
                 name: formData.name,
@@ -213,13 +194,13 @@ const CreateHotel = () => {
                 country: formData.country,
                 latitude: formData.latitude,
                 longitude: formData.longitude,
-                pricePerNight: parseFloat(formData.pricePerNight),
+                pricePerNight: 0, // Will be set via room types later
                 rating: 0, // Initial user rating
                 starRating: parseInt(formData.starRating),
                 imageUrl: formData.imageUrl || '',
                 images: JSON.stringify(uploadedImageUrls),
                 amenities: JSON.stringify(amenities),
-                roomTypes: JSON.stringify(filteredRoomTypes)
+                roomTypes: '[]' // Empty for now, will be managed separately
             };
 
             const response = await fetch('http://localhost:5150/api/hotels', {
@@ -259,7 +240,6 @@ const CreateHotel = () => {
                 country: '',
                 latitude: null,
                 longitude: null,
-                pricePerNight: '',
                 starRating: 3,
                 imageUrl: ''
             });
@@ -267,7 +247,6 @@ const CreateHotel = () => {
             setImageFiles([null]);
             setImagePreviews([null]);
             setAmenities([]);
-            setRoomTypes(['']);
 
             // Redirect to hotels page after 2 seconds
             setTimeout(() => {
@@ -415,45 +394,34 @@ const CreateHotel = () => {
                                 </div>
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>{t('pricePerNight')} (BGN) *</label>
-                                    <input
-                                        type="number"
-                                        name="pricePerNight"
-                                        value={formData.pricePerNight}
-                                        onChange={handleChange}
-                                        required
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="150.00"
-                                    />
+                            <div className="form-group">
+                                <label>{t('starRating')} *</label>
+                                <div className="star-rating-select">
+                                    {[0, 1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            className={`star-select-btn ${
+                                                star <= (hoveredStar !== null ? hoveredStar : formData.starRating) ? 'selected' : ''
+                                            } ${star === 0 ? 'zero-star' : ''}`}
+                                            onClick={() => setFormData({ ...formData, starRating: star })}
+                                            onMouseEnter={() => setHoveredStar(star)}
+                                            onMouseLeave={() => setHoveredStar(null)}
+                                            title={star === 0 ? t('noCategory') : `${star} ${star === 1 ? t('star') : t('starsCount')}`}
+                                        >
+                                            {star === 0 ? '—' : '★'}
+                                        </button>
+                                    ))}
                                 </div>
-                                <div className="form-group">
-                                    <label>{t('starRating')} *</label>
-                                    <div className="star-rating-select">
-                                        {[0, 1, 2, 3, 4, 5].map((star) => (
-                                            <button
-                                                key={star}
-                                                type="button"
-                                                className={`star-select-btn ${formData.starRating === star ? 'selected' : ''} ${star === 0 ? 'zero-star' : ''}`}
-                                                onClick={() => setFormData({ ...formData, starRating: star })}
-                                                title={star === 0 ? t('noCategory') : `${star} ${star === 1 ? t('star') : t('starsCount')}`}
-                                            >
-                                                {star === 0 ? '—' : '★'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <small className="rating-hint">
-                                        {formData.starRating === 0 ? t('noCategory') : `${formData.starRating} ${formData.starRating === 1 ? t('star') : t('starsCount')}`}
-                                    </small>
-                                    <input
-                                        type="hidden"
-                                        name="starRating"
-                                        value={formData.starRating}
-                                        required
-                                    />
-                                </div>
+                                <small className="rating-hint">
+                                    {formData.starRating === 0 ? t('noCategory') : `${formData.starRating} ${formData.starRating === 1 ? t('star') : t('starsCount')}`}
+                                </small>
+                                <input
+                                    type="hidden"
+                                    name="starRating"
+                                    value={formData.starRating}
+                                    required
+                                />
                             </div>
                         </div>
 
@@ -599,35 +567,7 @@ const CreateHotel = () => {
                             )}
                         </div>
 
-                        {/* Room Types */}
-                        <div className="form-section">
-                            <h3 className="section-title">🛏️ {t('roomTypes')}</h3>
 
-                            <div className="dynamic-list">
-                                {roomTypes.map((roomType, index) => (
-                                    <div key={index} className="dynamic-item">
-                                        <input
-                                            type="text"
-                                            value={roomType}
-                                            onChange={(e) => updateRoomType(index, e.target.value)}
-                                            placeholder={`${t('roomTypeLabel')} ${index + 1} ${t('roomTypeExample')}`}
-                                        />
-                                        {roomTypes.length > 1 && (
-                                            <button
-                                                type="button"
-                                                className="btn-remove"
-                                                onClick={() => removeRoomType(index)}
-                                            >
-                                                ✕
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                            <button type="button" className="btn-add" onClick={addRoomType}>
-                                {t('addMoreRoomType')}
-                            </button>
-                        </div>
 
                         <button type="submit" className="btn btn-primary btn-block" disabled={uploading}>
                             {uploading ? `⏳ ${t('uploading')}` : `✨ ${t('createHotelButton')}`}

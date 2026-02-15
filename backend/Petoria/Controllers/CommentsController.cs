@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Petoria.DTOs.Comment;
+using Petoria.Core.DTOs.Comment;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 

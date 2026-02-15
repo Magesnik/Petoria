@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Petoria.DTOs.Deals;
+using Petoria.Core.DTOs.Deals;
 using Petoria.Infrastructure.Data;
 
 namespace Petoria.Controllers;

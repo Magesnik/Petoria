@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
@@ -243,7 +243,7 @@ const HotelDetails = () => {
                         <div className="contact-card">
                             <h3>{t('needHelp')}</h3>
                             <p>{t('contactInfo')}</p>
-                            <button className="btn-contact">{t('contactSupport')}</button>
+                            <Link to={`/hotel/${id}/contact`} className="btn-contact">{t('contactSupport')}</Link>
                         </div>
                     </div>
                 </div>

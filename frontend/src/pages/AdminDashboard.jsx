@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState(null);
+    const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
     const getStatusLabel = (status) => {
         switch (status?.toLowerCase()) {
@@ -40,9 +41,10 @@ const AdminDashboard = () => {
             const token = localStorage.getItem('token');
             const headers = { 'Authorization': `Bearer ${token}` };
 
-            const [usersRes, statsRes] = await Promise.all([
+            const [usersRes, statsRes, messagesRes] = await Promise.all([
                 fetch('http://localhost:5150/api/admin/users', { headers }),
-                fetch('http://localhost:5150/api/admin/stats', { headers })
+                fetch('http://localhost:5150/api/admin/stats', { headers }),
+                fetch('http://localhost:5150/api/support/messages/admin/unread-count', { headers })
             ]);
 
             if (!usersRes.ok || !statsRes.ok) {
@@ -51,6 +53,9 @@ const AdminDashboard = () => {
 
             setUsers(await usersRes.json());
             setStats(await statsRes.json());
+            if (messagesRes.ok) {
+                setUnreadMessagesCount(await messagesRes.json());
+            }
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -140,7 +145,42 @@ const AdminDashboard = () => {
             <Header />
             <div className="admin-dashboard">
                 <div className="dashboard-header">
-                    <h1>🛡️ {t('superAdminDashboard')}</h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+                        <h1>🛡️ {t('superAdminDashboard')}</h1>
+                        <button
+                            className="notification-bell-btn"
+                            onClick={() => navigate('/admin/support-messages')}
+                            title={t('supportMessages')}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '1.5rem',
+                                cursor: 'pointer',
+                                position: 'relative'
+                            }}
+                        >
+                            🔔
+                            {unreadMessagesCount > 0 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-5px',
+                                    right: '-5px',
+                                    backgroundColor: 'red',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '20px',
+                                    height: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {unreadMessagesCount}
+                                </span>
+                            )}
+                        </button>
+                    </div>
                     <p>{t('manageDashboard')}</p>
                 </div>
 

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Petoria.DTOs.Availability;
+using Petoria.Core.DTOs.Availability;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 

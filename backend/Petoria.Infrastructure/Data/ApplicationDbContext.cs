@@ -20,6 +20,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<RoomAvailability> RoomAvailabilities { get; set; }
     public DbSet<HotelReview> HotelReviews { get; set; }
     public DbSet<RoomDiscount> RoomDiscounts { get; set; }
+    public DbSet<HotelMessage> HotelMessages { get; set; }
+    public DbSet<SupportMessage> SupportMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

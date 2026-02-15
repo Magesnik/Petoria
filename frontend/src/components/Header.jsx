@@ -28,6 +28,38 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fetch unread messages count
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      fetchUnreadCount();
+      // Poll every minute
+      const interval = setInterval(fetchUnreadCount, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('http://localhost:5150/api/hotels/my/messages/unread-responses-count', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadCount(data.count);
+      }
+    } catch (err) {
+      console.error('Error fetching unread count:', err);
+    }
+  };
+
   // Click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -104,43 +136,53 @@ const Header = () => {
 
         <div className="header-actions">
           {user ? (
-            <div className="user-menu" ref={dropdownRef}>
-              <button onClick={toggleDropdown} className="user-dropdown-trigger">
-                <div className="user-avatar-small">
-                  {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.firstName} />
-                  ) : (
-                    <span>👤</span>
-                  )}
-                </div>
-                <span className="user-name">{user.firstName}</span>
-                <span className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▼</span>
-              </button>
-              {dropdownOpen && (
-                <div className="user-dropdown">
-                  <Link to="/favorites" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <span className="dropdown-icon">❤️</span>
-                    {t('favorites')}
-                  </Link>
-                  <Link to="/purchase-history" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <span className="dropdown-icon">🛒</span>
-                    {t('purchaseHistory')}
-                  </Link>
-                  <Link to="/settings" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <span className="dropdown-icon">⚙️</span>
-                    {t('settings')}
-                  </Link>
-                  <Link to="/support" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
-                    <span className="dropdown-icon">💬</span>
-                    {t('support')}
-                  </Link>
-                  <div className="dropdown-divider"></div>
-                  <button onClick={handleLogout} className="dropdown-item logout-item">
-                    <span className="dropdown-icon">🚪</span>
-                    {t('logout')}
-                  </button>
-                </div>
-              )}
+            <div className="user-section" style={{ display: 'flex', alignItems: 'center' }}>
+              <Link to="/my-messages" className="nav-notification">
+                🔔
+                {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
+              </Link>
+              <div className="user-menu" ref={dropdownRef}>
+                <button onClick={toggleDropdown} className="user-dropdown-trigger">
+                  <div className="user-avatar-small">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.firstName} />
+                    ) : (
+                      <span>👤</span>
+                    )}
+                  </div>
+                  <span className="user-name">{user.firstName}</span>
+                  <span className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▼</span>
+                </button>
+                {dropdownOpen && (
+                  <div className="user-dropdown">
+                    <Link to="/favorites" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <span className="dropdown-icon">❤️</span>
+                      {t('favorites')}
+                    </Link>
+                    <Link to="/purchase-history" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <span className="dropdown-icon">🛒</span>
+                      {t('purchaseHistory')}
+                    </Link>
+                    <Link to="/my-messages" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <span className="dropdown-icon">💬</span>
+                      {t('myMessages') || 'My Messages'}
+                    </Link>
+                    <Link to="/settings" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <span className="dropdown-icon">⚙️</span>
+                      {t('settings')}
+                    </Link>
+                    <Link to="/support" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <span className="dropdown-icon">❓</span>
+                      {t('support')}
+                    </Link>
+                    <div className="dropdown-divider"></div>
+                    <button onClick={handleLogout} className="dropdown-item logout-item">
+                      <span className="dropdown-icon">🚪</span>
+                      {t('logout')}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="auth-buttons-desktop">
@@ -212,7 +254,7 @@ const Header = () => {
           )}
         </div>
       </nav>
-    </header>
+    </header >
   );
 };
 

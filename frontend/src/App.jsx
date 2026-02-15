@@ -21,6 +21,10 @@ import Support from './pages/Support';
 import AdminDashboard from './pages/AdminDashboard';
 import MyHotels from './pages/MyHotels';
 import ManageHotel from './pages/ManageHotel';
+import ContactHotel from './pages/ContactHotel';
+import HotelMessages from './pages/HotelMessages';
+import MyMessages from './pages/MyMessages';
+import AdminSupportMessages from './pages/AdminSupportMessages';
 
 function App() {
   return (
@@ -49,6 +53,10 @@ function App() {
                       <Route path="/my-hotels" element={<MyHotels />} />
                       <Route path="/manage-hotel/:id" element={<ManageHotel />} />
                       <Route path="/hotel/:id" element={<HotelDetails />} />
+                      <Route path="/hotel/:id/contact" element={<ContactHotel />} />
+                      <Route path="/hotel/:id/messages" element={<HotelMessages />} />
+                      <Route path="/my-messages" element={<MyMessages />} />
+                      <Route path="/admin/support-messages" element={<AdminSupportMessages />} />
                     </Routes>
                   </div>
                 </Router>

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Petoria.DTOs.Profile;
+using Petoria.Core.DTOs.Profile;
 using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;

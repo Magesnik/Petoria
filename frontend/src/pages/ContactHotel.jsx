@@ -1,0 +1,170 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import Header from '../components/Header';
+import './ContactHotel.css';
+
+const ContactHotel = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { t } = useLanguage();
+
+    const [hotel, setHotel] = useState(null);
+    const [formData, setFormData] = useState({
+        subject: '',
+        message: ''
+    });
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchHotel();
+    }, [id, user, navigate]);
+
+    const fetchHotel = async () => {
+        try {
+            const response = await fetch(`http://localhost:5150/api/hotels/${id}`);
+            if (!response.ok) throw new Error('Failed to fetch hotel');
+            const data = await response.json();
+            setHotel(data);
+        } catch (err) {
+            setError(t('errorLoadingHotel') || 'Error loading hotel');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSubmitting(true);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5150/api/hotels/${id}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.title || 'Failed to send message');
+            }
+
+            setSuccess(true);
+            setTimeout(() => {
+                navigate(`/hotel/${id}`);
+            }, 3000);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="contact-page">
+                <Header />
+                <div className="loading-container">
+                    <div className="spinner"></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!hotel) {
+        return null;
+    }
+
+    return (
+        <div className="contact-page">
+            <Header />
+            <div className="contact-container">
+                <Link to={`/hotel/${id}`} className="btn-back">
+                    ← {t('backToHotel') || 'Back to Hotel'}
+                </Link>
+
+                <div className="contact-card">
+                    <div className="contact-header">
+                        <h1>{t('contactSupport') || 'Contact Support'}</h1>
+                        <p className="hotel-name">{hotel.name}</p>
+                        <p className="subtitle">{t('askQuestion') || 'Have a question? Send a message to the hotel administration.'}</p>
+                    </div>
+
+                    {success ? (
+                        <div className="success-state">
+                            <div className="success-icon">✅</div>
+                            <h2>{t('messageSent') || 'Message Sent!'}</h2>
+                            <p>{t('messageSentDesc') || 'Your message has been sent to the hotel administration. You will be redirected shortly.'}</p>
+                            <Link to={`/hotel/${id}`} className="btn-primary">
+                                {t('backToHotel') || 'Back to Hotel'}
+                            </Link>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="contact-form">
+                            {error && <div className="error-message">{error}</div>}
+
+                            <div className="form-group">
+                                <label htmlFor="subject">{t('subject') || 'Subject'} *</label>
+                                <input
+                                    type="text"
+                                    id="subject"
+                                    name="subject"
+                                    value={formData.subject}
+                                    onChange={handleChange}
+                                    required
+                                    maxLength="200"
+                                    placeholder={t('subjectPlaceholder') || 'e.g. Question about parking'}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="message">{t('message') || 'Message'} *</label>
+                                <textarea
+                                    id="message"
+                                    name="message"
+                                    value={formData.message}
+                                    onChange={handleChange}
+                                    required
+                                    minLength="10"
+                                    maxLength="2000"
+                                    rows="6"
+                                    placeholder={t('messagePlaceholder') || 'Type your message here...'}
+                                />
+                                <small className="char-count">{formData.message.length}/2000</small>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="btn-submit"
+                                disabled={submitting}
+                            >
+                                {submitting ? (t('sending') || 'Sending...') : (t('sendMessage') || 'Send Message')}
+                            </button>
+                        </form>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ContactHotel;

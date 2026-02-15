@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Petoria.DTOs.Admin;
+using Petoria.Core.DTOs.Admin;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 

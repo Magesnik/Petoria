@@ -19,15 +19,34 @@ const Support = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Add API call to send support message
-        setSubmitMessage(t('messageSent'));
-        setFormData({
-            subject: '',
-            message: '',
-        });
-        setTimeout(() => setSubmitMessage(''), 5000);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5150/api/support/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send message');
+            }
+
+            setSubmitMessage(t('messageSent'));
+            setFormData({
+                subject: '',
+                message: '',
+            });
+            setTimeout(() => setSubmitMessage(''), 5000);
+        } catch (error) {
+            console.error('Error sending support message:', error);
+            // Optional: set error state
+        }
     };
 
     const toggleFaq = (index) => {

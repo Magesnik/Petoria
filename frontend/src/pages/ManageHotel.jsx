@@ -57,7 +57,6 @@ const ManageHotel = () => {
                 location: data.location,
                 city: data.city,
                 country: data.country,
-                pricePerNight: data.pricePerNight,
                 isAvailable: data.isAvailable
             });
         } catch (err) {
@@ -210,10 +209,7 @@ const ManageHotel = () => {
                                             <label>{t('address')}</label>
                                             <p>{hotel.location}</p>
                                         </div>
-                                        <div className="info-item">
-                                            <label>{t('basePrice')}</label>
-                                            <p>{hotel.pricePerNight} лв/нощ</p>
-                                        </div>
+
                                         <div className="info-item">
                                             <label>{t('status')}</label>
                                             <p className={hotel.isAvailable ? 'status-active' : 'status-inactive'}>
@@ -264,14 +260,7 @@ const ManageHotel = () => {
                                                 onChange={(e) => setEditData({ ...editData, location: e.target.value })}
                                             />
                                         </div>
-                                        <div className="form-group">
-                                            <label>{t('basePrice')} (лв)</label>
-                                            <input
-                                                type="number"
-                                                value={editData.pricePerNight}
-                                                onChange={(e) => setEditData({ ...editData, pricePerNight: parseFloat(e.target.value) })}
-                                            />
-                                        </div>
+
                                         <div className="form-group">
                                             <label>{t('status')}</label>
                                             <select
