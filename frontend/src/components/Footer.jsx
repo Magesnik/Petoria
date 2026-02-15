@@ -14,7 +14,7 @@ const Footer = () => {
                 <div className="footer-top">
                     <div className="footer-column">
                         <div className="footer-logo">
-                            (Petoria)<span>.</span>
+                            Petoria<span>.</span>
                         </div>
                         <p className="footer-description">
                             {t('footerDescription')}
