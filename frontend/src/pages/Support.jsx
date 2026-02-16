@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../utils/api';
 import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
 import './Support.css';
@@ -23,15 +24,7 @@ const Support = () => {
         e.preventDefault();
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/support/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
+            await api.post('/support/messages', formData);
 
             if (!response.ok) {
                 throw new Error('Failed to send message');

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import './ReviewSection.css';
@@ -20,24 +21,15 @@ const ReviewSection = ({ hotelId }) => {
     const fetchReviews = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/reviews`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setReviews(data);
+            const data = await api.get(`/hotels/${hotelId}/reviews`);
+            setReviews(data);
 
-                // Calculate average rating
-                if (data.length > 0) {
-                    const avg = data.reduce((acc, curr) => acc + curr.rating, 0) / data.length;
-                    setAverageRating(avg);
-                } else {
-                    setAverageRating(0);
-                }
+            // Calculate average rating
+            if (data.length > 0) {
+                const avg = data.reduce((acc, curr) => acc + curr.rating, 0) / data.length;
+                setAverageRating(avg);
             } else {
-                throw new Error('Failed to fetch reviews');
+                setAverageRating(0);
             }
         } catch (err) {
             setError(err.message);
@@ -55,22 +47,11 @@ const ReviewSection = ({ hotelId }) => {
 
         setIsSubmitting(true);
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/reviews`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(userReview)
-            });
+            await api.post(`/hotels/${hotelId}/reviews`, userReview);
 
-            if (response.ok) {
-                await fetchReviews();
-                setUserReview({ rating: 5, reviewText: '' });
-                alert('Review submitted successfully!');
-            } else {
-                throw new Error('Failed to submit review');
-            }
+            await fetchReviews();
+            setUserReview({ rating: 5, reviewText: '' });
+            alert('Review submitted successfully!');
         } catch (err) {
             alert(err.message);
         } finally {
@@ -82,18 +63,8 @@ const ReviewSection = ({ hotelId }) => {
         if (!window.confirm('Are you sure you want to delete this review?')) return;
 
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/reviews/${reviewId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (response.ok) {
-                fetchReviews();
-            } else {
-                throw new Error('Failed to delete review');
-            }
+            await api.delete(`/hotels/${hotelId}/reviews/${reviewId}`);
+            fetchReviews();
         } catch (err) {
             alert(err.message);
         }

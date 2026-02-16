@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
@@ -17,13 +18,8 @@ const CommentsSection = ({ hotelId }) => {
     const fetchComments = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/comments`);
-            if (response.ok) {
-                const data = await response.json();
-                setComments(data);
-            } else {
-                throw new Error('Failed to fetch comments');
-            }
+            const data = await api.get(`/hotels/${hotelId}/comments`);
+            setComments(data);
         } catch (err) {
             setError(err.message);
             console.error('Error fetching comments:', err);

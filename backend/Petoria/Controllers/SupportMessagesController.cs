@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Petoria.Core.DTOs.SupportMessage;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
-using Petoria.Infrastructure.Data.Entities;
+
 using System.Security.Claims;
 
 namespace Petoria.Controllers

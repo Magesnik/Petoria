@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -31,12 +32,8 @@ const HotelMessages = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-
             // Fetch hotel details to verify ownership and get name
-            const hotelResponse = await fetch(`http://localhost:5150/api/hotels/${id}`);
-            if (!hotelResponse.ok) throw new Error('Failed to fetch hotel');
-            const hotelData = await hotelResponse.json();
+            const hotelData = await api.get(`/hotels/${id}`);
 
             if (hotelData.createdById !== user?.id && !user?.roles?.includes('SuperAdmin')) {
                 navigate('/my-hotels');
@@ -45,14 +42,7 @@ const HotelMessages = () => {
             setHotel(hotelData);
 
             // Fetch messages
-            const messagesResponse = await fetch(`http://localhost:5150/api/hotels/${id}/messages`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!messagesResponse.ok) throw new Error('Failed to fetch messages');
-            const messagesData = await messagesResponse.json();
+            const messagesData = await api.get(`/hotels/${id}/messages`);
             setMessages(messagesData);
         } catch (err) {
             setError(t('errorLoadingData') || 'Error loading data');
@@ -77,17 +67,7 @@ const HotelMessages = () => {
 
         setSendingReply(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}/messages/${messageId}/answer`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ adminResponse: replyText })
-            });
-
-            if (!response.ok) throw new Error('Failed to send reply');
+            await api.put(`/hotels/${id}/messages/${messageId}/answer`, { adminResponse: replyText });
 
             // Update local state
             setMessages(messages.map(msg =>

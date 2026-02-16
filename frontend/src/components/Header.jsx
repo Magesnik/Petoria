@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import './Header.css';
 
 const Header = () => {
@@ -13,6 +15,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useLanguage();
+  const { currency, changeCurrency, availableCurrencies } = useCurrency();
   const { user, logout, isAdmin, isSuperAdmin } = useAuth();
 
   useEffect(() => {
@@ -42,19 +45,8 @@ const Header = () => {
 
   const fetchUnreadCount = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const response = await fetch('http://localhost:5150/api/hotels/my/messages/unread-responses-count', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.count);
-      }
+      const data = await api.get('/hotels/my/messages/unread-responses-count');
+      setUnreadCount(data.count);
     } catch (err) {
       console.error('Error fetching unread count:', err);
     }
@@ -135,6 +127,28 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
+          {/* Global Settings (Visible only when not logged in) */}
+          {!user && (
+            <div className="global-settings">
+              <button onClick={toggleTheme} className="btn-icon" title={theme === 'light' ? t('darkMode') : t('lightMode')}>
+                {theme === 'light' ? '🌙' : '☀️'}
+              </button>
+              <button onClick={toggleLanguage} className="btn-icon" title={language === 'en' ? 'Български' : 'English'}>
+                {language === 'en' ? '🇧🇬' : '🇬🇧'}
+              </button>
+              <button
+                onClick={() => {
+                  const nextIndex = (availableCurrencies.indexOf(currency) + 1) % availableCurrencies.length;
+                  changeCurrency(availableCurrencies[nextIndex]);
+                }}
+                className="btn-icon"
+                title={t('currency')}
+              >
+                {currency}
+              </button>
+            </div>
+          )}
+
           {user ? (
             <div className="user-section" style={{ display: 'flex', alignItems: 'center' }}>
               <Link to="/my-messages" className="nav-notification">

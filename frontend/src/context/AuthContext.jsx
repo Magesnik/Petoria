@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { api } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -6,43 +7,53 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Check for stored user data on mount
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
-
-        if (storedUser && storedToken) {
-            try {
-                const parsedUser = JSON.parse(storedUser);
-
+    const checkUser = async () => {
+        try {
+            const data = await api.get('/profile');
+            if (data) {
                 // Fix avatar URL if it's a relative path
-                if (parsedUser.avatarUrl && parsedUser.avatarUrl.startsWith('/uploads/')) {
-                    parsedUser.avatarUrl = `http://localhost:5150${parsedUser.avatarUrl}`;
+                if (data.avatarUrl && data.avatarUrl.startsWith('/uploads/')) {
+                    data.avatarUrl = `http://localhost:5150${data.avatarUrl}`;
                 }
-
-                setUser(parsedUser);
-            } catch (error) {
-                console.error("Failed to parse user data:", error);
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
+                setUser(data);
             }
+        } catch (error) {
+            // 401 or other error means not logged in
+            console.log("Not authenticated or session expired");
+            setUser(null);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
-    }, []);
-
-    const login = (userData, token) => {
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', token);
     };
 
-    const logout = () => {
+    useEffect(() => {
+        checkUser();
+    }, []);
+
+    const login = (userData) => {
+        // Cookie is already set by the server response in Login.jsx
+        // just update state
+        setUser(userData);
+    };
+
+    const logout = async () => {
+        try {
+            await api.post('/auth/logout');
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
         setUser(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        // Refresh to ensure clean state if needed, or just clear user
+        window.location.href = '/';
     };
 
     const isAdmin = () => {
+        // Roles might be returned from profile endpoint? 
+        // ProfileDto in backend Controller returns: Id, Email, FirstName, LastName, AvatarUrl. 
+        // It DOES NOT currently return Roles. We need to check this.
+        // Let's assume we need to update ProfileController to return roles or store them in state differently.
+        // For now, let's look at what Login returns. Login returns AuthResponse which has Roles.
+        // But /api/profile might need to return Roles too for persistence on refresh.
         return user?.roles?.includes('Admin') || false;
     };
 
@@ -51,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, isAdmin, isSuperAdmin }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, isAdmin, isSuperAdmin, checkUser }}>
             {!loading && children}
         </AuthContext.Provider>
     );

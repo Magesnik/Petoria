@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import './AvailabilityCalendar.css';
 
 const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
@@ -37,14 +38,11 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
             const fromStr = startOfMonth.toISOString().split('T')[0];
             const toStr = endOfMonth.toISOString().split('T')[0];
 
-            const response = await fetch(
-                `http://localhost:5150/api/hotels/${hotelId}/availability?from=${fromStr}&to=${toStr}`
+            const data = await api.get(
+                `/hotels/${hotelId}/availability?from=${fromStr}&to=${toStr}`
             );
 
-            if (response.ok) {
-                const data = await response.json();
-                setAvailability(data);
-            }
+            setAvailability(data);
         } catch (err) {
             console.error('Error fetching availability:', err);
         } finally {
@@ -101,51 +99,28 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('token');
-
             // Update availability
-            const response = await fetch(
-                `http://localhost:5150/api/hotels/${hotelId}/availability/bulk`,
+            await api.post(
+                `/hotels/${hotelId}/availability/bulk`,
                 {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        roomTypeId: selectedRoomType.id,
-                        startDate: selectionStart.toISOString(),
-                        endDate: selectionEnd.toISOString(),
-                        availableCount: bulkEditCount
-                    })
+                    roomTypeId: selectedRoomType.id,
+                    startDate: selectionStart.toISOString(),
+                    endDate: selectionEnd.toISOString(),
+                    availableCount: bulkEditCount
                 }
             );
 
-            if (!response.ok) throw new Error('Failed to update');
-
             // If discount percentage is set, create/update discount
             if (discountPercentage > 0) {
-                const discountResponse = await fetch(
-                    `http://localhost:5150/api/hotels/${hotelId}/discounts`,
+                await api.post(
+                    `/hotels/${hotelId}/discounts`,
                     {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            roomTypeId: selectedRoomType.id,
-                            startDate: selectionStart.toISOString(),
-                            endDate: selectionEnd.toISOString(),
-                            discountPercentage: discountPercentage
-                        })
+                        roomTypeId: selectedRoomType.id,
+                        startDate: selectionStart.toISOString(),
+                        endDate: selectionEnd.toISOString(),
+                        discountPercentage: discountPercentage
                     }
                 );
-
-                if (!discountResponse.ok) {
-                    const errorData = await discountResponse.json();
-                    throw new Error(errorData.message || 'Failed to create discount');
-                }
             }
 
             setSuccess(discountPercentage > 0
@@ -168,25 +143,15 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(
-                `http://localhost:5150/api/hotels/${hotelId}/availability/block`,
+            await api.put(
+                `/hotels/${hotelId}/availability/block`,
                 {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        roomTypeId: selectedRoomType?.id,
-                        startDate: selectionStart.toISOString(),
-                        endDate: selectionEnd.toISOString(),
-                        isBlocked: block
-                    })
+                    roomTypeId: selectedRoomType?.id,
+                    startDate: selectionStart.toISOString(),
+                    endDate: selectionEnd.toISOString(),
+                    isBlocked: block
                 }
             );
-
-            if (!response.ok) throw new Error('Failed to update');
 
             setSuccess(block ? 'Датите са блокирани!' : 'Датите са отблокирани!');
             setShowBulkEdit(false);

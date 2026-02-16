@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from './AuthContext';
 
 const FavoritesContext = createContext();
@@ -18,26 +19,15 @@ export const FavoritesProvider = ({ children }) => {
 
     // Fetch favorites from API when user logs in
     const fetchFavorites = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token || !user) {
+        if (!user) {
             setFavorites([]);
             return;
         }
 
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5150/api/favorites/ids', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setFavorites(data);
-            } else {
-                setFavorites([]);
-            }
+            const data = await api.get('/favorites/ids');
+            setFavorites(data);
         } catch (error) {
             console.error('Error fetching favorites:', error);
             setFavorites([]);
@@ -53,36 +43,23 @@ export const FavoritesProvider = ({ children }) => {
 
     // Toggle favorite via API
     const toggleFavorite = async (hotelId) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!user) {
             console.warn('User must be logged in to manage favorites');
             return false;
         }
 
         try {
-            const response = await fetch(`http://localhost:5150/api/favorites/toggle/${hotelId}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const data = await api.post(`/favorites/toggle/${hotelId}`);
 
-            if (response.ok) {
-                const data = await response.json();
-
-                if (data.isFavorite) {
-                    // Add to local state
-                    setFavorites(prev => [...prev, hotelId]);
-                } else {
-                    // Remove from local state
-                    setFavorites(prev => prev.filter(id => id !== hotelId));
-                }
-
-                return data.isFavorite;
+            if (data.isFavorite) {
+                // Add to local state
+                setFavorites(prev => [...prev, hotelId]);
             } else {
-                console.error('Failed to toggle favorite');
-                return null;
+                // Remove from local state
+                setFavorites(prev => prev.filter(id => id !== hotelId));
             }
+
+            return data.isFavorite;
         } catch (error) {
             console.error('Error toggling favorite:', error);
             return null;
@@ -95,22 +72,13 @@ export const FavoritesProvider = ({ children }) => {
 
     // Get full favorites list with hotel details
     const getFavoritesWithDetails = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!user) {
             return [];
         }
 
         try {
-            const response = await fetch('http://localhost:5150/api/favorites', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                return await response.json();
-            }
-            return [];
+            const data = await api.get('/favorites');
+            return data;
         } catch (error) {
             console.error('Error fetching favorites with details:', error);
             return [];

@@ -7,12 +7,12 @@ namespace Petoria.Controllers;
 [ApiController]
 public class UploadController : ControllerBase
 {
-    private readonly IWebHostEnvironment _environment;
+    private readonly Petoria.Core.Contracts.IPhotoService _photoService;
     private readonly ILogger<UploadController> _logger;
 
-    public UploadController(IWebHostEnvironment environment, ILogger<UploadController> logger)
+    public UploadController(Petoria.Core.Contracts.IPhotoService photoService, ILogger<UploadController> logger)
     {
-        _environment = environment;
+        _photoService = photoService;
         _logger = logger;
     }
 
@@ -28,12 +28,12 @@ public class UploadController : ControllerBase
             }
 
             // Validate file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif" };
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             
             if (!allowedExtensions.Contains(extension))
             {
-                return BadRequest(new { message = "Invalid file type. Allowed types: jpg, jpeg, png, gif, webp" });
+                return BadRequest(new { message = $"Invalid file type: '{extension}'. Allowed types: jpg, jpeg, png, gif, webp" });
             }
 
             // Validate file size (max 5MB)
@@ -42,27 +42,14 @@ public class UploadController : ControllerBase
                 return BadRequest(new { message = "File size exceeds 5MB limit" });
             }
 
-            // Create uploads directory if it doesn't exist
-            var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "hotels");
-            if (!Directory.Exists(uploadsPath))
+            var result = await _photoService.AddPhotoAsync(file);
+
+            if (result.Error != null)
             {
-                Directory.CreateDirectory(uploadsPath);
+                return BadRequest(new { message = result.Error.Message });
             }
 
-            // Generate unique filename
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsPath, fileName);
-
-            // Save file
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            // Return URL to access the file
-            var fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/hotels/{fileName}";
-
-            return Ok(new { url = fileUrl, fileName = fileName });
+            return Ok(new { url = result.SecureUrl.AbsoluteUri, publicId = result.PublicId });
         }
         catch (Exception ex)
         {
@@ -71,22 +58,20 @@ public class UploadController : ControllerBase
         }
     }
 
-    [HttpDelete("image/{fileName}")]
+    [HttpDelete("image/{publicId}")]
     [Authorize(Roles = "Admin")]
-    public IActionResult DeleteImage(string fileName)
+    public async Task<IActionResult> DeleteImage(string publicId)
     {
         try
         {
-            var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "hotels");
-            var filePath = Path.Combine(uploadsPath, fileName);
+            var result = await _photoService.DeletePhotoAsync(publicId);
 
-            if (System.IO.File.Exists(filePath))
+            if (result.Error != null)
             {
-                System.IO.File.Delete(filePath);
-                return Ok(new { message = "File deleted successfully" });
+                return BadRequest(new { message = result.Error.Message });
             }
 
-            return NotFound(new { message = "File not found" });
+            return Ok(new { message = "File deleted successfully" });
         }
         catch (Exception ex)
         {

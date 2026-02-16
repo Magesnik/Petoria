@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -93,20 +94,7 @@ const CreateHotel = () => {
             const formDataUpload = new FormData();
             formDataUpload.append('file', file);
 
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/upload/image', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formDataUpload
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to upload image');
-            }
-
-            const data = await response.json();
+            const data = await api.post('/upload/image', formDataUpload);
 
             if (isMain) {
                 setFormData({ ...formData, imageUrl: data.url });
@@ -172,8 +160,6 @@ const CreateHotel = () => {
         setUploading(true);
 
         try {
-            const token = localStorage.getItem('token');
-
             // Upload additional images that are files
             const uploadedImageUrls = [];
             for (let i = 0; i < imageFiles.length; i++) {
@@ -194,7 +180,7 @@ const CreateHotel = () => {
                 country: formData.country,
                 latitude: formData.latitude,
                 longitude: formData.longitude,
-                pricePerNight: 0, // Will be set via room types later
+                // pricePerNight removed
                 rating: 0, // Initial user rating
                 starRating: parseInt(formData.starRating),
                 imageUrl: formData.imageUrl || '',
@@ -203,32 +189,7 @@ const CreateHotel = () => {
                 roomTypes: '[]' // Empty for now, will be managed separately
             };
 
-            const response = await fetch('http://localhost:5150/api/hotels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(hotelData)
-            });
-
-            if (!response.ok) {
-                let errorMessage = 'Failed to create hotel';
-                try {
-                    const data = await response.json();
-                    if (data.errors) {
-                        const errorMessages = Object.entries(data.errors)
-                            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-                            .join('\n');
-                        errorMessage = errorMessages;
-                    } else {
-                        errorMessage = data.title || data.message || JSON.stringify(data);
-                    }
-                } catch (e) {
-                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-                }
-                throw new Error(errorMessage);
-            }
+            await api.post('/hotels', hotelData);
 
             setSuccess(true);
             // Reset form
@@ -401,9 +362,8 @@ const CreateHotel = () => {
                                         <button
                                             key={star}
                                             type="button"
-                                            className={`star-select-btn ${
-                                                star <= (hoveredStar !== null ? hoveredStar : formData.starRating) ? 'selected' : ''
-                                            } ${star === 0 ? 'zero-star' : ''}`}
+                                            className={`star-select-btn ${star <= (hoveredStar !== null ? hoveredStar : formData.starRating) ? 'selected' : ''
+                                                } ${star === 0 ? 'zero-star' : ''}`}
                                             onClick={() => setFormData({ ...formData, starRating: star })}
                                             onMouseEnter={() => setHoveredStar(star)}
                                             onMouseLeave={() => setHoveredStar(null)}

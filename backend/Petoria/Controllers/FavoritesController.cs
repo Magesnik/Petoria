@@ -41,7 +41,12 @@ public class FavoritesController : ControllerBase
                 HotelCity = f.Hotel.City,
                 HotelCountry = f.Hotel.Country,
                 HotelImageUrl = f.Hotel.ImageUrl,
-                HotelPricePerNight = f.Hotel.PricePerNight,
+                // Get min price from room types
+                HotelPricePerNight = _context.RoomTypes
+                    .Where(rt => rt.HotelId == f.HotelId)
+                    .OrderBy(rt => rt.PricePerNight)
+                    .Select(rt => rt.PricePerNight)
+                    .FirstOrDefault(),
                 HotelRating = f.Hotel.Rating,
                 CreatedAt = f.CreatedAt
             })

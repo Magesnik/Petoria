@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -27,15 +28,7 @@ const AdminSupportMessages = () => {
 
     const fetchMessages = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/support/messages/admin', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch messages');
-            const data = await response.json();
+            const data = await api.get('/support/messages/admin');
             setMessages(data);
         } catch (err) {
             setError(t('errorLoadingMessages') || 'Error loading messages');
@@ -50,17 +43,7 @@ const AdminSupportMessages = () => {
 
         setSendingReply(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/support/messages/${messageId}/answer`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ response: replyText })
-            });
-
-            if (!response.ok) throw new Error('Failed to send reply');
+            await api.put(`/support/messages/${messageId}/answer`, { response: replyText });
 
             // Refresh messages
             fetchMessages();

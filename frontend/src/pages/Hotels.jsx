@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useLanguage } from '../context/LanguageContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -19,6 +20,7 @@ const Hotels = () => {
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [view, setView] = useState('grid'); // 'grid' or 'map'
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [filters, setFilters] = useState({
         minPrice: '',
         maxPrice: '',
@@ -45,29 +47,17 @@ const Hotels = () => {
     const fetchFilterData = async () => {
         try {
             // Fetch all filter data in parallel
-            const [citiesRes, countriesRes, amenitiesRes, priceRangeRes] = await Promise.all([
-                fetch('http://localhost:5150/api/hotels/cities'),
-                fetch('http://localhost:5150/api/hotels/countries'),
-                fetch('http://localhost:5150/api/hotels/amenities'),
-                fetch('http://localhost:5150/api/hotels/price-range')
+            const [citiesData, countriesData, amenitiesData, priceRangeData] = await Promise.all([
+                api.get('/hotels/cities'),
+                api.get('/hotels/countries'),
+                api.get('/hotels/amenities'),
+                api.get('/hotels/price-range')
             ]);
 
-            if (citiesRes.ok) {
-                const data = await citiesRes.json();
-                setCities(data);
-            }
-            if (countriesRes.ok) {
-                const data = await countriesRes.json();
-                setCountries(data);
-            }
-            if (amenitiesRes.ok) {
-                const data = await amenitiesRes.json();
-                setAllAmenities(data);
-            }
-            if (priceRangeRes.ok) {
-                const data = await priceRangeRes.json();
-                setPriceRange(data);
-            }
+            setCities(citiesData);
+            setCountries(countriesData);
+            setAllAmenities(amenitiesData);
+            setPriceRange(priceRangeData);
         } catch (err) {
             console.error('Error fetching filter data:', err);
         }
@@ -89,13 +79,7 @@ const Hotels = () => {
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
 
-            const response = await fetch(`http://localhost:5150/api/hotels?${params.toString()}`);
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch hotels');
-            }
-
-            const data = await response.json();
+            const data = await api.get(`/hotels?${params.toString()}`);
             setHotels(data);
         } catch (err) {
             setError(err.message);
@@ -121,13 +105,7 @@ const Hotels = () => {
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
 
-            const response = await fetch(`http://localhost:5150/api/hotels/map?${params.toString()}`);
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch hotels for map');
-            }
-
-            const data = await response.json();
+            const data = await api.get(`/hotels/map?${params.toString()}`);
             setMapHotels(data);
         } catch (err) {
             setError(err.message);
@@ -187,7 +165,15 @@ const Hotels = () => {
 
             {/* Main Content */}
             <div className="hotels-container">
-                <aside className="filters-sidebar">
+                <div
+                    className={`mobile-overlay ${showMobileFilters ? 'visible' : ''}`}
+                    onClick={() => setShowMobileFilters(false)}
+                ></div>
+                <aside className={`filters-sidebar ${showMobileFilters ? 'open' : ''}`}>
+                    <div className="mobile-filter-header">
+                        <h3>{t('filters')}</h3>
+                        <button className="btn-close-filters" onClick={() => setShowMobileFilters(false)}>✕</button>
+                    </div>
                     <HotelFilters
                         filters={filters}
                         onFilterChange={handleFilterChange}
@@ -202,11 +188,19 @@ const Hotels = () => {
                 <main className="hotels-main">
                     {/* Results Header with View Toggle */}
                     <div className="results-header">
-                        <h2>
-                            {loading ? t('loading') : view === 'grid'
-                                ? `${hotels.length} ${t('hotelsFound')}`
-                                : `${mapHotels.length} ${t('hotelsOnMap')}`}
-                        </h2>
+                        <div className="header-left">
+                            <h2>
+                                {loading ? t('loading') : view === 'grid'
+                                    ? `${hotels.length} ${t('hotelsFound')}`
+                                    : `${mapHotels.length} ${t('hotelsOnMap')}`}
+                            </h2>
+                            <button
+                                className="btn-filter-toggle"
+                                onClick={() => setShowMobileFilters(true)}
+                            >
+                                <span className="filter-icon">☰</span> {t('filters')}
+                            </button>
+                        </div>
                         <div className="view-toggle">
                             <button
                                 className={`view-btn ${view === 'grid' ? 'active' : ''}`}

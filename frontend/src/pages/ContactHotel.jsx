@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -31,9 +32,7 @@ const ContactHotel = () => {
 
     const fetchHotel = async () => {
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}`);
-            if (!response.ok) throw new Error('Failed to fetch hotel');
-            const data = await response.json();
+            const data = await api.get(`/hotels/${id}`);
             setHotel(data);
         } catch (err) {
             setError(t('errorLoadingHotel') || 'Error loading hotel');
@@ -53,20 +52,7 @@ const ContactHotel = () => {
         setSubmitting(true);
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.title || 'Failed to send message');
-            }
+            await api.post(`/hotels/${id}/messages`, formData);
 
             setSuccess(true);
             setTimeout(() => {

@@ -32,9 +32,7 @@ public class Hotel
     [Column(TypeName = "decimal(10,7)")]
     public decimal? Longitude { get; set; }
 
-    [Required]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal PricePerNight { get; set; }
+
 
     [Column(TypeName = "decimal(2,1)")]
     [Range(0, 5)]

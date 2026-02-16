@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { api } from '../utils/api';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -45,28 +46,15 @@ const Settings = () => {
     const handleProfileSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    firstName: formData.firstName,
-                    lastName: formData.lastName
-                })
+            const data = await api.put('/profile', {
+                firstName: formData.firstName,
+                lastName: formData.lastName
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                // Update user in context
-                login({ ...user, firstName: data.user.firstName, lastName: data.user.lastName }, token);
-                setMessage(t('profileUpdated') || 'Profile updated successfully');
-                setTimeout(() => setMessage(''), 3000);
-            } else {
-                setMessage('Failed to update profile');
-            }
+            // Update user in context
+            login({ ...user, firstName: data.user.firstName, lastName: data.user.lastName });
+            setMessage(t('profileUpdated') || 'Profile updated successfully');
+            setTimeout(() => setMessage(''), 3000);
         } catch (error) {
             console.error('Error updating profile:', error);
             setMessage('Error updating profile');
@@ -109,26 +97,14 @@ const Settings = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/profile/avatar', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
+            const data = await api.post('/profile/avatar', formData);
 
-            if (response.ok) {
-                const data = await response.json();
-                const fullAvatarUrl = `http://localhost:5150${data.avatarUrl}`;
-                setAvatarPreview(fullAvatarUrl);
-                // Update user in context
-                login({ ...user, avatarUrl: fullAvatarUrl }, token);
-                setAvatarMessage('Avatar uploaded successfully');
-                setTimeout(() => setAvatarMessage(''), 3000);
-            } else {
-                setAvatarMessage('Failed to upload avatar');
-            }
+            const fullAvatarUrl = `http://localhost:5150${data.avatarUrl}`;
+            setAvatarPreview(fullAvatarUrl);
+            // Update user in context
+            login({ ...user, avatarUrl: fullAvatarUrl });
+            setAvatarMessage('Avatar uploaded successfully');
+            setTimeout(() => setAvatarMessage(''), 3000);
         } catch (error) {
             console.error('Error uploading avatar:', error);
             setAvatarMessage('Error uploading avatar');
@@ -139,23 +115,13 @@ const Settings = () => {
 
     const handleAvatarRemove = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/profile/avatar', {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            await api.delete('/profile/avatar');
 
-            if (response.ok) {
-                setAvatarPreview(null);
-                // Update user in context
-                login({ ...user, avatarUrl: null }, token);
-                setAvatarMessage('Avatar removed successfully');
-                setTimeout(() => setAvatarMessage(''), 3000);
-            } else {
-                setAvatarMessage('Failed to remove avatar');
-            }
+            setAvatarPreview(null);
+            // Update user in context
+            login({ ...user, avatarUrl: null });
+            setAvatarMessage('Avatar removed successfully');
+            setTimeout(() => setAvatarMessage(''), 3000);
         } catch (error) {
             console.error('Error removing avatar:', error);
             setAvatarMessage('Error removing avatar');

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
@@ -38,16 +39,7 @@ const HotelDetails = () => {
         setError(null);
 
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}`);
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error(t('hotelNotFound'));
-                }
-                throw new Error('Failed to fetch hotel details');
-            }
-
-            const data = await response.json();
+            const data = await api.get(`/hotels/${id}`);
             setHotel(data);
         } catch (err) {
             setError(err.message);
@@ -204,7 +196,7 @@ const HotelDetails = () => {
                             </div>
                             <div className="hotel-price-box">
                                 <span className="price-label">{t('from')}</span>
-                                <span className="price-amount">{convertAndFormat(hotel.pricePerNight)}</span>
+                                <span className="price-amount">{convertAndFormat(hotel.displayPrice)}</span>
                                 <span className="price-period">{t('perNight')}</span>
                             </div>
                         </div>

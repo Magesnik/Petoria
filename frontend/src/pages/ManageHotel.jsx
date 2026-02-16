@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -34,17 +35,9 @@ const ManageHotel = () => {
 
     const fetchHotel = async () => {
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}`);
-            if (!response.ok) throw new Error('Hotel not found');
-
-            const data = await response.json();
+            const data = await api.get(`/hotels/${id}`);
 
             // Check if user owns this hotel
-            console.log('DEBUG - User ID:', user?.id);
-            console.log('DEBUG - Hotel createdById:', data.createdById);
-            console.log('DEBUG - User roles:', user?.roles);
-            console.log('DEBUG - Match:', data.createdById === user?.id);
-
             if (data.createdById !== user?.id && !user?.roles?.includes('SuperAdmin')) {
                 navigate('/my-hotels');
                 return;
@@ -57,7 +50,8 @@ const ManageHotel = () => {
                 location: data.location,
                 city: data.city,
                 country: data.country,
-                isAvailable: data.isAvailable
+                isAvailable: data.isAvailable,
+                starRating: data.starRating || 3
             });
         } catch (err) {
             setError(t('errorLoadingHotel'));
@@ -69,11 +63,8 @@ const ManageHotel = () => {
 
     const fetchRoomTypes = async () => {
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}/rooms`);
-            if (response.ok) {
-                const data = await response.json();
-                setRoomTypes(data);
-            }
+            const data = await api.get(`/hotels/${id}/rooms`);
+            setRoomTypes(data);
         } catch (err) {
             console.error('Error fetching room types:', err);
         }
@@ -90,20 +81,10 @@ const ManageHotel = () => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/hotels/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ...hotel,
-                    ...editData
-                })
+            await api.put(`/hotels/${id}`, {
+                ...hotel,
+                ...editData
             });
-
-            if (!response.ok) throw new Error('Failed to update');
 
             setSuccess(t('savedSuccessfully'));
             setIsEditing(false);
@@ -136,8 +117,8 @@ const ManageHotel = () => {
             <div className="manage-hotel-page">
                 <Header />
                 <div className="error-state">
-                    <h2>Хотелът не е намерен</h2>
-                    <Link to="/my-hotels" className="btn-back">← Назад</Link>
+                    <h2>{t('hotelNotFound') || 'Хотелът не е намерен'}</h2>
+                    <Link to="/my-hotels" className="btn-back">← {t('back')}</Link>
                 </div>
             </div>
         );
@@ -159,6 +140,13 @@ const ManageHotel = () => {
                         👁️ {t('viewPage')}
                     </Link>
                 </div>
+
+                {/* Inactivity Warning */}
+                {!hotel.isAvailable && roomTypes.length === 0 && (
+                    <div className="message warning">
+                        ⚠️ Хотелът е неактивен. Моля, добавете поне един тип стая в таб "Стаи", за да можете да го активирате.
+                    </div>
+                )}
 
                 {error && <div className="message error">{error}</div>}
                 {success && <div className="message success">{success}</div>}
@@ -271,6 +259,21 @@ const ManageHotel = () => {
                                                 <option value="false">{t('inactive')}</option>
                                             </select>
                                         </div>
+
+                                        <div className="form-group">
+                                            <label>{t('starRating') || 'Звезди'}</label>
+                                            <select
+                                                value={editData.starRating}
+                                                onChange={(e) => setEditData({ ...editData, starRating: parseInt(e.target.value) })}
+                                            >
+                                                <option value="1">1 ⭐</option>
+                                                <option value="2">2 ⭐⭐</option>
+                                                <option value="3">3 ⭐⭐⭐</option>
+                                                <option value="4">4 ⭐⭐⭐⭐</option>
+                                                <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                                            </select>
+                                        </div>
+
                                         <div className="form-group full-width">
                                             <label>{t('description')}</label>
                                             <textarea

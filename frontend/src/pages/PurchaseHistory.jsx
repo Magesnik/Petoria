@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -25,16 +26,7 @@ const PurchaseHistory = () => {
 
     const fetchReservations = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/reservations/my', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch reservations');
-
-            const data = await response.json();
+            const data = await api.get('/reservations/my');
             setReservations(data);
         } catch (err) {
             console.error('Error fetching reservations:', err);
@@ -50,16 +42,7 @@ const PurchaseHistory = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/reservations/${reservationId}/cancel`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to cancel reservation');
-
+            await api.put(`/reservations/${reservationId}/cancel`);
             // Refresh list
             fetchReservations();
         } catch (err) {

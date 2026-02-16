@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLanguage } from '../context/LanguageContext';
+import { api } from '../utils/api';
 import './LocationPicker.css';
 
 // Fix for default marker icon
@@ -57,24 +58,12 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
     const [addressInfo, setAddressInfo] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Reverse geocoding using Nominatim API
+    // Reverse geocoding using Nominatim API (via backend proxy)
     const reverseGeocode = async (lat, lng) => {
         setLoading(true);
         try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-                {
-                    headers: {
-                        'Accept-Language': 'bg,en'
-                    }
-                }
-            );
+            const data = await api.get(`/hotels/geocode?lat=${lat}&lon=${lng}`);
 
-            if (!response.ok) {
-                throw new Error('Geocoding failed');
-            }
-
-            const data = await response.json();
             const address = data.address || {};
 
             // Extract relevant address components

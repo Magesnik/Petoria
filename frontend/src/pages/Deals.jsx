@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -24,13 +25,7 @@ const Deals = () => {
         setError(null);
 
         try {
-            const response = await fetch(`http://localhost:5150/api/deals/${type}`);
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch deals');
-            }
-
-            const data = await response.json();
+            const data = await api.get(`/deals/${type}`);
             setDeals(data);
         } catch (err) {
             setError(err.message);

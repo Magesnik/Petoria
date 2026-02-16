@@ -12,12 +12,12 @@ namespace Petoria.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IWebHostEnvironment _environment;
+    private readonly Petoria.Core.Contracts.IPhotoService _photoService;
 
-    public ProfileController(UserManager<ApplicationUser> userManager, IWebHostEnvironment environment)
+    public ProfileController(UserManager<ApplicationUser> userManager, Petoria.Core.Contracts.IPhotoService photoService)
     {
         _userManager = userManager;
-        _environment = environment;
+        _photoService = photoService;
     }
 
     // GET: api/profile
@@ -37,13 +37,16 @@ public class ProfileController : ControllerBase
         }
 
         // Map Entity → Response DTO
+        var roles = await _userManager.GetRolesAsync(user);
+        
         return Ok(new ProfileResponseDto
         {
             Id = user.Id,
             Email = user.Email,
             FirstName = user.FirstName,
             LastName = user.LastName,
-            AvatarUrl = user.AvatarUrl
+            AvatarUrl = user.AvatarUrl,
+            Roles = roles.ToList()
         });
     }
 
@@ -83,7 +86,8 @@ public class ProfileController : ControllerBase
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                AvatarUrl = user.AvatarUrl
+                AvatarUrl = user.AvatarUrl,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList()
             }
         });
     }
@@ -110,7 +114,7 @@ public class ProfileController : ControllerBase
         }
 
         // Validate file type
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".avif" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(extension))
         {
@@ -125,32 +129,15 @@ public class ProfileController : ControllerBase
 
         try
         {
-            // Create uploads directory if it doesn't exist
-            var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "avatars");
-            Directory.CreateDirectory(uploadsPath);
+            var uploadResult = await _photoService.AddPhotoAsync(file);
 
-            // Delete old avatar if exists
-            if (!string.IsNullOrEmpty(user.AvatarUrl))
+            if (uploadResult.Error != null)
             {
-                var oldAvatarPath = Path.Combine(_environment.WebRootPath, user.AvatarUrl.TrimStart('/'));
-                if (System.IO.File.Exists(oldAvatarPath))
-                {
-                    System.IO.File.Delete(oldAvatarPath);
-                }
-            }
-
-            // Generate unique filename
-            var fileName = $"{userId}_{DateTime.Now.Ticks}{extension}";
-            var filePath = Path.Combine(uploadsPath, fileName);
-
-            // Save file
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
+                return BadRequest(uploadResult.Error.Message);
             }
 
             // Update user avatar URL
-            user.AvatarUrl = $"/uploads/avatars/{fileName}";
+            user.AvatarUrl = uploadResult.SecureUrl.AbsoluteUri;
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
@@ -193,13 +180,14 @@ public class ProfileController : ControllerBase
 
         try
         {
-            // Delete file from filesystem
-            var avatarPath = Path.Combine(_environment.WebRootPath, user.AvatarUrl.TrimStart('/'));
-            if (System.IO.File.Exists(avatarPath))
-            {
-                System.IO.File.Delete(avatarPath);
-            }
+            // Note: Since we don't store the PublicId in the user entity, we might not be able to delete from Cloudinary easily 
+            // unless we extract it from the URL or store it. 
+            // For now, we will just clear the URL from the user profile.
+            // Ideally, we should store the PublicId in the User entity.
 
+            // Attempt to extract PublicId from URL if possible (Cloudinary URLs usually contain it)
+            // But for simplicity/safety, just clear the reference for now or implementing basic extraction if standard format.
+            
             // Remove avatar URL from user
             user.AvatarUrl = null;
             var result = await _userManager.UpdateAsync(user);

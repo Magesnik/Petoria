@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -58,10 +59,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
 
     const fetchRoomTypes = async () => {
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/rooms`);
-            if (!response.ok) throw new Error('Failed to fetch room types');
-
-            const data = await response.json();
+            const data = await api.get(`/hotels/${hotelId}/rooms`);
             setRoomTypes(data);
 
             // Auto-select first room type if available
@@ -84,13 +82,10 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
             toDate.setDate(toDate.getDate() + 90);
             const toDateStr = toDate.toISOString().split('T')[0];
 
-            const response = await fetch(
-                `http://localhost:5150/api/hotels/${hotelId}/availability?from=${fromDate}&to=${toDateStr}`
+            const data = await api.get(
+                `/hotels/${hotelId}/availability?from=${fromDate}&to=${toDateStr}`
             );
 
-            if (!response.ok) throw new Error('Failed to fetch availability');
-
-            const data = await response.json();
             setAvailability(data);
 
             // Build set of blocked dates
@@ -110,21 +105,14 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
         if (!selectedRoomType || !checkInDate || !checkOutDate) return;
 
         try {
-            const response = await fetch('http://localhost:5150/api/reservations/calculate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    roomTypeId: selectedRoomType.id,
-                    checkInDate,
-                    checkOutDate,
-                    numberOfRooms
-                })
+            const data = await api.post('/reservations/calculate', {
+                roomTypeId: selectedRoomType.id,
+                checkInDate,
+                checkOutDate,
+                numberOfRooms
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setPriceInfo(data);
-            }
+            setPriceInfo(data);
         } catch (err) {
             console.error('Error calculating price:', err);
         }
@@ -146,27 +134,13 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
         setSuccess('');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/reservations', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    hotelId,
-                    roomTypeId: selectedRoomType.id,
-                    checkInDate,
-                    checkOutDate,
-                    numberOfRooms
-                })
+            const data = await api.post('/reservations', {
+                hotelId,
+                roomTypeId: selectedRoomType.id,
+                checkInDate,
+                checkOutDate,
+                numberOfRooms
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Грешка при резервация');
-            }
 
             setSuccess(t('bookingSuccessful'));
 
@@ -184,7 +158,7 @@ const BookingWidget = ({ hotelId, onBookingComplete }) => {
                 onBookingComplete(data);
             }
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Грешка при резервация');
         } finally {
             setBookingLoading(false);
         }

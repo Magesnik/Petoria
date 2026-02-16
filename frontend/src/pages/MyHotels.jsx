@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -26,20 +27,11 @@ const MyHotels = () => {
 
     const fetchMyHotels = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/hotels/my', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to fetch hotels');
-
-            const data = await response.json();
+            const data = await api.get('/hotels/my');
             setHotels(data);
 
             // Fetch unread message counts
-            fetchUnreadCounts(token);
+            fetchUnreadCounts();
         } catch (err) {
             setError('Грешка при зареждане на хотелите');
             console.error(err);
@@ -48,22 +40,14 @@ const MyHotels = () => {
         }
     };
 
-    const fetchUnreadCounts = async (token) => {
+    const fetchUnreadCounts = async () => {
         try {
-            const response = await fetch('http://localhost:5150/api/hotels/my/messages/unread-counts', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const data = await api.get('/hotels/my/messages/unread-counts');
+            const counts = {};
+            data.forEach(item => {
+                counts[item.hotelId] = item.unreadCount;
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                const counts = {};
-                data.forEach(item => {
-                    counts[item.hotelId] = item.unreadCount;
-                });
-                setUnreadCounts(counts);
-            }
+            setUnreadCounts(counts);
         } catch (err) {
             console.error('Error fetching unread counts:', err);
         }
@@ -125,7 +109,7 @@ const MyHotels = () => {
                                 <div className="hotel-content">
                                     <h3>{hotel.name}</h3>
                                     <p className="hotel-location">📍 {hotel.city}, {hotel.country}</p>
-                                    <p className="hotel-price">💰 {convertAndFormat(hotel.pricePerNight)}{t('perNight')}</p>
+                                    <p className="hotel-price">💰 {convertAndFormat(hotel.displayPrice)}{t('perNight')}</p>
 
                                     <div className="hotel-stats">
                                         <span>⭐ {hotel.rating?.toFixed(1) || '0.0'}</span>

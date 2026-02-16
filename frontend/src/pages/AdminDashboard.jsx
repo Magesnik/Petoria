@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -38,24 +39,27 @@ const AdminDashboard = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const headers = { 'Authorization': `Bearer ${token}` };
+            let usersData = [];
+            let statsData = null;
+            let messagesCount = 0;
 
-            const [usersRes, statsRes, messagesRes] = await Promise.all([
-                fetch('http://localhost:5150/api/admin/users', { headers }),
-                fetch('http://localhost:5150/api/admin/stats', { headers }),
-                fetch('http://localhost:5150/api/support/messages/admin/unread-count', { headers })
+            const [usersRes, statsRes, messagesRes] = await Promise.allSettled([
+                api.get('/admin/users'),
+                api.get('/admin/stats'),
+                api.get('/support/messages/admin/unread-count')
             ]);
 
-            if (!usersRes.ok || !statsRes.ok) {
-                throw new Error('Failed to fetch data');
-            }
+            if (usersRes.status === 'fulfilled') usersData = usersRes.value;
+            else throw new Error('Failed to fetch users');
 
-            setUsers(await usersRes.json());
-            setStats(await statsRes.json());
-            if (messagesRes.ok) {
-                setUnreadMessagesCount(await messagesRes.json());
-            }
+            if (statsRes.status === 'fulfilled') statsData = statsRes.value;
+            else throw new Error('Failed to fetch stats');
+
+            if (messagesRes.status === 'fulfilled') messagesCount = messagesRes.value;
+
+            setUsers(usersData);
+            setStats(statsData);
+            setUnreadMessagesCount(messagesCount);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -65,12 +69,7 @@ const AdminDashboard = () => {
 
     const fetchUserDetails = async (userId) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5150/api/admin/users/${userId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) throw new Error('Failed to fetch user details');
-            const data = await res.json();
+            const data = await api.get(`/admin/users/${userId}`);
             setUserDetails(data);
             setSelectedUser(userId);
         } catch (err) {
@@ -80,15 +79,7 @@ const AdminDashboard = () => {
 
     const promoteUser = async (userId) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5150/api/admin/users/${userId}/promote`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.message || 'Failed to promote user');
-            }
+            await api.put(`/admin/users/${userId}/promote`);
             fetchData();
             if (selectedUser === userId) {
                 fetchUserDetails(userId);
@@ -100,15 +91,7 @@ const AdminDashboard = () => {
 
     const demoteUser = async (userId) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5150/api/admin/users/${userId}/demote`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.message || 'Failed to demote user');
-            }
+            await api.delete(`/admin/users/${userId}/demote`);
             fetchData();
             if (selectedUser === userId) {
                 fetchUserDetails(userId);

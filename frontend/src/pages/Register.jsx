@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useLanguage } from '../context/LanguageContext';
@@ -27,19 +28,7 @@ const Register = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:5150/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
-            }
+            const data = await api.post('/auth/register', formData);
 
             // Store token with avatar URL
             const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
@@ -53,30 +42,18 @@ const Register = () => {
                 email: data.email,
                 roles: data.roles || [],
                 avatarUrl: avatarUrl
-            }, data.token);
+            });
 
             navigate('/');
         } catch (err) {
-            setError('Registration failed. Please try again.');
+            setError(err.message || 'Registration failed');
             console.error(err);
         }
     };
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
-            const response = await fetch('http://localhost:5150/api/auth/google-login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ googleToken: credentialResponse.credential })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Google registration failed');
-            }
+            const data = await api.post('/auth/google-login', { googleToken: credentialResponse.credential });
 
             // Store token with avatar URL
             const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
@@ -90,11 +67,11 @@ const Register = () => {
                 email: data.email,
                 roles: data.roles || [],
                 avatarUrl: avatarUrl
-            }, data.token);
+            });
 
             navigate('/');
         } catch (err) {
-            setError('Google authentication failed. Please try again.');
+            setError(err.message || 'Google authentication failed. Please try again.');
             console.error(err);
         }
     };

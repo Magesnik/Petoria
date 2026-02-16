@@ -245,31 +245,42 @@ public class DealsController : ControllerBase
     [HttpGet("packages")]
     public async Task<ActionResult<IEnumerable<PackageDealResponseDto>>> GetPackageDeals()
     {
-        var hotels = await _context.Hotels
-            .Where(h => h.PricePerNight > 0)
-            .Select(h => new PackageDealResponseDto
+        // Get hotels with at least one room type
+        var hotelsWithRooms = await _context.Hotels
+            .Select(h => new 
             {
-                Id = h.Id,
-                Name = h.Name,
-                City = h.City,
-                Country = h.Country,
-                Location = h.Location,
-                ImageUrl = h.ImageUrl,
-                Rating = h.Rating,
-                Description = h.Description,
-                PricePerNight = h.PricePerNight,
-                // 7 nights package with 15% discount
-                PackageNights = 7,
-                OriginalPackagePrice = h.PricePerNight * 7,
-                DiscountedPackagePrice = h.PricePerNight * 7 * 0.85m,
-                DiscountPercentage = 15,
-                SaveAmount = h.PricePerNight * 7 * 0.15m,
-                PricePerNightWithDiscount = h.PricePerNight * 0.85m
+                Hotel = h,
+                MinPrice = _context.RoomTypes
+                    .Where(rt => rt.HotelId == h.Id)
+                    .OrderBy(rt => rt.PricePerNight)
+                    .Select(rt => (decimal?)rt.PricePerNight)
+                    .FirstOrDefault() ?? 0
             })
-            .OrderByDescending(h => h.Rating)
+            .Where(x => x.MinPrice > 0)
+            .OrderByDescending(x => x.Hotel.Rating)
             .Take(10)
             .ToListAsync();
 
-        return Ok(hotels);
+        var result = hotelsWithRooms.Select(x => new PackageDealResponseDto
+        {
+            Id = x.Hotel.Id,
+            Name = x.Hotel.Name,
+            City = x.Hotel.City,
+            Country = x.Hotel.Country,
+            Location = x.Hotel.Location,
+            ImageUrl = x.Hotel.ImageUrl,
+            Rating = x.Hotel.Rating,
+            Description = x.Hotel.Description,
+            PricePerNight = x.MinPrice,
+            // 7 nights package with 15% discount
+            PackageNights = 7,
+            OriginalPackagePrice = x.MinPrice * 7,
+            DiscountedPackagePrice = x.MinPrice * 7 * 0.85m,
+            DiscountPercentage = 15,
+            SaveAmount = x.MinPrice * 7 * 0.15m,
+            PricePerNightWithDiscount = x.MinPrice * 0.85m
+        });
+
+        return Ok(result);
     }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -29,23 +30,27 @@ const MyMessages = () => {
 
     const fetchMessages = async () => {
         try {
-            const token = localStorage.getItem('token');
+            let hotelMessages = [];
+            let supportMessages = [];
 
-            const [hotelMessagesRes, supportMessagesRes] = await Promise.all([
-                fetch('http://localhost:5150/api/hotels/my/messages', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }),
-                fetch('http://localhost:5150/api/support/messages/my', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-            ]);
+            try {
+                hotelMessages = await api.get('/hotels/my/messages');
+            } catch (e) {
+                console.error("Failed to fetch hotel messages", e);
+                // If hotel messages fail, we probably should show error as in original code
+                throw e;
+            }
 
-            if (!hotelMessagesRes.ok) throw new Error('Failed to fetch hotel messages');
+            try {
+                supportMessages = await api.get('/support/messages/my');
+            } catch (e) {
+                console.warn("Failed to fetch support messages", e);
+                // Support messages optional or failed, array remains empty
+            }
 
             let combinedMessages = [];
 
             // Process Hotel Messages
-            const hotelMessages = await hotelMessagesRes.json();
             const processedHotelMessages = hotelMessages.map(msg => ({
                 ...msg,
                 type: 'hotel',
@@ -54,11 +59,9 @@ const MyMessages = () => {
             }));
             combinedMessages = [...processedHotelMessages];
 
-            // Process Support Messages (if successful)
-            let processedSupportMessages = [];
-            if (supportMessagesRes.ok) {
-                const supportMessages = await supportMessagesRes.json();
-                processedSupportMessages = supportMessages.map(msg => ({
+            // Process Support Messages
+            if (supportMessages.length > 0) {
+                const processedSupportMessages = supportMessages.map(msg => ({
                     ...msg,
                     type: 'support',
                     displayTo: t('superAdmin') || 'Super Admin',
@@ -74,16 +77,13 @@ const MyMessages = () => {
             // Mark answered messages as read (Hotel messages only for now as per previous logic)
             const unreadAnsweredMessages = processedHotelMessages.filter(m => m.isAnswered && !m.isReadByUser);
             if (unreadAnsweredMessages.length > 0) {
-                markMessagesAsRead(unreadAnsweredMessages, token);
+                markMessagesAsRead(unreadAnsweredMessages);
             }
 
             // Mark support messages as read
-            if (supportMessagesRes.ok) {
-                // Use the already processed messages, no need to clone or re-read
-                const unreadSupport = processedSupportMessages.filter(m => m.isAnswered && !m.isReadByUser);
-                if (unreadSupport.length > 0) {
-                    markSupportMessagesAsRead(unreadSupport, token);
-                }
+            const unreadSupport = supportMessages.filter(m => m.isAnswered && !m.isReadByUser);
+            if (unreadSupport.length > 0) {
+                markSupportMessagesAsRead(unreadSupport);
             }
 
         } catch (err) {
@@ -94,29 +94,21 @@ const MyMessages = () => {
         }
     };
 
-    const markSupportMessagesAsRead = async (messages, token) => {
+    const markSupportMessagesAsRead = async (messages) => {
         for (const msg of messages) {
             try {
-                await fetch(`http://localhost:5150/api/support/messages/${msg.id}/read`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                await api.put(`/support/messages/${msg.id}/read`);
             } catch (err) {
                 console.error('Error marking support message as read:', err);
             }
         }
     };
 
-    const markMessagesAsRead = async (unreadMessages, token) => {
+    const markMessagesAsRead = async (unreadMessages) => {
         // We mark them as read in the background without blocking UI
         for (const msg of unreadMessages) {
             try {
-                await fetch(`http://localhost:5150/api/hotels/my/messages/${msg.id}/read`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                await api.put(`/hotels/my/messages/${msg.id}/read`);
             } catch (err) {
                 console.error('Error marking message as read:', err);
             }

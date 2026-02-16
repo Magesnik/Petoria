@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import './DiscountManager.css';
 
 const DiscountManager = ({ hotelId, roomTypes }) => {
@@ -22,9 +23,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
 
     const fetchDiscounts = async () => {
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/discounts`);
-            if (!response.ok) throw new Error('Failed to fetch discounts');
-            const data = await response.json();
+            const data = await api.get(`/hotels/${hotelId}/discounts`);
             setDiscounts(data);
         } catch (err) {
             setError('Грешка при зареждане на отстъпки');
@@ -56,25 +55,10 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const url = editingId
-                ? `http://localhost:5150/api/discounts/${editingId}`
-                : `http://localhost:5150/api/hotels/${hotelId}/discounts`;
-
-            const method = editingId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to save discount');
+            if (editingId) {
+                await api.put(`/discounts/${editingId}`, formData);
+            } else {
+                await api.post(`/hotels/${hotelId}/discounts`, formData);
             }
 
             setSuccess(editingId ? 'Отстъпката е актуализирана!' : 'Отстъпката е създадена!');
@@ -103,15 +87,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/discounts/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to delete');
+            await api.delete(`/discounts/${id}`);
 
             setSuccess('Отстъпката е изтрита!');
             fetchDiscounts();
@@ -244,7 +220,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                             <div
                                 key={discount.id}
                                 className={`discount-card ${isDiscountActive(discount) ? 'active' :
-                                        isDiscountExpired(discount) ? 'expired' : 'upcoming'
+                                    isDiscountExpired(discount) ? 'expired' : 'upcoming'
                                     }`}
                             >
                                 <div className="discount-card-header">

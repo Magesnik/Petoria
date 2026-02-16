@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import './RoomTypeManager.css';
@@ -31,10 +32,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
     const fetchRoomTypes = async () => {
         try {
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/rooms`);
-            if (!response.ok) throw new Error('Failed to fetch room types');
-
-            const data = await response.json();
+            const data = await api.get(`/hotels/${hotelId}/rooms`);
             setRoomTypes(data);
 
             if (onRoomsChange) {
@@ -59,37 +57,26 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const url = editingId
-                ? `http://localhost:5150/api/hotels/${hotelId}/rooms/${editingId}`
-                : `http://localhost:5150/api/hotels/${hotelId}/rooms`;
+            const body = {
+                ...formData,
+                id: editingId || 0,
+                hotelId,
+                pricePerNight: parseFloat(formData.pricePerNight),
+                capacity: parseInt(formData.capacity),
+                totalRooms: parseInt(formData.totalRooms)
+            };
 
-            const response = await fetch(url, {
-                method: editingId ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    id: editingId || 0,
-                    hotelId,
-                    pricePerNight: parseFloat(formData.pricePerNight),
-                    capacity: parseInt(formData.capacity),
-                    totalRooms: parseInt(formData.totalRooms)
-                })
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || t('errorSaving'));
+            if (editingId) {
+                await api.put(`/hotels/${hotelId}/rooms/${editingId}`, body);
+            } else {
+                await api.post(`/hotels/${hotelId}/rooms`, body);
             }
 
             setSuccess(editingId ? t('roomUpdated') : t('roomAdded'));
             resetForm();
             fetchRoomTypes();
         } catch (err) {
-            setError(err.message);
+            setError(err.message || t('errorSaving'));
         }
     };
 
@@ -112,15 +99,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/hotels/${hotelId}/rooms/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Failed to delete');
+            await api.delete(`/hotels/${hotelId}/rooms/${id}`);
 
             setSuccess(t('roomDeleted'));
             fetchRoomTypes();
@@ -144,25 +123,13 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
     const handleInitializeAvailability = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(
-                `http://localhost:5150/api/hotels/${hotelId}/availability/initialize?daysAhead=90`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
+            await api.post(
+                `/hotels/${hotelId}/availability/initialize?daysAhead=90`
             );
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || t('error'));
-            }
 
             setSuccess(t('availabilityInitialized'));
         } catch (err) {
-            setError(err.message);
+            setError(err.message || t('error'));
         }
     };
 

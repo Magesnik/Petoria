@@ -12,10 +12,12 @@ namespace Petoria.Controllers;
 public class HotelsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly HttpClient _httpClient;
 
-    public HotelsController(ApplicationDbContext context)
+    public HotelsController(ApplicationDbContext context, HttpClient httpClient)
     {
         _context = context;
+        _httpClient = httpClient;
     }
 
     // GET: api/hotels
@@ -38,17 +40,6 @@ public class HotelsController : ControllerBase
                                     h.Location.Contains(search) || 
                                     h.City.Contains(search) ||
                                     h.Country.Contains(search));
-        }
-
-        // Filter by price range
-        if (minPrice.HasValue)
-        {
-            query = query.Where(h => h.PricePerNight >= minPrice.Value);
-        }
-
-        if (maxPrice.HasValue)
-        {
-            query = query.Where(h => h.PricePerNight <= maxPrice.Value);
         }
 
         // Filter by city
@@ -82,13 +73,14 @@ public class HotelsController : ControllerBase
         // Only show available hotels
         query = query.Where(h => h.IsAvailable);
 
+        // Include RoomTypes to check prices
         var today = DateTime.UtcNow;
         
-        // Get hotels with room types and active discounts
         var hotelsWithDiscounts = await query
             .Select(h => new
             {
                 Hotel = h,
+                // Get the cheapest room for this hotel
                 MinRoomPrice = _context.RoomTypes
                     .Where(rt => rt.HotelId == h.Id)
                     .Select(rt => new {
@@ -105,53 +97,65 @@ public class HotelsController : ControllerBase
             .OrderByDescending(h => h.Hotel.Rating)
             .ToListAsync();
 
-        // Transform to HotelResponseDto
-        var result = hotelsWithDiscounts.Select(h =>
+        // Transform results and apply price filters in memory (since we need calculated prices)
+        var result = hotelsWithDiscounts
+            .Select(h =>
+            {
+                var hotel = h.Hotel;
+                decimal originalPrice = h.MinRoomPrice?.PricePerNight ?? 0;
+                decimal displayPrice = originalPrice;
+                int? discountPercentage = null;
+                bool hasDiscount = false;
+
+                if (h.MinRoomPrice != null && h.MinRoomPrice.MaxDiscount.HasValue)
+                {
+                    hasDiscount = true;
+                    discountPercentage = h.MinRoomPrice.MaxDiscount.Value;
+                    displayPrice = h.MinRoomPrice.PricePerNight * (1 - discountPercentage.Value / 100m);
+                }
+
+                return new HotelResponseDto
+                {
+                    Id = hotel.Id,
+                    Name = hotel.Name,
+                    Description = hotel.Description,
+                    Location = hotel.Location,
+                    City = hotel.City,
+                    Country = hotel.Country,
+                    Latitude = hotel.Latitude,
+                    Longitude = hotel.Longitude,
+                    OriginalPrice = originalPrice, // Calculated from RoomTypes
+                    DisplayPrice = displayPrice,   // Calculated from RoomTypes
+                    HasDiscount = hasDiscount,
+                    DiscountPercentage = discountPercentage,
+                    Rating = hotel.Rating,
+                    StarRating = hotel.StarRating,
+                    ImageUrl = hotel.ImageUrl,
+                    Images = hotel.Images,
+                    Amenities = hotel.Amenities,
+                    RoomTypes = hotel.RoomTypes,
+                    IsAvailable = hotel.IsAvailable,
+                    CreatedById = hotel.CreatedById,
+                    CreatedAt = hotel.CreatedAt,
+                    UpdatedAt = hotel.UpdatedAt
+                };
+            });
+
+        // Only show hotels that have a valid price (meaning they have rooms)
+        result = result.Where(h => h.DisplayPrice > 0);
+
+        // Apply price filters after calculation
+        if (minPrice.HasValue)
         {
-            var hotel = h.Hotel;
-            decimal displayPrice = hotel.PricePerNight;
-            int? discountPercentage = null;
-            bool hasDiscount = false;
+            result = result.Where(h => h.DisplayPrice >= minPrice.Value);
+        }
 
-            if (h.MinRoomPrice != null && h.MinRoomPrice.MaxDiscount.HasValue)
-            {
-                hasDiscount = true;
-                discountPercentage = h.MinRoomPrice.MaxDiscount.Value;
-                displayPrice = h.MinRoomPrice.PricePerNight * (1 - discountPercentage.Value / 100m);
-            }
-            else if (h.MinRoomPrice != null)
-            {
-                displayPrice = h.MinRoomPrice.PricePerNight;
-            }
+        if (maxPrice.HasValue)
+        {
+            result = result.Where(h => h.DisplayPrice <= maxPrice.Value);
+        }
 
-            return new HotelResponseDto
-            {
-                Id = hotel.Id,
-                Name = hotel.Name,
-                Description = hotel.Description,
-                Location = hotel.Location,
-                City = hotel.City,
-                Country = hotel.Country,
-                Latitude = hotel.Latitude,
-                Longitude = hotel.Longitude,
-                OriginalPrice = hotel.PricePerNight,
-                DisplayPrice = displayPrice,
-                HasDiscount = hasDiscount,
-                DiscountPercentage = discountPercentage,
-                Rating = hotel.Rating,
-                StarRating = hotel.StarRating,
-                ImageUrl = hotel.ImageUrl,
-                Images = hotel.Images,
-                Amenities = hotel.Amenities,
-                RoomTypes = hotel.RoomTypes,
-                IsAvailable = hotel.IsAvailable,
-                CreatedById = hotel.CreatedById,
-                CreatedAt = hotel.CreatedAt,
-                UpdatedAt = hotel.UpdatedAt
-            };
-        }).ToList();
-
-        return Ok(result);
+        return Ok(result.ToList());
     }
 
     // GET: api/hotels/5
@@ -165,6 +169,13 @@ public class HotelsController : ControllerBase
             return NotFound();
         }
 
+        // Calculate price from room types
+        var minRoomPrice = await _context.RoomTypes
+            .Where(rt => rt.HotelId == id)
+            .OrderBy(rt => rt.PricePerNight)
+            .Select(rt => rt.PricePerNight)
+            .FirstOrDefaultAsync(); // Returns 0 if no rooms
+
         return Ok(new HotelResponseDto
         {
             Id = hotel.Id,
@@ -175,8 +186,8 @@ public class HotelsController : ControllerBase
             Country = hotel.Country,
             Latitude = hotel.Latitude,
             Longitude = hotel.Longitude,
-            OriginalPrice = hotel.PricePerNight,
-            DisplayPrice = hotel.PricePerNight,
+            OriginalPrice = minRoomPrice,
+            DisplayPrice = minRoomPrice,
             HasDiscount = false,
             DiscountPercentage = null,
             Rating = hotel.Rating,
@@ -204,35 +215,48 @@ public class HotelsController : ControllerBase
             return Unauthorized();
         }
 
-        var hotels = await _context.Hotels
+        // We need to fetch hotels and then lookup their prices, or do a join
+        // For simplicity with EF Core, let's fetch hotel items and a subquery for price
+        var hotelsData = await _context.Hotels
             .Where(h => h.CreatedById == userId)
             .OrderByDescending(h => h.CreatedAt)
-            .Select(h => new HotelResponseDto
+            .Select(h => new 
             {
-                Id = h.Id,
-                Name = h.Name,
-                Description = h.Description,
-                Location = h.Location,
-                City = h.City,
-                Country = h.Country,
-                Latitude = h.Latitude,
-                Longitude = h.Longitude,
-                OriginalPrice = h.PricePerNight,
-                DisplayPrice = h.PricePerNight,
-                HasDiscount = false,
-                DiscountPercentage = null,
-                Rating = h.Rating,
-                StarRating = h.StarRating,
-                ImageUrl = h.ImageUrl,
-                Images = h.Images,
-                Amenities = h.Amenities,
-                RoomTypes = h.RoomTypes,
-                IsAvailable = h.IsAvailable,
-                CreatedById = h.CreatedById,
-                CreatedAt = h.CreatedAt,
-                UpdatedAt = h.UpdatedAt
+                Hotel = h,
+                MinPrice = _context.RoomTypes
+                    .Where(rt => rt.HotelId == h.Id)
+                    .OrderBy(rt => rt.PricePerNight)
+                    .Select(rt => (decimal?)rt.PricePerNight)
+                    .FirstOrDefault() ?? 0
             })
             .ToListAsync();
+
+        var hotels = hotelsData.Select(h => new HotelResponseDto
+            {
+                Id = h.Hotel.Id,
+                Name = h.Hotel.Name,
+                Description = h.Hotel.Description,
+                Location = h.Hotel.Location,
+                City = h.Hotel.City,
+                Country = h.Hotel.Country,
+                Latitude = h.Hotel.Latitude,
+                Longitude = h.Hotel.Longitude,
+                OriginalPrice = h.MinPrice,
+                DisplayPrice = h.MinPrice,
+                HasDiscount = false,
+                DiscountPercentage = null,
+                Rating = h.Hotel.Rating,
+                StarRating = h.Hotel.StarRating,
+                ImageUrl = h.Hotel.ImageUrl,
+                Images = h.Hotel.Images,
+                Amenities = h.Hotel.Amenities,
+                RoomTypes = h.Hotel.RoomTypes,
+                IsAvailable = h.Hotel.IsAvailable,
+                CreatedById = h.Hotel.CreatedById,
+                CreatedAt = h.Hotel.CreatedAt,
+                UpdatedAt = h.Hotel.UpdatedAt
+            })
+            .ToList();
 
         return Ok(hotels);
     }
@@ -309,8 +333,14 @@ public class HotelsController : ControllerBase
     [HttpGet("price-range")]
     public async Task<ActionResult<object>> GetPriceRange()
     {
-        var minPrice = await _context.Hotels.MinAsync(h => h.PricePerNight);
-        var maxPrice = await _context.Hotels.MaxAsync(h => h.PricePerNight);
+        // Calculate range based on RoomTypes, as Hotel doesn't have price anymore
+        if (!await _context.RoomTypes.AnyAsync())
+        {
+             return Ok(new { minPrice = 0, maxPrice = 1000 }); // Default fallback
+        }
+
+        var minPrice = await _context.RoomTypes.MinAsync(rt => rt.PricePerNight);
+        var maxPrice = await _context.RoomTypes.MaxAsync(rt => rt.PricePerNight);
 
         return Ok(new { minPrice, maxPrice });
     }
@@ -335,16 +365,6 @@ public class HotelsController : ControllerBase
                                     h.Location.Contains(search) || 
                                     h.City.Contains(search) ||
                                     h.Country.Contains(search));
-        }
-
-        if (minPrice.HasValue)
-        {
-            query = query.Where(h => h.PricePerNight >= minPrice.Value);
-        }
-
-        if (maxPrice.HasValue)
-        {
-            query = query.Where(h => h.PricePerNight <= maxPrice.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(city))
@@ -374,24 +394,76 @@ public class HotelsController : ControllerBase
         // Only show available hotels
         query = query.Where(h => h.IsAvailable);
 
-        // Return only necessary data for map markers
-        var hotels = await query
-            .Select(h => new HotelMapResponseDto
+        // Fetch hotels with their min room price
+        var hotelsData = await query
+            .Select(h => new 
             {
-                Id = h.Id,
-                Name = h.Name,
-                City = h.City,
-                Country = h.Country,
-                Latitude = h.Latitude,
-                Longitude = h.Longitude,
-                PricePerNight = h.PricePerNight,
-                Rating = h.Rating,
-                StarRating = h.StarRating,
-                ImageUrl = h.ImageUrl
+                Hotel = h,
+                MinPrice = _context.RoomTypes
+                    .Where(rt => rt.HotelId == h.Id)
+                    .OrderBy(rt => rt.PricePerNight)
+                    .Select(rt => (decimal?)rt.PricePerNight)
+                    .FirstOrDefault() ?? 0
             })
             .ToListAsync();
 
-        return Ok(hotels);
+        var hotels = hotelsData.Select(h => new HotelMapResponseDto
+        {
+            Id = h.Hotel.Id,
+            Name = h.Hotel.Name,
+            City = h.Hotel.City,
+            Country = h.Hotel.Country,
+            Latitude = h.Hotel.Latitude,
+            Longitude = h.Hotel.Longitude,
+            PricePerNight = h.MinPrice,
+            Rating = h.Hotel.Rating,
+            StarRating = h.Hotel.StarRating,
+            ImageUrl = h.Hotel.ImageUrl
+        });
+
+        // Apply price filters in memory
+        if (minPrice.HasValue)
+        {
+            hotels = hotels.Where(h => h.PricePerNight >= minPrice.Value);
+        }
+
+        if (maxPrice.HasValue)
+        {
+            hotels = hotels.Where(h => h.PricePerNight <= maxPrice.Value);
+        }
+
+        // Only show hotels that have a valid price
+        hotels = hotels.Where(h => h.PricePerNight > 0);
+
+        return Ok(hotels.ToList());
+    }
+
+    // GET: api/hotels/geocode
+    [HttpGet("geocode")]
+    public async Task<IActionResult> GetAddress([FromQuery] double lat, [FromQuery] double lon)
+    {
+        try
+        {
+            var latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var request = new HttpRequestMessage(HttpMethod.Get, 
+                $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=18&addressdetails=1");
+            request.Headers.Add("User-Agent", "PetoriaApp/1.0 (contact@petoria.com)");
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, "Error from geocoding service");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            return Content(content, "application/json");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error during geocoding", error = ex.Message });
+        }
     }
 
     // POST: api/hotels
@@ -419,13 +491,14 @@ public class HotelsController : ControllerBase
                 Country = dto.Country,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
-                PricePerNight = dto.PricePerNight,
+                // PricePerNight removed
                 StarRating = dto.StarRating,
                 ImageUrl = dto.ImageUrl,
                 Images = dto.Images,
                 Amenities = dto.Amenities,
                 RoomTypes = dto.RoomTypes,
-                IsAvailable = dto.IsAvailable,
+                // Force inactive by default until rooms/prices are added
+                IsAvailable = false,
                 CreatedById = userId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -445,8 +518,8 @@ public class HotelsController : ControllerBase
                 Country = hotel.Country,
                 Latitude = hotel.Latitude,
                 Longitude = hotel.Longitude,
-                OriginalPrice = hotel.PricePerNight,
-                DisplayPrice = hotel.PricePerNight,
+                OriginalPrice = 0, // No rooms yet
+                DisplayPrice = 0,
                 HasDiscount = false,
                 DiscountPercentage = null,
                 Rating = hotel.Rating,
@@ -471,7 +544,6 @@ public class HotelsController : ControllerBase
             });
         }
     }
-
     // PUT: api/hotels/5
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
@@ -492,6 +564,17 @@ public class HotelsController : ControllerBase
             return Forbid("You can only edit hotels that you created");
         }
 
+        // Validate activation rule: Cannot activate if no rooms
+        if (dto.IsAvailable && !existingHotel.IsAvailable)
+        {
+            // Check if hotel has any room types
+            var hasRooms = await _context.RoomTypes.AnyAsync(rt => rt.HotelId == id);
+            if (!hasRooms)
+            {
+                return BadRequest(new { message = "Cannot activate hotel without any rooms or prices configured." });
+            }
+        }
+
         // Map DTO → Entity (update)
         existingHotel.Name = dto.Name;
         existingHotel.Description = dto.Description;
@@ -500,11 +583,13 @@ public class HotelsController : ControllerBase
         existingHotel.Country = dto.Country;
         existingHotel.Latitude = dto.Latitude;
         existingHotel.Longitude = dto.Longitude;
-        existingHotel.PricePerNight = dto.PricePerNight;
         existingHotel.ImageUrl = dto.ImageUrl;
         existingHotel.Images = dto.Images;
         existingHotel.Amenities = dto.Amenities;
-        existingHotel.RoomTypes = dto.RoomTypes;
+        // RoomTypes are managed via separate controller usually, but if passed here, ignore or handle carefully. 
+        // We generally don't update connection via UpdateHotelDto for RoomTypes as it's complex.
+        // exisingHotel.RoomTypes = dto.RoomTypes; // Avoid updating detailed navigation property here if not needed
+        
         existingHotel.IsAvailable = dto.IsAvailable;
         existingHotel.UpdatedAt = DateTime.UtcNow;
 

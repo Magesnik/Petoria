@@ -16,7 +16,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Services
+// Services
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<Petoria.Core.Contracts.IAuthService, Petoria.Core.Services.AuthService>();
+builder.Services.AddScoped<Petoria.Core.Contracts.IPhotoService, Petoria.Core.Services.CloudinaryService>();
+
+
 
 // CORS Configuration
 builder.Services.AddCors(options =>
@@ -25,7 +30,8 @@ builder.Services.AddCors(options =>
         builder => builder
             .WithOrigins("http://localhost:5174")
             .AllowAnyMethod()
-            .AllowAnyHeader());
+            .AllowAnyHeader()
+            .AllowCredentials()); // Allow cookies
 });
 
 // Database Configuration
@@ -57,6 +63,20 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+    
+    // Read token from cookie
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Cookies["jwt"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 

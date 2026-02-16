@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import CommentForm from './CommentForm';
 import './Comment.css';
@@ -28,20 +29,8 @@ const Comment = ({ comment, hotelId, onDeleted, onRatingUpdated }) => {
         if (!user) return;
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/comments/${comment.id}/rate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ isLike: true })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                onRatingUpdated(comment.id, data);
-            }
+            const data = await api.post(`/comments/${comment.id}/rate`, { isLike: true });
+            onRatingUpdated(comment.id, data);
         } catch (err) {
             console.error('Error rating comment:', err);
         }
@@ -51,20 +40,8 @@ const Comment = ({ comment, hotelId, onDeleted, onRatingUpdated }) => {
         if (!user) return;
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/comments/${comment.id}/rate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ isLike: false })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                onRatingUpdated(comment.id, data);
-            }
+            const data = await api.post(`/comments/${comment.id}/rate`, { isLike: false });
+            onRatingUpdated(comment.id, data);
         } catch (err) {
             console.error('Error rating comment:', err);
         }
@@ -76,17 +53,8 @@ const Comment = ({ comment, hotelId, onDeleted, onRatingUpdated }) => {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5150/api/comments/${comment.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                onDeleted(comment.id);
-            }
+            await api.delete(`/comments/${comment.id}`);
+            onDeleted(comment.id);
         } catch (err) {
             console.error('Error deleting comment:', err);
         }

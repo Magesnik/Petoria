@@ -119,8 +119,116 @@
     }
 }
 
+
+/* Filter Sidebar - Sticky on Desktop */
 .filters-sidebar {
     height: fit-content;
+}
+
+@media (min-width: 1025px) {
+    .filters-sidebar {
+        position: sticky;
+        top: 100px;
+        align-self: start;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        /* Scrollbar styling */
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .filters-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .filters-sidebar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 6px;
+    }
+}
+
+/* Mobile Filter Elements (Hidden by default) */
+.btn-filter-toggle {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-filter-toggle:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme="dark"] .btn-filter-toggle {
+    background: #1a1a2e;
+    border-color: #2d3748;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .btn-filter-toggle:hover {
+    background: #2d3748;
+}
+
+.mobile-filter-header {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mobile-filter-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+}
+
+[data-theme="dark"] .mobile-filter-header h3 {
+    color: #fff;
+}
+
+.btn-close-filters {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #64748b;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+}
+
+[data-theme="dark"] .btn-close-filters {
+    color: #a0aec0;
+}
+
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+}
+
+.mobile-overlay.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .hotels-main {
@@ -135,6 +243,13 @@
     margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 1rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .results-header h2 {
@@ -362,13 +477,77 @@
         padding: 30px 20px;
     }
 
+    /* Mobile Drawer Styles */
     .filters-sidebar {
-        order: 2;
+        position: fixed;
+        top: 0;
+        right: -320px;
+        width: 300px;
+        height: 100vh;
+        z-index: 1201;
+        /* Above header (1000) */
+        background: white;
+        padding: 20px;
+        overflow-y: auto;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+        order: unset;
+        /* Remove flex/grid ordering */
+    }
+
+    .filters-sidebar.open {
+        right: 0;
+    }
+
+    [data-theme="dark"] .filters-sidebar {
+        background: #1a1a2e;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
     }
 
     .hotels-main {
-        order: 1;
+        width: 100%;
     }
+
+    /* Show mobile specific elements */
+    .btn-filter-toggle {
+        display: flex;
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background: #1a1a2e;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        font-weight: 600;
+        border: none;
+    }
+
+    [data-theme="dark"] .btn-filter-toggle {
+        background: #667eea;
+        color: white;
+    }
+
+    .mobile-filter-header {
+        display: flex;
+    }
+}
+
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1200;
+    /* Above header */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
 }
 
 @media (max-width: 768px) {

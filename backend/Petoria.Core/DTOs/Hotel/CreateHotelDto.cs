@@ -30,9 +30,7 @@ public class CreateHotelDto
 
     public decimal? Longitude { get; set; }
 
-    [Required(ErrorMessage = "Цената на нощувка е задължителна")]
-    [Range(0.01, 100000, ErrorMessage = "Цената трябва да бъде между 0.01 и 100000")]
-    public decimal PricePerNight { get; set; }
+
 
     [Range(1, 5, ErrorMessage = "Звездният рейтинг трябва да бъде между 1 и 5")]
     public int StarRating { get; set; } = 3;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import './Comment.css';
 
@@ -20,31 +21,18 @@ const CommentForm = ({ hotelId, parentCommentId = null, onCommentSubmitted, onCa
         setError('');
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5150/api/comments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    hotelId,
-                    text: text.trim(),
-                    parentCommentId
-                })
+            const newComment = await api.post('/comments', {
+                hotelId,
+                text: text.trim(),
+                parentCommentId
             });
 
-            if (response.ok) {
-                const newComment = await response.json();
-                setText('');
-                if (onCommentSubmitted) {
-                    onCommentSubmitted(newComment);
-                }
-                if (onCancel) {
-                    onCancel();
-                }
-            } else {
-                setError('Failed to post comment');
+            setText('');
+            if (onCommentSubmitted) {
+                onCommentSubmitted(newComment);
+            }
+            if (onCancel) {
+                onCancel();
             }
         } catch (err) {
             console.error('Error posting comment:', err);
