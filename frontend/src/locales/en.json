@@ -416,5 +416,10 @@
     "errorSendingReply": "Error sending reply",
     "reply": "Reply",
     "superAdmin": "Petoria Support",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "hotelClass": "Hotel Class",
+    "guestRating": "Guest Rating",
+    "excellent": "Excellent",
+    "veryGood": "Very Good",
+    "good": "Good"
 }

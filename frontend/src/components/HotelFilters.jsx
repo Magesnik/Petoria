@@ -50,6 +50,14 @@ const HotelFilters = ({
         onFilterChange('amenities', newAmenities);
     };
 
+    const handleStarRatingToggle = (rating) => {
+        const currentStars = filters.starRating || [];
+        const newStars = currentStars.includes(rating)
+            ? currentStars.filter(r => r !== rating)
+            : [...currentStars, rating];
+        onFilterChange('starRating', newStars);
+    };
+
     const handleCitySelect = (city) => {
         onFilterChange('city', city);
         setCitySearch(city);
@@ -256,17 +264,41 @@ const HotelFilters = ({
                 </div>
             </div>
 
-            {/* Rating Filter */}
+            {/* Star Rating Filter (Hotel Class) */}
             <div className="filter-section">
-                <label className="filter-label">{t('minRating')}</label>
-                <div className="rating-options">
-                    {[5, 4, 3, 2, 1].map((rating) => (
+                <label className="filter-label">{t('hotelClass')}</label>
+                <div className="star-rating-select-filter">
+                    {[1, 2, 3, 4, 5].map((star) => (
                         <button
-                            key={rating}
-                            className={`rating-btn ${filters.minRating === rating ? 'active' : ''}`}
-                            onClick={() => onFilterChange('minRating', filters.minRating === rating ? null : rating)}
+                            key={star}
+                            className={`star-select-btn-filter ${(filters.starRating || []).includes(star) ? 'selected' : ''}`}
+                            onClick={() => handleStarRatingToggle(star)}
+                            title={`${star} ${star === 1 ? t('star') : t('starsCount')}`}
                         >
-                            {'★'.repeat(rating)}
+                            <span className="star-icon">★</span>
+                            <span className="star-number">{star}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Min Rating Filter (User Reviews) */}
+            <div className="filter-section">
+                <label className="filter-label">{t('guestRating')}</label>
+                <div className="rating-options-grid">
+                    {[
+                        { value: 4.5, label: '4.5+' },
+                        { value: 4.0, label: '4.0+' },
+                        { value: 3.5, label: '3.5+' },
+                        { value: 3.0, label: '3.0+' }
+                    ].map((option) => (
+                        <button
+                            key={option.value}
+                            className={`rating-pill ${filters.minRating === option.value ? 'active' : ''}`}
+                            onClick={() => onFilterChange('minRating', filters.minRating === option.value ? null : option.value)}
+                        >
+                            <span className="rating-score">{option.label}</span>
+                            <span className="rating-desc">{option.value >= 4.5 ? t('excellent') : option.value >= 4 ? t('veryGood') : t('good')}</span>
                         </button>
                     ))}
                 </div>

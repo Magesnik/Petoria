@@ -27,7 +27,8 @@ const Hotels = () => {
         city: '',
         country: '',
         amenities: [],
-        minRating: null
+        minRating: null,
+        starRating: []
     });
 
     // Fetch filter data on mount
@@ -78,6 +79,7 @@ const Hotels = () => {
             if (filters.country) params.append('country', filters.country);
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
+            if (filters.starRating && filters.starRating.length > 0) params.append('starRating', filters.starRating.join(','));
 
             const data = await api.get(`/hotels?${params.toString()}`);
             setHotels(data);
@@ -104,6 +106,7 @@ const Hotels = () => {
             if (filters.country) params.append('country', filters.country);
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
+            if (filters.starRating && filters.starRating.length > 0) params.append('starRating', filters.starRating.join(','));
 
             const data = await api.get(`/hotels/map?${params.toString()}`);
             setMapHotels(data);
@@ -129,7 +132,8 @@ const Hotels = () => {
             city: '',
             country: '',
             amenities: [],
-            minRating: null
+            minRating: null,
+            starRating: []
         });
         setSearchQuery('');
     };

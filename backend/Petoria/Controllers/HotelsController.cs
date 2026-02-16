@@ -29,7 +29,8 @@ public class HotelsController : ControllerBase
         [FromQuery] string? city,
         [FromQuery] string? country,
         [FromQuery] string? amenities,
-        [FromQuery] decimal? minRating)
+        [FromQuery] decimal? minRating,
+        [FromQuery] string? starRating)
     {
         var query = _context.Hotels.AsQueryable();
 
@@ -68,6 +69,16 @@ public class HotelsController : ControllerBase
         if (minRating.HasValue)
         {
             query = query.Where(h => h.Rating >= minRating.Value);
+        }
+
+        // Filter by star rating
+        if (!string.IsNullOrWhiteSpace(starRating))
+        {
+            var stars = starRating.Split(',').Select(s => int.Parse(s.Trim())).ToList();
+            if (stars.Any())
+            {
+                query = query.Where(h => stars.Contains(h.StarRating));
+            }
         }
 
         // Only show available hotels
@@ -354,7 +365,8 @@ public class HotelsController : ControllerBase
         [FromQuery] string? city,
         [FromQuery] string? country,
         [FromQuery] string? amenities,
-        [FromQuery] decimal? minRating)
+        [FromQuery] decimal? minRating,
+        [FromQuery] string? starRating)
     {
         var query = _context.Hotels.AsQueryable();
 
@@ -389,6 +401,16 @@ public class HotelsController : ControllerBase
         if (minRating.HasValue)
         {
             query = query.Where(h => h.Rating >= minRating.Value);
+        }
+
+        // Filter by star rating
+        if (!string.IsNullOrWhiteSpace(starRating))
+        {
+            var stars = starRating.Split(',').Select(s => int.Parse(s.Trim())).ToList();
+            if (stars.Any())
+            {
+                query = query.Where(h => stars.Contains(h.StarRating));
+            }
         }
 
         // Only show available hotels

@@ -410,5 +410,10 @@
     "errorSendingReply": "Грешка при изпращане на отговор",
     "reply": "Отговори",
     "superAdmin": "Petoria Поддръжка",
-    "backToDashboard": "Назад към таблото"
+    "backToDashboard": "Назад към таблото",
+    "hotelClass": "Категория",
+    "guestRating": "Оценка от гости",
+    "excellent": "Отлично",
+    "veryGood": "Много добро",
+    "good": "Добро"
 }

@@ -535,3 +535,136 @@
         height: 18px;
     }
 }
+
+/* Star Rating List (New Button Style) */
+.star-rating-select-filter {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.star-select-btn-filter {
+    width: 42px;
+    height: 42px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+[data-theme="dark"] .star-select-btn-filter {
+    background: #0f3460;
+    border-color: #2d3748;
+    color: #4a5568;
+}
+
+.star-select-btn-filter:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+}
+
+.star-select-btn-filter.selected {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    border-color: #ffd700;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.star-select-btn-filter.selected .star-number {
+    color: #1a1a1a;
+    font-weight: 700;
+}
+
+.star-icon {
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+
+.star-number {
+    font-size: 10px;
+    font-weight: 600;
+    color: #999;
+}
+
+[data-theme="dark"] .star-number {
+    color: #8892b0;
+}
+
+/* Rating Options Grid (New Min Rating UI) */
+.rating-options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.rating-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+[data-theme="dark"] .rating-pill {
+    background: #0f3460;
+    border-color: #2d3748;
+}
+
+.rating-pill:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+[data-theme="dark"] .rating-pill:hover {
+    background: #1a2744;
+}
+
+.rating-pill.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+}
+
+.rating-score {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+}
+
+[data-theme="dark"] .rating-score {
+    color: #e6f1ff;
+}
+
+.rating-pill.active .rating-score {
+    color: white;
+}
+
+.rating-desc {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+}
+
+[data-theme="dark"] .rating-desc {
+    color: #8892b0;
+}
+
+.rating-pill.active .rating-desc {
+    color: rgba(255, 255, 255, 0.9);
+}
