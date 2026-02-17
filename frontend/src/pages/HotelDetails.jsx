@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
-import Header from '../components/Header';
+
 import ReviewSection from '../components/ReviewSection';
 import BookingWidget from '../components/BookingWidget';
 import RoomTypeManager from '../components/RoomTypeManager';
@@ -79,7 +79,7 @@ const HotelDetails = () => {
     if (loading) {
         return (
             <div className="hotel-details-page">
-                <Header />
+
                 <div className="loading-container">
                     <div className="spinner"></div>
                     <p>{t('loadingHotel')}</p>
@@ -91,7 +91,7 @@ const HotelDetails = () => {
     if (error) {
         return (
             <div className="hotel-details-page">
-                <Header />
+
                 <div className="error-container">
                     <h2>❌ {error}</h2>
                     <p>{t('hotelNotFoundText')}</p>
@@ -112,7 +112,7 @@ const HotelDetails = () => {
 
     return (
         <div className="hotel-details-page">
-            <Header />
+
 
             {/* Hero Section */}
             <section

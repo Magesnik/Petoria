@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Petoria.Core.DTOs.Hotel;
@@ -13,11 +14,13 @@ public class HotelsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly HttpClient _httpClient;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public HotelsController(ApplicationDbContext context, HttpClient httpClient)
+    public HotelsController(ApplicationDbContext context, HttpClient httpClient, UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _httpClient = httpClient;
+        _userManager = userManager;
     }
 
     // GET: api/hotels
@@ -173,8 +176,9 @@ public class HotelsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<HotelResponseDto>> GetHotel(int id)
     {
-        var hotel = await _context.Hotels.FindAsync(id);
-
+        var hotel = await _context.Hotels
+            .FirstOrDefaultAsync(h => h.Id == id);
+            
         if (hotel == null)
         {
             return NotFound();
@@ -186,6 +190,16 @@ public class HotelsController : ControllerBase
             .OrderBy(rt => rt.PricePerNight)
             .Select(rt => rt.PricePerNight)
             .FirstOrDefaultAsync(); // Returns 0 if no rooms
+
+        // Check if user is moderator
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var isModerator = false;
+        
+        if (!string.IsNullOrEmpty(userId))
+        {
+            isModerator = await _context.HotelModerators
+                .AnyAsync(hm => hm.HotelId == id && hm.UserId == userId);
+        }
 
         return Ok(new HotelResponseDto
         {
@@ -210,7 +224,8 @@ public class HotelsController : ControllerBase
             IsAvailable = hotel.IsAvailable,
             CreatedById = hotel.CreatedById,
             CreatedAt = hotel.CreatedAt,
-            UpdatedAt = hotel.UpdatedAt
+            UpdatedAt = hotel.UpdatedAt,
+            IsModerator = isModerator
         });
     }
 
@@ -268,6 +283,36 @@ public class HotelsController : ControllerBase
                 UpdatedAt = h.Hotel.UpdatedAt
             })
             .ToList();
+
+        return Ok(hotels);
+    }
+
+    // GET: api/hotels/moderated
+    [HttpGet("moderated")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetModeratedHotels()
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        var hotels = await _context.HotelModerators
+            .Where(hm => hm.UserId == userId)
+            .Include(hm => hm.Hotel)
+            .Select(hm => hm.Hotel)
+            .Select(h => new HotelResponseDto
+            {
+                Id = h.Id,
+                Name = h.Name,
+                Description = h.Description,
+                Location = h.Location,
+                City = h.City,
+                Country = h.Country,
+                Latitude = h.Latitude,
+                Longitude = h.Longitude,
+                StarRating = h.StarRating,
+                ImageUrl = h.ImageUrl,
+                IsModerator = true
+            })
+            .ToListAsync();
 
         return Ok(hotels);
     }
@@ -663,5 +708,114 @@ public class HotelsController : ControllerBase
     private bool HotelExists(int id)
     {
         return _context.Hotels.Any(e => e.Id == id);
+    }
+
+    // POST: api/hotels/5/moderators
+    [HttpPost("{id}/moderators")]
+    [Authorize]
+    public async Task<IActionResult> AddModerator(int id, [FromBody] AddModeratorDto dto)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var hotel = await _context.Hotels.FindAsync(id);
+
+        if (hotel == null) return NotFound("Hotel not found");
+
+        // Only owner or super admin can add moderators
+        if (hotel.CreatedById != userId && !User.IsInRole("SuperAdmin"))
+        {
+            return Forbid();
+        }
+
+        var moderatorUser = await _userManager.FindByEmailAsync(dto.Email);
+        if (moderatorUser == null)
+        {
+            return BadRequest("User with this email not found");
+        }
+
+        if (moderatorUser.Id == hotel.CreatedById)
+        {
+             return BadRequest("Owner cannot be a moderator");
+        }
+
+        var existing = await _context.HotelModerators
+            .FirstOrDefaultAsync(hm => hm.HotelId == id && hm.UserId == moderatorUser.Id);
+
+        if (existing != null)
+        {
+            return BadRequest("User is already a moderator for this hotel");
+        }
+
+        var moderator = new HotelModerator
+        {
+            HotelId = id,
+            UserId = moderatorUser.Id
+        };
+
+        _context.HotelModerators.Add(moderator);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Moderator added successfully" });
+    }
+
+    // GET: api/hotels/5/moderators
+    [HttpGet("{id}/moderators")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<ModeratorResponseDto>>> GetModerators(int id)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var hotel = await _context.Hotels.FindAsync(id);
+
+        if (hotel == null) return NotFound("Hotel not found");
+
+        // Only owner or super admin can see moderators
+        if (hotel.CreatedById != userId && !User.IsInRole("SuperAdmin"))
+        {
+            return Forbid();
+        }
+
+        var moderators = await _context.HotelModerators
+            .Where(hm => hm.HotelId == id)
+            .Include(hm => hm.User)
+            .Select(hm => new ModeratorResponseDto
+            {
+                UserId = hm.UserId,
+                Email = hm.User.Email,
+                FirstName = hm.User.FirstName,
+                LastName = hm.User.LastName,
+                AddedAt = hm.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(moderators);
+    }
+
+    // DELETE: api/hotels/5/moderators/{userId}
+    [HttpDelete("{id}/moderators/{moderatorId}")]
+    [Authorize]
+    public async Task<IActionResult> RemoveModerator(int id, string moderatorId)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var hotel = await _context.Hotels.FindAsync(id);
+
+        if (hotel == null) return NotFound("Hotel not found");
+
+        // Only owner or super admin can remove moderators
+        if (hotel.CreatedById != userId && !User.IsInRole("SuperAdmin"))
+        {
+            return Forbid();
+        }
+
+        var moderator = await _context.HotelModerators
+            .FirstOrDefaultAsync(hm => hm.HotelId == id && hm.UserId == moderatorId);
+
+        if (moderator == null)
+        {
+            return NotFound("Moderator not found");
+        }
+
+        _context.HotelModerators.Remove(moderator);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Moderator removed successfully" });
     }
 }

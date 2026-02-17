@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import Footer from '../components/Footer';
 import './About.css';
 
@@ -25,7 +25,7 @@ const About = () => {
 
     return (
         <div className="about-page">
-            <Header />
+
 
             {/* Hero Section */}
             <section className="about-hero">

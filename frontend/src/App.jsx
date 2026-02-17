@@ -25,6 +25,10 @@ import ContactHotel from './pages/ContactHotel';
 import HotelMessages from './pages/HotelMessages';
 import MyMessages from './pages/MyMessages';
 import AdminSupportMessages from './pages/AdminSupportMessages';
+import ModeratorDashboard from './pages/ModeratorDashboard';
+import ModeratorHotelPanel from './pages/ModeratorHotelPanel';
+
+import Header from './components/Header'; // Added import
 
 function App() {
   return (
@@ -36,6 +40,7 @@ function App() {
               <FavoritesProvider>
                 <Router>
                   <div className="App">
+                    <Header /> {/* Added Global Header */}
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/hotels" element={<Hotels />} />
@@ -50,6 +55,8 @@ function App() {
                       <Route path="/purchase-history" element={<PurchaseHistory />} />
                       <Route path="/support" element={<Support />} />
                       <Route path="/admin" element={<AdminDashboard />} />
+                      <Route path="/moderator" element={<ModeratorDashboard />} />
+                      <Route path="/moderator/hotel/:id" element={<ModeratorHotelPanel />} />
                       <Route path="/my-hotels" element={<MyHotels />} />
                       <Route path="/manage-hotel/:id" element={<ManageHotel />} />
                       <Route path="/hotel/:id" element={<HotelDetails />} />

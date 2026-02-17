@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './MyMessages.css';
 
 const MyMessages = () => {
@@ -126,7 +126,7 @@ const MyMessages = () => {
     if (loading) {
         return (
             <div className="my-messages-page">
-                <Header />
+
                 <div className="loading-container">
                     <div className="spinner"></div>
                 </div>
@@ -136,7 +136,7 @@ const MyMessages = () => {
 
     return (
         <div className="my-messages-page">
-            <Header />
+
             <div className="messages-container">
                 <div className="messages-header">
                     <h1>{t('myMessages') || 'My Support Messages'}</h1>

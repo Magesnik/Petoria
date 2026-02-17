@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import './AvailabilityCalendar.css';
 
-const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
+const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false, onDateSelect }) => {
+    const safeRoomTypes = Array.isArray(roomTypes) ? roomTypes : [];
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [availability, setAvailability] = useState([]);
     const [selectedRoomType, setSelectedRoomType] = useState(null);
@@ -18,10 +19,10 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
     const [discountPercentage, setDiscountPercentage] = useState(0);
 
     useEffect(() => {
-        if (roomTypes.length > 0 && !selectedRoomType) {
-            setSelectedRoomType(roomTypes[0]);
+        if (safeRoomTypes.length > 0 && !selectedRoomType) {
+            setSelectedRoomType(safeRoomTypes[0]);
         }
-    }, [roomTypes]);
+    }, [safeRoomTypes, selectedRoomType]);
 
     useEffect(() => {
         if (selectedRoomType) {
@@ -67,18 +68,29 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
             setSelectionStart(date);
             setSelectionEnd(date);
         } else if (!selectionEnd || selectionStart.getTime() === selectionEnd.getTime()) {
+            let start = selectionStart;
+            let end = date;
+
             if (date < selectionStart) {
                 setSelectionEnd(selectionStart);
                 setSelectionStart(date);
+                start = date;
+                end = selectionStart;
             } else {
                 setSelectionEnd(date);
             }
-            setShowBulkEdit(true);
 
-            // Get current count and discount for selected date range
-            const avail = getAvailabilityForDate(selectionStart);
-            setBulkEditCount(avail?.availableCount ?? selectedRoomType?.totalRooms ?? 0);
-            setDiscountPercentage(avail?.discountPercentage ?? 0);
+            if (isModeratorMode && onDateSelect) {
+                onDateSelect({ start, end }, selectedRoomType);
+                // Reset selection after a short delay or let parent handle it
+                // For now, let's keep it selected visually
+            } else {
+                setShowBulkEdit(true);
+                // Get current count and discount for selected date range
+                const avail = getAvailabilityForDate(start);
+                setBulkEditCount(avail?.availableCount ?? selectedRoomType?.totalRooms ?? 0);
+                setDiscountPercentage(avail?.discountPercentage ?? 0);
+            }
         } else {
             // Reset selection
             setSelectionStart(date);
@@ -197,7 +209,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
         return `${months[date.getMonth()]} ${date.getFullYear()}`;
     };
 
-    if (roomTypes.length === 0) {
+    if (safeRoomTypes.length === 0) {
         return (
             <div className="availability-calendar empty">
                 <h3>📅 Календар за наличност</h3>
@@ -222,7 +234,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes }) => {
             <div className="room-type-selector">
                 <label>Тип стая:</label>
                 <div className="room-type-buttons">
-                    {roomTypes.map(room => (
+                    {safeRoomTypes.map(room => (
                         <button
                             key={room.id}
                             className={`room-type-btn ${selectedRoomType?.id === room.id ? 'active' : ''}`}

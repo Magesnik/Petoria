@@ -63,7 +63,7 @@ public class HotelMessagesController : ControllerBase
     /// GET /api/hotels/{hotelId}/messages
     /// </summary>
     [HttpGet("{hotelId}/messages")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<HotelMessageResponseDto>>> GetHotelMessages(int hotelId)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -79,9 +79,12 @@ public class HotelMessagesController : ControllerBase
             return NotFound("Хотелът не е намерен");
         }
 
-        // Check if user owns this hotel (or is SuperAdmin)
+        // Check if user owns this hotel, is SuperAdmin, or is a Moderator
         var isSuperAdmin = User.IsInRole("SuperAdmin");
-        if (hotel.CreatedById != userId && !isSuperAdmin)
+        var isModerator = await _context.HotelModerators
+            .AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+
+        if (hotel.CreatedById != userId && !isSuperAdmin && !isModerator)
         {
             return Forbid();
         }
@@ -116,7 +119,7 @@ public class HotelMessagesController : ControllerBase
     /// PUT /api/hotels/{hotelId}/messages/{id}/answer
     /// </summary>
     [HttpPut("{hotelId}/messages/{id}/answer")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize]
     public async Task<ActionResult> AnswerMessage(int hotelId, int id, [FromBody] AnswerMessageDto dto)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -134,9 +137,12 @@ public class HotelMessagesController : ControllerBase
             return NotFound("Съобщението не е намерено");
         }
 
-        // Check if user owns this hotel (or is SuperAdmin)
+        // Check if user owns this hotel, is SuperAdmin, or is a Moderator
         var isSuperAdmin = User.IsInRole("SuperAdmin");
-        if (message.Hotel.CreatedById != userId && !isSuperAdmin)
+        var isModerator = await _context.HotelModerators
+            .AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+
+        if (message.Hotel.CreatedById != userId && !isSuperAdmin && !isModerator)
         {
             return Forbid();
         }
@@ -155,7 +161,7 @@ public class HotelMessagesController : ControllerBase
     /// GET /api/hotels/my/messages/unread-counts
     /// </summary>
     [HttpGet("my/messages/unread-counts")]
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<UnreadCountDto>>> GetUnreadCounts()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -164,11 +170,18 @@ public class HotelMessagesController : ControllerBase
             return Unauthorized();
         }
 
-        // Get all hotels owned by this admin
-        var hotelIds = await _context.Hotels
+        // Get all hotels owned by this admin OR where they are a moderator
+        var ownedHotelIds = await _context.Hotels
             .Where(h => h.CreatedById == userId)
             .Select(h => h.Id)
             .ToListAsync();
+
+        var moderatedHotelIds = await _context.HotelModerators
+            .Where(hm => hm.UserId == userId)
+            .Select(hm => hm.HotelId)
+            .ToListAsync();
+
+        var hotelIds = ownedHotelIds.Concat(moderatedHotelIds).Distinct().ToList();
 
         // Get unread message counts for each hotel
         var unreadCounts = await _context.HotelMessages

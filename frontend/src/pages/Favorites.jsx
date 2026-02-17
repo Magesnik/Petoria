@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
-import Header from '../components/Header';
+
 import HotelCard from '../components/HotelCard';
 import './Favorites.css';
 
@@ -61,7 +61,7 @@ const Favorites = () => {
 
     return (
         <>
-            <Header />
+
             <div className="favorites-page">
                 <div className="favorites-hero">
                     <h1>{t('favoritesTitle')}</h1>

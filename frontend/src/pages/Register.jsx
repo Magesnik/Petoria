@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import Header from '../components/Header';
+
 import './Auth.css';
 
 const Register = () => {
@@ -82,7 +82,7 @@ const Register = () => {
 
     return (
         <div className="auth-page">
-            <Header />
+
             <div className="auth-container">
                 <div className="auth-card">
                     <h2>{t('registerTitle')}</h2>

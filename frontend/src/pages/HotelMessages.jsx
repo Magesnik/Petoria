@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './HotelMessages.css';
 
 const HotelMessages = () => {
@@ -23,19 +23,24 @@ const HotelMessages = () => {
     const [sendingReply, setSendingReply] = useState(false);
 
     useEffect(() => {
-        if (!isAdmin()) {
-            navigate('/');
+        if (!user) {
+            navigate('/login');
             return;
         }
         fetchData();
-    }, [id, isAdmin, navigate]);
+    }, [id, user, navigate]);
 
     const fetchData = async () => {
         try {
             // Fetch hotel details to verify ownership and get name
             const hotelData = await api.get(`/hotels/${id}`);
 
-            if (hotelData.createdById !== user?.id && !user?.roles?.includes('SuperAdmin')) {
+            // Check if user is owner, moderator or super admin
+            const isOwner = hotelData.createdById === user?.id;
+            const isModerator = hotelData.isModerator; // This comes from getHotel endpoint which checks current user
+            const isSuperAdmin = user?.roles?.includes('SuperAdmin');
+
+            if (!isOwner && !isModerator && !isSuperAdmin) {
                 navigate('/my-hotels');
                 return;
             }
@@ -92,7 +97,7 @@ const HotelMessages = () => {
     if (loading) {
         return (
             <div className="messages-page">
-                <Header />
+
                 <div className="loading-container">
                     <div className="spinner"></div>
                 </div>
@@ -104,7 +109,7 @@ const HotelMessages = () => {
 
     return (
         <div className="messages-page">
-            <Header />
+
             <div className="messages-container">
                 <div className="messages-header">
                     <div className="header-left">

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './MyHotels.css';
 
 const MyHotels = () => {
@@ -59,7 +59,7 @@ const MyHotels = () => {
 
     return (
         <div className="my-hotels-page">
-            <Header />
+
 
             <div className="my-hotels-container">
                 <div className="page-header">

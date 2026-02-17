@@ -114,6 +114,22 @@ public class ReservationsController : ControllerBase
         totalPrice *= request.NumberOfRooms;
         originalTotal *= request.NumberOfRooms;
 
+        // Check for moderator/owner if user is logged in
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var isModerator = await _context.HotelModerators
+                .AnyAsync(hm => hm.HotelId == roomType.HotelId && hm.UserId == userId);
+            
+            var isOwner = await _context.Hotels
+                .AnyAsync(h => h.Id == roomType.HotelId && h.CreatedById == userId);
+
+            if (isModerator || isOwner)
+            {
+                totalPrice = 0;
+            }
+        }
+
         return Ok(new PriceCalculationResponseDto
         {
             NumberOfNights = numberOfNights,
@@ -212,6 +228,19 @@ public class ReservationsController : ControllerBase
         }
         totalPrice *= request.NumberOfRooms;
 
+        // Check if user is moderator for this hotel
+        var isModerator = await _context.HotelModerators
+            .AnyAsync(hm => hm.HotelId == request.HotelId && hm.UserId == userId);
+        
+        // Also check if owner (though owners usually don't book their own rooms via API, logic applies)
+        var isOwner = await _context.Hotels
+            .AnyAsync(h => h.Id == request.HotelId && h.CreatedById == userId);
+
+        if (isModerator || isOwner)
+        {
+            totalPrice = 0; // Free for moderators and owners
+        }
+
         // Create reservation — Map DTO → Entity
         var reservation = new Reservation
         {
@@ -297,8 +326,16 @@ public class ReservationsController : ControllerBase
             return NotFound();
         }
 
-        // Only allow user to see their own reservations (or SuperAdmin)
-        if (!isSuperAdmin && reservation.UserId != userId)
+        // Check if user is moderator for this hotel
+        var isModerator = await _context.HotelModerators
+            .AnyAsync(hm => hm.HotelId == reservation.HotelId && hm.UserId == userId);
+        
+        // Check if user is owner
+        var isOwner = await _context.Hotels
+            .AnyAsync(h => h.Id == reservation.HotelId && h.CreatedById == userId);
+
+        // Only allow user to see their own reservations (or SuperAdmin, Moderator, or Owner)
+        if (!isSuperAdmin && reservation.UserId != userId && !isModerator && !isOwner)
         {
             return Forbid();
         }
@@ -340,8 +377,16 @@ public class ReservationsController : ControllerBase
             return NotFound();
         }
 
-        // Only allow user to cancel their own reservations (or SuperAdmin)
-        if (!isSuperAdmin && reservation.UserId != userId)
+        // Check if user is moderator for this hotel
+        var isModerator = await _context.HotelModerators
+            .AnyAsync(hm => hm.HotelId == reservation.HotelId && hm.UserId == userId);
+        
+        // Check if user is owner
+        var isOwner = await _context.Hotels
+            .AnyAsync(h => h.Id == reservation.HotelId && h.CreatedById == userId);
+
+        // Only allow user to cancel their own reservations (or SuperAdmin, Moderator, or Owner)
+        if (!isSuperAdmin && reservation.UserId != userId && !isModerator && !isOwner)
         {
             return Forbid();
         }

@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './ContactHotel.css';
 
 const ContactHotel = () => {
@@ -68,7 +68,7 @@ const ContactHotel = () => {
     if (loading) {
         return (
             <div className="contact-page">
-                <Header />
+
                 <div className="loading-container">
                     <div className="spinner"></div>
                 </div>
@@ -82,7 +82,7 @@ const ContactHotel = () => {
 
     return (
         <div className="contact-page">
-            <Header />
+
             <div className="contact-container">
                 <Link to={`/hotel/${id}`} className="btn-back">
                     ← {t('backToHotel') || 'Back to Hotel'}

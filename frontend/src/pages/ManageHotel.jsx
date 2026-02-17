@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import RoomTypeManager from '../components/RoomTypeManager';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import './ManageHotel.css';
@@ -21,6 +21,11 @@ const ManageHotel = () => {
     const [success, setSuccess] = useState('');
     const [activeTab, setActiveTab] = useState('rooms');
 
+    // Moderator management
+    const [moderators, setModerators] = useState([]);
+    const [moderatorEmail, setModeratorEmail] = useState('');
+    const [showAddModerator, setShowAddModerator] = useState(false);
+
     // Edit mode
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({});
@@ -37,8 +42,8 @@ const ManageHotel = () => {
         try {
             const data = await api.get(`/hotels/${id}`);
 
-            // Check if user owns this hotel
-            if (data.createdById !== user?.id && !user?.roles?.includes('SuperAdmin')) {
+            // Check if user owns this hotel or is moderator
+            if (data.createdById !== user?.id && !data.isModerator && !user?.roles?.includes('SuperAdmin')) {
                 navigate('/my-hotels');
                 return;
             }
@@ -98,12 +103,57 @@ const ManageHotel = () => {
         setRoomTypes(rooms);
     };
 
+    const fetchModerators = async () => {
+        try {
+            const data = await api.get(`/hotels/${id}/moderators`);
+            setModerators(data);
+        } catch (err) {
+            console.error('Error fetching moderators:', err);
+        }
+    };
+
+    const handleAddModerator = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+
+        try {
+            await api.post(`/hotels/${id}/moderators`, { email: moderatorEmail });
+            setSuccess(t('moderatorAdded') || 'Модераторът е добавен успешно');
+            setModeratorEmail('');
+            setShowAddModerator(false);
+            fetchModerators();
+        } catch (err) {
+            setError(err.message || t('errorAddingModerator') || 'Грешка при добавяне на модератор');
+        }
+    };
+
+    const handleRemoveModerator = async (userId) => {
+        if (!window.confirm(t('confirmRemoveModerator') || 'Сигурни ли сте, че искате да премахнете този модератор?')) {
+            return;
+        }
+
+        try {
+            await api.delete(`/hotels/${id}/moderators/${userId}`);
+            setSuccess(t('moderatorRemoved') || 'Модераторът е премахнат успешно');
+            fetchModerators();
+        } catch (err) {
+            setError(t('errorRemovingModerator') || 'Грешка при премахване на модератор');
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'moderators') {
+            fetchModerators();
+        }
+    }, [activeTab]);
+
     if (!isAdmin()) return null;
 
     if (loading) {
         return (
             <div className="manage-hotel-page">
-                <Header />
+
                 <div className="loading-state">
                     <div className="spinner"></div>
                     <p>{t('loading')}</p>
@@ -115,7 +165,7 @@ const ManageHotel = () => {
     if (!hotel) {
         return (
             <div className="manage-hotel-page">
-                <Header />
+
                 <div className="error-state">
                     <h2>{t('hotelNotFound') || 'Хотелът не е намерен'}</h2>
                     <Link to="/my-hotels" className="btn-back">← {t('back')}</Link>
@@ -126,7 +176,7 @@ const ManageHotel = () => {
 
     return (
         <div className="manage-hotel-page">
-            <Header />
+
 
             <div className="manage-container">
                 {/* Header */}
@@ -171,6 +221,14 @@ const ManageHotel = () => {
                     >
                         📅 {t('availabilityTab')}
                     </button>
+                    {(hotel.createdById === user?.id || user?.roles?.includes('SuperAdmin')) && (
+                        <button
+                            className={`tab ${activeTab === 'moderators' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('moderators')}
+                        >
+                            🛡️ {t('moderatorsTab') || 'Модератори'}
+                        </button>
+                    )}
                 </div>
 
                 {/* Tab Content */}
@@ -310,6 +368,66 @@ const ManageHotel = () => {
                             hotelId={parseInt(id)}
                             roomTypes={roomTypes}
                         />
+                    )}
+
+                    {/* Moderators Tab */}
+                    {activeTab === 'moderators' && (
+                        <div className="moderators-section">
+                            <div className="moderators-header">
+                                <h3>{t('manageModerators') || 'Управление на модератори'}</h3>
+                                <button
+                                    className="btn-add"
+                                    onClick={() => setShowAddModerator(!showAddModerator)}
+                                >
+                                    {showAddModerator ? `❌ ${t('cancel')}` : `➕ ${t('addModerator') || 'Добави модератор'}`}
+                                </button>
+                            </div>
+
+                            {showAddModerator && (
+                                <div className="add-moderator-form">
+                                    <form onSubmit={handleAddModerator}>
+                                        <div className="form-group">
+                                            <label>{t('userEmail')}</label>
+                                            <input
+                                                type="email"
+                                                value={moderatorEmail}
+                                                onChange={(e) => setModeratorEmail(e.target.value)}
+                                                placeholder="user@example.com"
+                                                required
+                                            />
+                                        </div>
+                                        <button type="submit" className="btn-save">
+                                            ✅ {t('add')}
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+
+                            <div className="moderators-list">
+                                {moderators.length === 0 ? (
+                                    <p className="no-data">{t('noModerators') || 'Няма добавени модератори за този хотел.'}</p>
+                                ) : (
+                                    <div className="moderators-grid">
+                                        {moderators.map(mod => (
+                                            <div key={mod.userId} className="moderator-card">
+                                                <div className="moderator-info">
+                                                    <strong>{mod.firstName} {mod.lastName}</strong>
+                                                    <span>{mod.email}</span>
+                                                    <small>{t('addedOn') || 'Добавен на'}: {new Date(mod.addedAt).toLocaleDateString()}</small>
+                                                </div>
+                                                <button
+                                                    className="btn-delete"
+                                                    onClick={() => handleRemoveModerator(mod.userId)}
+                                                    title={t('remove')}
+                                                >
+                                                    ❌ {t('remove')}
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useCurrency } from '../context/CurrencyContext';
-import Header from '../components/Header';
+
 import './Settings.css';
 
 const Settings = () => {
@@ -147,7 +147,7 @@ const Settings = () => {
 
     return (
         <>
-            <Header />
+
             <div className="settings-page">
                 <div className="settings-hero">
                     <h1>{t('settingsTitle')}</h1>

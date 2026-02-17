@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import LocationPicker from '../components/LocationPicker';
 import './CreateHotel.css';
 
@@ -227,7 +227,7 @@ const CreateHotel = () => {
 
     return (
         <div className="create-hotel-page">
-            <Header />
+
             <div className="create-hotel-container">
                 <div className="create-hotel-card">
                     <h2>{t('createNewHotel')}</h2>

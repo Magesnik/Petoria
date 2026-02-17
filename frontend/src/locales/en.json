@@ -136,6 +136,7 @@
     "myHotels": "My Hotels",
     "createHotel": "Create Hotel",
     "adminPanel": "Admin Panel",
+    "moderatorPanel": "Moderator Panel",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -421,5 +422,12 @@
     "guestRating": "Guest Rating",
     "excellent": "Excellent",
     "veryGood": "Very Good",
-    "good": "Good"
+    "good": "Good",
+    "moderatorDashboard": "Moderator Dashboard",
+    "moderatorDashboardDesc": "Manage hotels where you have moderator privileges.",
+    "noModeratedHotels": "You are not moderating any hotels yet.",
+    "manageHotel": "Manage Hotel",
+    "moderator": "Moderator",
+    "moderatorCalendarInstruction": "Click and drag on dates to create a reservation or block dates.",
+    "moderatorFreeBooking": "As a moderator, this booking will be free ($0)."
 }

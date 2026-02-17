@@ -136,6 +136,7 @@
     "myHotels": "Моите хотели",
     "createHotel": "Създай хотел",
     "adminPanel": "Админ панел",
+    "moderatorPanel": "Модератор панел",
     "loading": "Зареждане...",
     "error": "Грешка",
     "success": "Успех",
@@ -415,5 +416,12 @@
     "guestRating": "Оценка от гости",
     "excellent": "Отлично",
     "veryGood": "Много добро",
-    "good": "Добро"
+    "good": "Добро",
+    "moderatorDashboard": "Модераторски панел",
+    "moderatorDashboardDesc": "Управлявайте хотелите, където имате права на модератор.",
+    "noModeratedHotels": "Все още не модерирате никакви хотели.",
+    "manageHotel": "Управление на хотел",
+    "moderator": "Модератор",
+    "moderatorCalendarInstruction": "Кликнете и плъзнете върху датите, за да създадете резервация или да блокирате дати.",
+    "moderatorFreeBooking": "Като модератор, тази резервация ще бъде безплатна (0 лв.)."
 }

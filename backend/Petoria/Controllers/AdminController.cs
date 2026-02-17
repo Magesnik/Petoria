@@ -245,4 +245,42 @@ public class AdminController : ControllerBase
             TotalComments = totalComments
         });
     }
+
+    // GET: api/admin/moderators
+    [HttpGet("moderators")]
+    public async Task<ActionResult<IEnumerable<AdminModeratorDto>>> GetAllModerators()
+    {
+        var moderators = await _context.HotelModerators
+            .Include(hm => hm.Hotel)
+            .Include(hm => hm.User)
+            .Select(hm => new AdminModeratorDto
+            {
+                Id = hm.Id,
+                HotelId = hm.HotelId,
+                HotelName = hm.Hotel.Name,
+                UserId = hm.UserId,
+                UserEmail = hm.User.Email!,
+                UserFullName = $"{hm.User.FirstName} {hm.User.LastName}",
+                AddedAt = hm.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(moderators);
+    }
+
+    // DELETE: api/admin/moderators/{id}
+    [HttpDelete("moderators/{id}")]
+    public async Task<IActionResult> RemoveModeratorRole(int id)
+    {
+        var moderator = await _context.HotelModerators.FindAsync(id);
+        if (moderator == null)
+        {
+            return NotFound("Moderator assignment not found");
+        }
+
+        _context.HotelModerators.Remove(moderator);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Moderator role removed successfully" });
+    }
 }

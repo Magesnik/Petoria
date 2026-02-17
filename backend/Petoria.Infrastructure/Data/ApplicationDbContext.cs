@@ -22,6 +22,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<RoomDiscount> RoomDiscounts { get; set; }
     public DbSet<HotelMessage> HotelMessages { get; set; }
     public DbSet<SupportMessage> SupportMessages { get; set; }
+    public DbSet<HotelModerator> HotelModerators { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -49,5 +50,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         // Add index for efficient discount queries
         builder.Entity<RoomDiscount>()
             .HasIndex(rd => new { rd.RoomTypeId, rd.StartDate, rd.EndDate });
+
+        // Ensure unique moderator per hotel
+        builder.Entity<HotelModerator>()
+            .HasIndex(hm => new { hm.HotelId, hm.UserId })
+            .IsUnique();
     }
 }

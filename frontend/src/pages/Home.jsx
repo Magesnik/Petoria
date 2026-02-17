@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import Footer from '../components/Footer';
 import './Home.css';
 
@@ -9,7 +9,7 @@ const Home = () => {
 
     return (
         <div className="home">
-            <Header />
+
 
             {/* Hero Section */}
             <section className="hero">

@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -11,6 +11,7 @@ const AdminDashboard = () => {
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
+    const [moderators, setModerators] = useState([]);
     const [stats, setStats] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
@@ -18,6 +19,7 @@ const AdminDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState(null);
     const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+    const [activeDashboardTab, setActiveDashboardTab] = useState('users');
 
     const getStatusLabel = (status) => {
         switch (status?.toLowerCase()) {
@@ -42,11 +44,13 @@ const AdminDashboard = () => {
             let usersData = [];
             let statsData = null;
             let messagesCount = 0;
+            let moderatorsData = [];
 
-            const [usersRes, statsRes, messagesRes] = await Promise.allSettled([
+            const [usersRes, statsRes, messagesRes, moderatorsRes] = await Promise.allSettled([
                 api.get('/admin/users'),
                 api.get('/admin/stats'),
-                api.get('/support/messages/admin/unread-count')
+                api.get('/support/messages/admin/unread-count'),
+                api.get('/admin/moderators')
             ]);
 
             if (usersRes.status === 'fulfilled') usersData = usersRes.value;
@@ -57,9 +61,12 @@ const AdminDashboard = () => {
 
             if (messagesRes.status === 'fulfilled') messagesCount = messagesRes.value;
 
+            if (moderatorsRes.status === 'fulfilled') moderatorsData = moderatorsRes.value;
+
             setUsers(usersData);
             setStats(statsData);
             setUnreadMessagesCount(messagesCount);
+            setModerators(moderatorsData);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -101,6 +108,16 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleRemoveModeratorRole = async (id) => {
+        if (!window.confirm(t('confirmRemoveModeratorRole') || 'Are you sure you want to remove this moderator assignment?')) return;
+        try {
+            await api.delete(`/admin/moderators/${id}`);
+            fetchData();
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const filteredUsers = users.filter(u =>
         u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,7 +131,7 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <>
-                <Header />
+
                 <div className="admin-dashboard loading">
                     <div className="loading-spinner"></div>
                     <p>{t('loadingDashboard')}</p>
@@ -125,7 +142,7 @@ const AdminDashboard = () => {
 
     return (
         <>
-            <Header />
+
             <div className="admin-dashboard">
                 <div className="dashboard-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
@@ -230,47 +247,90 @@ const AdminDashboard = () => {
 
                 <div className="dashboard-content">
                     <div className="users-panel">
-                        <div className="panel-header">
-                            <h2>👥 {t('users')}</h2>
-                            <input
-                                type="text"
-                                placeholder={t('searchUsers')}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="search-input"
-                            />
+                        <div className="panel-tabs">
+                            <button
+                                className={`panel-tab ${activeDashboardTab === 'users' ? 'active' : ''}`}
+                                onClick={() => setActiveDashboardTab('users')}
+                            >
+                                👥 {t('users')}
+                            </button>
+                            <button
+                                className={`panel-tab ${activeDashboardTab === 'moderators' ? 'active' : ''}`}
+                                onClick={() => setActiveDashboardTab('moderators')}
+                            >
+                                🛡️ {t('moderators') || 'Moderators'}
+                            </button>
                         </div>
-                        <div className="users-list">
-                            {filteredUsers.map(u => (
-                                <div
-                                    key={u.id}
-                                    className={`user-card ${selectedUser === u.id ? 'selected' : ''}`}
-                                    onClick={() => fetchUserDetails(u.id)}
-                                >
-                                    <div className="user-avatar">
-                                        {u.avatarUrl ? (
-                                            <img src={`http://localhost:5150${u.avatarUrl}`} alt={u.firstName} />
-                                        ) : (
-                                            <span>{u.firstName?.[0] || u.email?.[0] || '?'}</span>
-                                        )}
-                                    </div>
-                                    <div className="user-info">
-                                        <span className="user-name">
-                                            {u.firstName} {u.lastName}
-                                            {u.roles?.includes('SuperAdmin') && <span className="badge super">Super</span>}
-                                            {u.roles?.includes('Admin') && !u.roles?.includes('SuperAdmin') && <span className="badge admin">Admin</span>}
-                                        </span>
-                                        <span className="user-email">{u.email}</span>
-                                    </div>
-                                    <div className="user-stats">
-                                        <span title="Favorites">❤️ {u.favoritesCount}</span>
-                                        <span title="Reservations">📅 {u.reservationsCount}</span>
-                                        <span title="Comments">💬 {u.commentsCount}</span>
-                                        <span title="Hotels Created">🏨 {u.hotelsCreated}</span>
-                                    </div>
+
+                        {activeDashboardTab === 'users' && (
+                            <>
+                                <div className="panel-header">
+                                    <input
+                                        type="text"
+                                        placeholder={t('searchUsers')}
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="search-input"
+                                    />
                                 </div>
-                            ))}
-                        </div>
+                                <div className="users-list">
+                                    {filteredUsers.map(u => (
+                                        <div
+                                            key={u.id}
+                                            className={`user-card ${selectedUser === u.id ? 'selected' : ''}`}
+                                            onClick={() => fetchUserDetails(u.id)}
+                                        >
+                                            <div className="user-avatar">
+                                                {u.avatarUrl ? (
+                                                    <img src={`http://localhost:5150${u.avatarUrl}`} alt={u.firstName} />
+                                                ) : (
+                                                    <span>{u.firstName?.[0] || u.email?.[0] || '?'}</span>
+                                                )}
+                                            </div>
+                                            <div className="user-info">
+                                                <span className="user-name">
+                                                    {u.firstName} {u.lastName}
+                                                    {u.roles?.includes('SuperAdmin') && <span className="badge super">Super</span>}
+                                                    {u.roles?.includes('Admin') && !u.roles?.includes('SuperAdmin') && <span className="badge admin">Admin</span>}
+                                                </span>
+                                                <span className="user-email">{u.email}</span>
+                                            </div>
+                                            <div className="user-stats">
+                                                <span title="Favorites">❤️ {u.favoritesCount}</span>
+                                                <span title="Reservations">📅 {u.reservationsCount}</span>
+                                                <span title="Comments">💬 {u.commentsCount}</span>
+                                                <span title="Hotels Created">🏨 {u.hotelsCreated}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {activeDashboardTab === 'moderators' && (
+                            <div className="moderators-list">
+                                {moderators.length === 0 ? (
+                                    <p className="empty-message">{t('noModerators') || 'No moderators assigned'}</p>
+                                ) : (
+                                    moderators.map(m => (
+                                        <div key={m.id} className="moderator-card-admin">
+                                            <div className="moderator-info">
+                                                <strong>{m.userFullName}</strong>
+                                                <span>{m.userEmail}</span>
+                                                <small>{t('moderates') || 'Moderates'}: {m.hotelName}</small>
+                                            </div>
+                                            <button
+                                                className="btn-revoke"
+                                                onClick={() => handleRemoveModeratorRole(m.id)}
+                                                title={t('revokeModerator') || 'Revoke'}
+                                            >
+                                                ❌
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {userDetails && (

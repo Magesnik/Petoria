@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import Footer from '../components/Footer';
 import './Deals.css';
 
@@ -56,7 +56,7 @@ const Deals = () => {
 
     return (
         <div className="deals-page">
-            <Header />
+
 
             {/* Hero Section */}
             <div className="deals-hero">

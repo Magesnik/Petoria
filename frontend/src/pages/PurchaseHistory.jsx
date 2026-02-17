@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
-import Header from '../components/Header';
+
 import './PurchaseHistory.css';
 
 const PurchaseHistory = () => {
@@ -92,7 +92,7 @@ const PurchaseHistory = () => {
     if (loading) {
         return (
             <>
-                <Header />
+
                 <div className="purchase-history-page">
                     <div className="loading-state">
                         <div className="spinner"></div>
@@ -105,7 +105,7 @@ const PurchaseHistory = () => {
 
     return (
         <>
-            <Header />
+
             <div className="purchase-history-page">
                 <div className="purchase-hero">
                     <h1>📋 {t('myReservations')}</h1>

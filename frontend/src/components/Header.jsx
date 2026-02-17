@@ -31,24 +31,30 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch unread messages count
+  // Fetch unread messages count and moderator status
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isModerator, setIsModerator] = useState(false);
 
   useEffect(() => {
     if (user) {
-      fetchUnreadCount();
+      fetchUserData();
       // Poll every minute
-      const interval = setInterval(fetchUnreadCount, 60000);
+      const interval = setInterval(fetchUserData, 60000);
       return () => clearInterval(interval);
     }
   }, [user]);
 
-  const fetchUnreadCount = async () => {
+  const fetchUserData = async () => {
     try {
-      const data = await api.get('/hotels/my/messages/unread-responses-count');
-      setUnreadCount(data.count);
+      const messagesData = await api.get('/hotels/my/messages/unread-responses-count');
+      setUnreadCount(messagesData.count);
+
+      // Check if user is a moderator for any hotel
+      // We can use the /hotels/moderated endpoint. If it returns any hotels, they are a moderator.
+      const moderatedHotels = await api.get('/hotels/moderated');
+      setIsModerator(moderatedHotels.length > 0);
     } catch (err) {
-      console.error('Error fetching unread count:', err);
+      console.error('Error fetching user data:', err);
     }
   };
 
@@ -122,6 +128,9 @@ const Header = () => {
             )}
             {isSuperAdmin() && (
               <li><Link to="/admin" className="nav-link super-admin-link">🛡️ {t('adminPanel')}</Link></li>
+            )}
+            {isModerator && (
+              <li><Link to="/moderator" className="nav-link moderator-link">🛡️ {t('moderatorPanel')}</Link></li>
             )}
           </ul>
         </nav>
@@ -237,6 +246,9 @@ const Header = () => {
             )}
             {isSuperAdmin() && (
               <li><Link to="/admin" className="mobile-nav-link super-admin-link" onClick={closeMobileMenu}>🛡️ {t('adminPanel')}</Link></li>
+            )}
+            {isModerator && (
+              <li><Link to="/moderator" className="mobile-nav-link moderator-link" onClick={closeMobileMenu}>🛡️ {t('moderatorPanel')}</Link></li>
             )}
           </ul>
 

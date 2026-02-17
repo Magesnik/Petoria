@@ -3,7 +3,7 @@ import { api } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './AdminSupportMessages.css';
 
 const AdminSupportMessages = () => {
@@ -64,7 +64,7 @@ const AdminSupportMessages = () => {
     if (loading) {
         return (
             <div className="admin-support-page">
-                <Header />
+
                 <div className="loading-container">
                     <div className="spinner"></div>
                 </div>
@@ -74,7 +74,7 @@ const AdminSupportMessages = () => {
 
     return (
         <div className="admin-support-page">
-            <Header />
+
             <div className="admin-container">
                 <div className="page-header">
                     <button className="btn-back" onClick={() => navigate('/admin')}>

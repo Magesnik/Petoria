@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import './Support.css';
 
 const Support = () => {
@@ -71,7 +71,7 @@ const Support = () => {
 
     return (
         <>
-            <Header />
+
             <div className="support-page">
                 <div className="support-hero">
                     <h1>{t('supportTitle')}</h1>

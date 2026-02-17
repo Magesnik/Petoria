@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { useLanguage } from '../context/LanguageContext';
-import Header from '../components/Header';
+
 import Footer from '../components/Footer';
 import HotelCard from '../components/HotelCard';
 import HotelFilters from '../components/HotelFilters';
@@ -144,7 +144,7 @@ const Hotels = () => {
 
     return (
         <div className="hotels-page">
-            <Header />
+
 
             {/* Hero Section with Search */}
             <section className="hotels-hero">

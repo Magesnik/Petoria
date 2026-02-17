@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Petoria.Core\Petoria.Core.csproj" />
+    <ProjectReference Include="..\Petoria.Infrastructure\Petoria.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
