@@ -22,18 +22,20 @@ public class ProfileController : ControllerBase
 
     // GET: api/profile
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<ProfileResponseDto>> GetProfile()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized();
+            // Return 200 OK with null to avoid 401 browser console errors
+            return Ok(null);
         }
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
-            return NotFound();
+            return Ok(null);
         }
 
         // Map Entity → Response DTO
@@ -46,6 +48,9 @@ public class ProfileController : ControllerBase
             FirstName = user.FirstName,
             LastName = user.LastName,
             AvatarUrl = user.AvatarUrl,
+            Theme = user.Theme,
+            Currency = user.Currency,
+            Language = user.Language,
             Roles = roles.ToList()
         });
     }
@@ -70,6 +75,11 @@ public class ProfileController : ControllerBase
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
 
+        // Update preferences if provided
+        if (!string.IsNullOrEmpty(request.Theme)) user.Theme = request.Theme;
+        if (!string.IsNullOrEmpty(request.Currency)) user.Currency = request.Currency;
+        if (!string.IsNullOrEmpty(request.Language)) user.Language = request.Language;
+
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {
@@ -87,6 +97,9 @@ public class ProfileController : ControllerBase
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 AvatarUrl = user.AvatarUrl,
+                Theme = user.Theme,
+                Currency = user.Currency,
+                Language = user.Language,
                 Roles = (await _userManager.GetRolesAsync(user)).ToList()
             }
         });

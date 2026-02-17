@@ -13,4 +13,8 @@ public class UpdateProfileDto
 
     [MaxLength(100, ErrorMessage = "Фамилията не може да надвишава 100 символа")]
     public string? LastName { get; set; }
+
+    public string? Theme { get; set; }
+    public string? Currency { get; set; }
+    public string? Language { get; set; }
 }

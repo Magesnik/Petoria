@@ -16,10 +16,13 @@ export const AuthProvider = ({ children }) => {
                     data.avatarUrl = `http://localhost:5150${data.avatarUrl}`;
                 }
                 setUser(data);
+            } else {
+                // 200 OK but null data means not logged in
+                setUser(null);
             }
         } catch (error) {
             // 401 or other error means not logged in
-            console.log("Not authenticated or session expired");
+            // console.debug("Not authenticated or session expired");
             setUser(null);
         } finally {
             setLoading(false);

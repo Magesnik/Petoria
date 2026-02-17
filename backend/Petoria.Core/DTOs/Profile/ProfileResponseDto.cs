@@ -11,5 +11,8 @@ public class ProfileResponseDto
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? AvatarUrl { get; set; }
+    public string? Theme { get; set; }
+    public string? Currency { get; set; }
+    public string? Language { get; set; }
     public List<string> Roles { get; set; } = new();
 }

@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import { api } from '../utils/api';
 
 const CurrencyContext = createContext();
 
@@ -22,6 +24,15 @@ export const CurrencyProvider = ({ children }) => {
         const saved = localStorage.getItem('currency');
         return saved || 'BGN';
     });
+    const { user } = useAuth();
+
+    // Sync from user profile when user logs in
+    useEffect(() => {
+        if (user?.currency && EXCHANGE_RATES[user.currency]) {
+            setCurrency(user.currency);
+            localStorage.setItem('currency', user.currency);
+        }
+    }, [user]);
 
     useEffect(() => {
         localStorage.setItem('currency', currency);
@@ -59,6 +70,13 @@ export const CurrencyProvider = ({ children }) => {
     const changeCurrency = (newCurrency) => {
         if (EXCHANGE_RATES[newCurrency]) {
             setCurrency(newCurrency);
+            localStorage.setItem('currency', newCurrency);
+
+            // Sync to backend if logged in
+            if (user) {
+                api.put('/profile', { currency: newCurrency })
+                    .catch(err => console.error("Failed to save currency preference", err));
+            }
         }
     };
 

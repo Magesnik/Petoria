@@ -29,11 +29,11 @@ import AdminSupportMessages from './pages/AdminSupportMessages';
 function App() {
   return (
     <GoogleOAuthProvider clientId="21847094498-c94136osjkahal0fjg0nk9q4mc7e4um9.apps.googleusercontent.com">
-      <ThemeProvider>
-        <LanguageProvider>
-          <AuthProvider>
-            <FavoritesProvider>
-              <CurrencyProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <CurrencyProvider>
+              <FavoritesProvider>
                 <Router>
                   <div className="App">
                     <Routes>
@@ -60,11 +60,11 @@ function App() {
                     </Routes>
                   </div>
                 </Router>
-              </CurrencyProvider>
-            </FavoritesProvider>
-          </AuthProvider>
-        </LanguageProvider>
-      </ThemeProvider>
+              </FavoritesProvider>
+            </CurrencyProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </GoogleOAuthProvider>
   );
 }

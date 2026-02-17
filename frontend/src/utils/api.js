@@ -58,19 +58,24 @@ async function request(endpoint, options = {}) {
         let data;
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
-             data = await response.json();
+            data = await response.json();
         } else {
-             data = await response.text();
+            data = await response.text();
         }
 
         if (!response.ok) {
-            // Throw error with message from server if available
-            throw new Error(data.message || data || response.statusText || 'API request failed');
+            // Create error object with status
+            const error = new Error(data.message || data || response.statusText || 'API request failed');
+            error.status = response.status;
+            throw error;
         }
 
         return data;
     } catch (error) {
-        console.error(`API Error (${options.method || 'GET'} ${endpoint}):`, error);
+        // Only log error if it's NOT a 401 (Unauthorized)
+        if (error.status !== 401) {
+            console.error(`API Error (${options.method || 'GET'} ${endpoint}):`, error);
+        }
         throw error;
     }
 }
