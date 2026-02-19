@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../components/Footer';
+import Footer from '../../components/Footer';
 import './About.css';
 
 const About = () => {

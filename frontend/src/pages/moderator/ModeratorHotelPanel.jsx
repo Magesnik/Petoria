@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
-import AvailabilityCalendar from '../components/AvailabilityCalendar';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
+import AvailabilityCalendar from '../../components/AvailabilityCalendar';
 import './ModeratorHotelPanel.css'; // We'll create this
 
 const ModeratorHotelPanel = () => {

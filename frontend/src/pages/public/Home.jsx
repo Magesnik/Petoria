@@ -1,7 +1,7 @@
-import React from 'react';
-import { useLanguage } from '../context/LanguageContext';
+﻿import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../components/Footer';
+import Footer from '../../components/Footer';
 import './Home.css';
 
 const Home = () => {

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
+﻿import React, { useState, useEffect } from 'react';
+import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { useCurrency } from '../context/CurrencyContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../components/Footer';
+import Footer from '../../components/Footer';
 import './Deals.css';
 
 const Deals = () => {

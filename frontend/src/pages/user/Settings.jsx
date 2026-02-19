@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import { useCurrency } from '../context/CurrencyContext';
+﻿import React, { useState, useRef } from 'react';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 import './Settings.css';
 

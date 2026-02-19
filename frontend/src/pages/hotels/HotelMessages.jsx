@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
+﻿import React, { useState, useEffect } from 'react';
+import { api } from '../../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 import './HotelMessages.css';
 

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+﻿import React, { useState, useEffect } from 'react';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../components/Footer';
-import HotelCard from '../components/HotelCard';
-import HotelFilters from '../components/HotelFilters';
-import HotelMap from '../components/HotelMap';
+import Footer from '../../components/Footer';
+import HotelCard from '../../components/HotelCard';
+import HotelFilters from '../../components/HotelFilters';
+import HotelMap from '../../components/HotelMap';
 import './Hotels.css';
 
 const Hotels = () => {

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+﻿import React, { useState } from 'react';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 
 import './Support.css';
 

@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
-import { api } from '../utils/api';
+﻿import React, { useState } from 'react';
+import { api } from '../../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 import './Auth.css';
 
-const Login = () => {
+const Register = () => {
     const { t } = useLanguage();
     const { login } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         password: ''
     });
@@ -26,7 +28,7 @@ const Login = () => {
         setError('');
 
         try {
-            const data = await api.post('/auth/login', formData);
+            const data = await api.post('/auth/register', formData);
 
             // Store token with avatar URL
             const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
@@ -44,7 +46,7 @@ const Login = () => {
 
             navigate('/');
         } catch (err) {
-            setError(err.message || 'Invalid email or password');
+            setError(err.message || 'Registration failed');
             console.error(err);
         }
     };
@@ -83,12 +85,35 @@ const Login = () => {
 
             <div className="auth-container">
                 <div className="auth-card">
-                    <h2>{t('loginTitle')}</h2>
-                    <p className="auth-subtitle">{t('loginSubtitle')}</p>
+                    <h2>{t('registerTitle')}</h2>
+                    <p className="auth-subtitle">{t('registerSubtitle')}</p>
 
                     {error && <div className="error-message">{error}</div>}
 
                     <form onSubmit={handleSubmit}>
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label>{t('firstNameLabel')}</label>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>{t('lastNameLabel')}</label>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
                         <div className="form-group">
                             <label>{t('emailLabel')}</label>
                             <input
@@ -108,11 +133,12 @@ const Login = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
+                                minLength="6"
                             />
                         </div>
 
                         <button type="submit" className="btn btn-primary btn-block">
-                            {t('loginBtn')}
+                            {t('registerBtn')}
                         </button>
                     </form>
 
@@ -126,11 +152,12 @@ const Login = () => {
                             onError={handleGoogleError}
                             theme="outline"
                             size="large"
+                            width="100%"
                         />
                     </div>
 
                     <div className="auth-footer">
-                        {t('noAccount')} <Link to="/register">{t('registerLink')}</Link>
+                        {t('hasAccount')} <Link to="/login">{t('loginLink')}</Link>
                     </div>
                 </div>
             </div>
@@ -138,4 +165,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;

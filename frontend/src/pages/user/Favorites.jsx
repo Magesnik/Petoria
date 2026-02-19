@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
-import { useFavorites } from '../context/FavoritesContext';
-import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFavorites } from '../../context/FavoritesContext';
+import { useAuth } from '../../context/AuthContext';
 
-import HotelCard from '../components/HotelCard';
+import HotelCard from '../../components/HotelCard';
 import './Favorites.css';
 
 const Favorites = () => {

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
+﻿import React, { useState, useEffect } from 'react';
+import { api } from '../../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
-import { useFavorites } from '../context/FavoritesContext';
-import { useAuth } from '../context/AuthContext';
-import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFavorites } from '../../context/FavoritesContext';
+import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
-import ReviewSection from '../components/ReviewSection';
-import BookingWidget from '../components/BookingWidget';
-import RoomTypeManager from '../components/RoomTypeManager';
+import ReviewSection from '../../components/ReviewSection';
+import BookingWidget from '../../components/BookingWidget';
+import RoomTypeManager from '../../components/RoomTypeManager';
 import './HotelDetails.css';
 
 const HotelDetails = () => {

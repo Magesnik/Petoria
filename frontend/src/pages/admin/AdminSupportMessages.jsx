@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
+﻿import React, { useState, useEffect } from 'react';
+import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 import './AdminSupportMessages.css';
 
@@ -78,7 +78,7 @@ const AdminSupportMessages = () => {
             <div className="admin-container">
                 <div className="page-header">
                     <button className="btn-back" onClick={() => navigate('/admin')}>
-                        ← {t('backToDashboard')}
+                        тЖР {t('backToDashboard')}
                     </button>
                     <h1>{t('supportMessagesTitle')}</h1>
                 </div>
@@ -151,7 +151,7 @@ const AdminSupportMessages = () => {
                                                 className="btn-reply"
                                                 onClick={() => setReplyingTo(msg.id)}
                                             >
-                                                ↩️ {t('reply')}
+                                                тЖйя╕П {t('reply')}
                                             </button>
                                         )}
                                     </div>

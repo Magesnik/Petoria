@@ -7,28 +7,39 @@ import { AuthProvider } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { CartProvider } from './context/CartContext';
-import Cart from './pages/Cart';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Hotels from './pages/Hotels';
-import HotelDetails from './pages/HotelDetails';
-import CreateHotel from './pages/CreateHotel';
-import Deals from './pages/Deals';
-import About from './pages/About';
-import Settings from './pages/Settings';
-import Favorites from './pages/Favorites';
-import PurchaseHistory from './pages/PurchaseHistory';
-import Support from './pages/Support';
-import AdminDashboard from './pages/AdminDashboard';
-import MyHotels from './pages/MyHotels';
-import ManageHotel from './pages/ManageHotel';
-import ContactHotel from './pages/ContactHotel';
-import HotelMessages from './pages/HotelMessages';
-import MyMessages from './pages/MyMessages';
-import AdminSupportMessages from './pages/AdminSupportMessages';
-import ModeratorDashboard from './pages/ModeratorDashboard';
-import ModeratorHotelPanel from './pages/ModeratorHotelPanel';
+// Auth
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+
+// Admin
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminSupportMessages from './pages/admin/AdminSupportMessages';
+
+// Moderator
+import ModeratorDashboard from './pages/moderator/ModeratorDashboard';
+import ModeratorHotelPanel from './pages/moderator/ModeratorHotelPanel';
+
+// Hotels
+import Hotels from './pages/hotels/Hotels';
+import HotelDetails from './pages/hotels/HotelDetails';
+import CreateHotel from './pages/hotels/CreateHotel';
+import ManageHotel from './pages/hotels/ManageHotel';
+import MyHotels from './pages/hotels/MyHotels';
+import ContactHotel from './pages/hotels/ContactHotel';
+import HotelMessages from './pages/hotels/HotelMessages';
+
+// User
+import Cart from './pages/user/Cart';
+import Settings from './pages/user/Settings';
+import Favorites from './pages/user/Favorites';
+import PurchaseHistory from './pages/user/PurchaseHistory';
+import MyMessages from './pages/user/MyMessages';
+
+// Public
+import Home from './pages/public/Home';
+import About from './pages/public/About';
+import Deals from './pages/public/Deals';
+import Support from './pages/public/Support';
 
 import Header from './components/Header'; // Added import
 

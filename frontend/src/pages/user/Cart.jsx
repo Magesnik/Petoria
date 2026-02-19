@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useLanguage } from '../context/LanguageContext';
-import { useCurrency } from '../context/CurrencyContext';
-import { useAuth } from '../context/AuthContext';
-import { api } from '../utils/api';
+import { useCart } from '../../context/CartContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../utils/api';
 import './Cart.css';
 
 const Cart = () => {
