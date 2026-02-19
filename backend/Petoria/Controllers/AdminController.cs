@@ -283,4 +283,53 @@ public class AdminController : ControllerBase
 
         return Ok(new { message = "Moderator role removed successfully" });
     }
+
+    // GET: api/admin/hotels
+    [HttpGet("hotels")]
+    public async Task<ActionResult<IEnumerable<object>>> GetAllHotelsForAdmin()
+    {
+        var hotels = await _context.Hotels
+            .Select(h => new
+            {
+                h.Id,
+                h.Name,
+                h.City,
+                h.Country,
+                h.IsAvailable,
+                h.IsSuspendedBySuperAdmin,
+                h.CreatedAt,
+                OwnerEmail = _context.Users
+                    .Where(u => u.Id == h.CreatedById)
+                    .Select(u => u.Email)
+                    .FirstOrDefault()
+            })
+            .OrderByDescending(h => h.CreatedAt)
+            .ToListAsync();
+
+        return Ok(hotels);
+    }
+
+    // POST: api/admin/hotels/{id}/toggle-suspend
+    [HttpPost("hotels/{id}/toggle-suspend")]
+    public async Task<IActionResult> ToggleHotelSuspend(int id)
+    {
+        var hotel = await _context.Hotels.FindAsync(id);
+        if (hotel == null)
+        {
+            return NotFound("Hotel not found");
+        }
+
+        hotel.IsSuspendedBySuperAdmin = !hotel.IsSuspendedBySuperAdmin;
+        hotel.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            hotelId = hotel.Id,
+            isSuspendedBySuperAdmin = hotel.IsSuspendedBySuperAdmin,
+            message = hotel.IsSuspendedBySuperAdmin
+                ? $"Хотел '{hotel.Name}' е деактивиран."
+                : $"Хотел '{hotel.Name}' е активиран."
+        });
+    }
 }

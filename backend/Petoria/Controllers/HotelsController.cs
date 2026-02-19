@@ -84,8 +84,8 @@ public class HotelsController : ControllerBase
             }
         }
 
-        // Only show available hotels
-        query = query.Where(h => h.IsAvailable);
+        // Only show available hotels that are not suspended by SuperAdmin
+        query = query.Where(h => h.IsAvailable && !h.IsSuspendedBySuperAdmin);
 
         var today = DateTime.UtcNow;
         var thirtyDaysAgo = today.AddDays(-30);
@@ -156,6 +156,7 @@ public class HotelsController : ControllerBase
                     Amenities = hotel.Amenities,
                     RoomTypes = hotel.RoomTypes,
                     IsAvailable = hotel.IsAvailable,
+                    IsSuspendedBySuperAdmin = hotel.IsSuspendedBySuperAdmin,
                     CreatedById = hotel.CreatedById,
                     CreatedAt = hotel.CreatedAt,
                     UpdatedAt = hotel.UpdatedAt,
@@ -192,6 +193,12 @@ public class HotelsController : ControllerBase
         if (hotel == null)
         {
             return NotFound();
+        }
+
+        // Block access to suspended hotels for non-SuperAdmin users
+        if (hotel.IsSuspendedBySuperAdmin && !User.IsInRole("SuperAdmin"))
+        {
+            return StatusCode(403, new { message = "Този хотел е временно спрян от администрацията." });
         }
 
         // Calculate price from room types

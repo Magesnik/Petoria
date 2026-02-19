@@ -58,6 +58,9 @@ public class Hotel
 
     public bool IsAvailable { get; set; } = true;
 
+    // Set by SuperAdmin to globally hide and lock the hotel
+    public bool IsSuspendedBySuperAdmin { get; set; } = false;
+
     // Track who created the hotel - set by controller, not required from client
     public string CreatedById { get; set; } = string.Empty;
 

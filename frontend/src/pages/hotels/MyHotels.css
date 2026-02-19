@@ -224,6 +224,26 @@
     color: #fff !important;
 }
 
+.btn-suspended {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border: 1px dashed rgba(239, 68, 68, 0.4);
+    cursor: not-allowed;
+    user-select: none;
+}
+
+[data-theme='dark'] .btn-suspended {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
 .error-message {
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.3);

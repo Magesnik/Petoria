@@ -26,6 +26,7 @@ public class HotelResponseDto
     public string Amenities { get; set; } = "[]";
     public string RoomTypes { get; set; } = "[]";
     public bool IsAvailable { get; set; }
+    public bool IsSuspendedBySuperAdmin { get; set; }
     public string CreatedById { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

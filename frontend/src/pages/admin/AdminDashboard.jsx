@@ -12,12 +12,14 @@ const AdminDashboard = () => {
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [moderators, setModerators] = useState([]);
+    const [adminHotels, setAdminHotels] = useState([]);
     const [stats, setStats] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchModeratorTerm, setSearchModeratorTerm] = useState('');
+    const [searchHotelTerm, setSearchHotelTerm] = useState('');
     const [error, setError] = useState(null);
     const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
     const [activeDashboardTab, setActiveDashboardTab] = useState('users');
@@ -47,11 +49,12 @@ const AdminDashboard = () => {
             let messagesCount = 0;
             let moderatorsData = [];
 
-            const [usersRes, statsRes, messagesRes, moderatorsRes] = await Promise.allSettled([
+            const [usersRes, statsRes, messagesRes, moderatorsRes, hotelsRes] = await Promise.allSettled([
                 api.get('/admin/users'),
                 api.get('/admin/stats'),
                 api.get('/support/messages/admin/unread-count'),
-                api.get('/admin/moderators')
+                api.get('/admin/moderators'),
+                api.get('/admin/hotels')
             ]);
 
             if (usersRes.status === 'fulfilled') usersData = usersRes.value;
@@ -63,6 +66,8 @@ const AdminDashboard = () => {
             if (messagesRes.status === 'fulfilled') messagesCount = messagesRes.value;
 
             if (moderatorsRes.status === 'fulfilled') moderatorsData = moderatorsRes.value;
+
+            if (hotelsRes.status === 'fulfilled') setAdminHotels(hotelsRes.value);
 
             setUsers(usersData);
             setStats(statsData);
@@ -130,6 +135,23 @@ const AdminDashboard = () => {
         m.userEmail?.toLowerCase().includes(searchModeratorTerm.toLowerCase()) ||
         m.hotelName?.toLowerCase().includes(searchModeratorTerm.toLowerCase())
     );
+
+    const filteredAdminHotels = adminHotels.filter(h =>
+        h.name?.toLowerCase().includes(searchHotelTerm.toLowerCase()) ||
+        h.city?.toLowerCase().includes(searchHotelTerm.toLowerCase()) ||
+        h.ownerEmail?.toLowerCase().includes(searchHotelTerm.toLowerCase())
+    );
+
+    const toggleHotelSuspend = async (hotelId) => {
+        try {
+            const res = await api.post(`/admin/hotels/${hotelId}/toggle-suspend`);
+            setAdminHotels(prev => prev.map(h =>
+                h.id === hotelId ? { ...h, isSuspendedBySuperAdmin: res.isSuspendedBySuperAdmin } : h
+            ));
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
     if (!isSuperAdmin()) {
         return null;
@@ -267,6 +289,12 @@ const AdminDashboard = () => {
                             >
                                 🛡️ {t('moderators') || 'Moderators'}
                             </button>
+                            <button
+                                className={`panel-tab ${activeDashboardTab === 'hotels' ? 'active' : ''}`}
+                                onClick={() => setActiveDashboardTab('hotels')}
+                            >
+                                🏨 Хотели ({adminHotels.length})
+                            </button>
                         </div>
 
                         {activeDashboardTab === 'users' && (
@@ -349,6 +377,45 @@ const AdminDashboard = () => {
                                 </div>
                             </>
                         )}
+                        {activeDashboardTab === 'hotels' && (
+                            <>
+                                <div className="panel-header">
+                                    <input
+                                        type="text"
+                                        placeholder="Търси хотел по име, град или имейл..."
+                                        value={searchHotelTerm}
+                                        onChange={(e) => setSearchHotelTerm(e.target.value)}
+                                        className="search-input"
+                                    />
+                                </div>
+                                <div className="hotels-admin-list">
+                                    {filteredAdminHotels.length === 0 ? (
+                                        <p className="empty-message">Няма хотели</p>
+                                    ) : (
+                                        filteredAdminHotels.map(h => (
+                                            <div key={h.id} className={`hotel-admin-card ${h.isSuspendedBySuperAdmin ? 'suspended' : ''}`}>
+                                                <div className="hotel-admin-info">
+                                                    <strong>{h.name}</strong>
+                                                    <span>📍 {h.city}, {h.country}</span>
+                                                    <small>👤 {h.ownerEmail || 'Неизвестен'}</small>
+                                                    {h.isSuspendedBySuperAdmin && (
+                                                        <span className="badge-suspended">⛔ Спрян</span>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    className={`btn-suspend ${h.isSuspendedBySuperAdmin ? 'btn-activate' : 'btn-deactivate'}`}
+                                                    onClick={() => toggleHotelSuspend(h.id)}
+                                                    title={h.isSuspendedBySuperAdmin ? 'Активирай' : 'Деактивирай'}
+                                                >
+                                                    {h.isSuspendedBySuperAdmin ? '✅ Активирай' : '🚫 Деактивирай'}
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </>
+                        )}
+
                     </div>
 
                     {userDetails && (

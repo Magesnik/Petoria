@@ -11,7 +11,7 @@ import './ManageHotel.css';
 const ManageHotel = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, isSuperAdmin } = useAuth();
     const { t } = useLanguage();
 
     const [hotel, setHotel] = useState(null);
@@ -44,6 +44,12 @@ const ManageHotel = () => {
 
             // Check if user owns this hotel or is moderator
             if (data.createdById !== user?.id && !data.isModerator && !user?.roles?.includes('SuperAdmin')) {
+                navigate('/my-hotels');
+                return;
+            }
+
+            // Block access if hotel is suspended by SuperAdmin (only SuperAdmin can still access it)
+            if (data.isSuspendedBySuperAdmin && !isSuperAdmin()) {
                 navigate('/my-hotels');
                 return;
             }
@@ -165,10 +171,10 @@ const ManageHotel = () => {
     if (!hotel) {
         return (
             <div className="manage-hotel-page">
-
                 <div className="error-state">
                     <h2>{t('hotelNotFound') || 'Хотелът не е намерен'}</h2>
-                    <Link to="/my-hotels" className="btn-back">← {t('back')}</Link>
+                    <p>Хотелът може да е бил деактивиран от администратор или не съществува.</p>
+                    <Link to="/my-hotels" className="btn-back">← {t('back') || 'Назад'}</Link>
                 </div>
             </div>
         );

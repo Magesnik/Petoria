@@ -116,12 +116,18 @@ const MyHotels = () => {
                                     </div>
 
                                     <div className="hotel-actions">
-                                        <Link
-                                            to={`/manage-hotel/${hotel.id}`}
-                                            className="btn-manage"
-                                        >
-                                            ⚙️ {t('manage')}
-                                        </Link>
+                                        {hotel.isSuspendedBySuperAdmin ? (
+                                            <span className="btn-suspended">
+                                                🔒 Спрян от админ.
+                                            </span>
+                                        ) : (
+                                            <Link
+                                                to={`/manage-hotel/${hotel.id}`}
+                                                className="btn-manage"
+                                            >
+                                                ⚙️ {t('manage')}
+                                            </Link>
+                                        )}
                                         <Link
                                             to={`/hotel/${hotel.id}`}
                                             className="btn-view"
