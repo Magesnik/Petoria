@@ -339,7 +339,10 @@ public class HotelsController : ControllerBase
     public async Task<ActionResult<IEnumerable<string>>> GetCities()
     {
         var cities = await _context.Hotels
-            .Where(h => !string.IsNullOrEmpty(h.City))
+            .Where(h => !string.IsNullOrEmpty(h.City) && 
+                        h.IsAvailable && 
+                        !h.IsSuspendedBySuperAdmin &&
+                        _context.RoomTypes.Any(rt => rt.HotelId == h.Id))
             .Select(h => h.City)
             .Distinct()
             .OrderBy(c => c)
@@ -353,7 +356,10 @@ public class HotelsController : ControllerBase
     public async Task<ActionResult<IEnumerable<string>>> GetCountries()
     {
         var countries = await _context.Hotels
-            .Where(h => !string.IsNullOrEmpty(h.Country))
+            .Where(h => !string.IsNullOrEmpty(h.Country) && 
+                        h.IsAvailable && 
+                        !h.IsSuspendedBySuperAdmin &&
+                        _context.RoomTypes.Any(rt => rt.HotelId == h.Id))
             .Select(h => h.Country)
             .Distinct()
             .OrderBy(c => c)
@@ -367,7 +373,10 @@ public class HotelsController : ControllerBase
     public async Task<ActionResult<IEnumerable<string>>> GetAllAmenities()
     {
         var hotels = await _context.Hotels
-            .Where(h => !string.IsNullOrEmpty(h.Amenities))
+            .Where(h => !string.IsNullOrEmpty(h.Amenities) && 
+                        h.IsAvailable && 
+                        !h.IsSuspendedBySuperAdmin &&
+                        _context.RoomTypes.Any(rt => rt.HotelId == h.Id))
             .Select(h => h.Amenities)
             .ToListAsync();
 
@@ -406,16 +415,24 @@ public class HotelsController : ControllerBase
     [HttpGet("price-range")]
     public async Task<ActionResult<object>> GetPriceRange()
     {
-        // Calculate range based on RoomTypes, as Hotel doesn't have price anymore
-        if (!await _context.RoomTypes.AnyAsync())
+        // Calculate range based on RoomTypes for visible hotels only
+        var query = _context.RoomTypes
+            .Include(rt => rt.Hotel)
+            .Where(rt => rt.Hotel.IsAvailable && !rt.Hotel.IsSuspendedBySuperAdmin);
+
+        if (!await query.AnyAsync())
         {
              return Ok(new { minPrice = 0, maxPrice = 1000 }); // Default fallback
         }
 
-        var minPrice = await _context.RoomTypes.MinAsync(rt => rt.PricePerNight);
-        var maxPrice = await _context.RoomTypes.MaxAsync(rt => rt.PricePerNight);
+        var minPrice = await query.MinAsync(rt => rt.PricePerNight);
+        var maxPrice = await query.MaxAsync(rt => rt.PricePerNight);
 
-        return Ok(new { minPrice, maxPrice });
+        return Ok(new 
+        { 
+            minPrice = Math.Floor(minPrice), 
+            maxPrice = Math.Ceiling(maxPrice) 
+        });
     }
 
     // GET: api/hotels/map

@@ -1,7 +1,11 @@
 .my-hotels-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8fafc;
     padding-top: var(--header-height, 80px);
+}
+
+[data-theme='dark'] .my-hotels-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .my-hotels-container {
@@ -22,6 +26,10 @@
 .page-header h1 {
     margin: 0;
     font-size: 2rem;
+    color: #1e293b;
+}
+
+[data-theme='dark'] .page-header h1 {
     color: #fff;
 }
 
@@ -67,13 +75,21 @@
 }
 
 .empty-state h2 {
-    color: #fff;
+    color: #1e293b;
     margin-bottom: 0.5rem;
 }
 
+[data-theme='dark'] .empty-state h2 {
+    color: #fff;
+}
+
 .empty-state p {
-    color: #888;
+    color: #64748b;
     margin-bottom: 2rem;
+}
+
+[data-theme='dark'] .empty-state p {
+    color: #8892b0;
 }
 
 .btn-create-large {
@@ -100,17 +116,28 @@
 }
 
 .my-hotels-page .hotel-card {
-    background: rgba(30, 35, 60, 0.8);
+    background: #ffffff;
     border-radius: 16px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid #e2e8f0;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .my-hotels-page .hotel-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
     border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-theme='dark'] .my-hotels-page .hotel-card {
+    background: rgba(30, 35, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+[data-theme='dark'] .my-hotels-page .hotel-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .hotel-image {
@@ -150,14 +177,22 @@
 
 .hotel-content h3 {
     margin: 0 0 0.5rem;
-    color: #fff;
+    color: #1e293b;
     font-size: 1.2rem;
 }
 
+[data-theme='dark'] .hotel-content h3 {
+    color: #fff;
+}
+
 .hotel-location {
-    color: #888;
+    color: #64748b;
     font-size: 0.9rem;
     margin: 0 0 0.25rem;
+}
+
+[data-theme='dark'] .hotel-location {
+    color: #8892b0;
 }
 
 .hotel-price {
@@ -167,9 +202,13 @@
 }
 
 .hotel-stats {
-    color: #fbbf24;
+    color: #b45309;
     font-size: 0.9rem;
     margin-bottom: 1rem;
+}
+
+[data-theme='dark'] .hotel-stats {
+    color: #fbbf24;
 }
 
 .hotel-actions {

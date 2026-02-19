@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import './HotelFilters.css';
 
@@ -81,8 +81,35 @@ const HotelFilters = ({
     };
 
     // Price slider values
-    const minPriceValue = filters.minPrice || priceRange.minPrice;
-    const maxPriceValue = filters.maxPrice || priceRange.maxPrice;
+    // Use local state for immediate UI feedback, debounce updates to parent
+    const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice || priceRange.minPrice);
+    const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice || Math.ceil(priceRange.maxPrice));
+
+    // Update local state when props change (e.g. initial load or clear filters)
+    useEffect(() => {
+        setLocalMinPrice(filters.minPrice !== '' ? filters.minPrice : priceRange.minPrice);
+        setLocalMaxPrice(filters.maxPrice !== '' ? filters.maxPrice : Math.ceil(priceRange.maxPrice));
+    }, [filters.minPrice, filters.maxPrice, priceRange]);
+
+    // Debounce updates to parent
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const effectiveMin = filters.minPrice !== '' ? filters.minPrice : priceRange.minPrice;
+            const effectiveMax = filters.maxPrice !== '' ? filters.maxPrice : Math.ceil(priceRange.maxPrice);
+
+            if (localMinPrice !== effectiveMin) {
+                onFilterChange('minPrice', localMinPrice);
+            }
+
+            if (localMaxPrice !== effectiveMax) {
+                onFilterChange('maxPrice', localMaxPrice);
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(timer);
+    }, [localMinPrice, localMaxPrice, filters.minPrice, filters.maxPrice, priceRange.minPrice, priceRange.maxPrice]);
+
+    const rangeMax = Math.ceil(priceRange.maxPrice);
 
     return (
         <div className="hotel-filters">
@@ -104,13 +131,13 @@ const HotelFilters = ({
                             <input
                                 type="number"
                                 className="price-input-field"
-                                value={minPriceValue}
+                                value={localMinPrice}
                                 min={priceRange.minPrice}
-                                max={maxPriceValue - 1}
+                                max={localMaxPrice - 1}
                                 onChange={(e) => {
                                     const value = parseInt(e.target.value) || priceRange.minPrice;
-                                    if (value < maxPriceValue) {
-                                        onFilterChange('minPrice', value);
+                                    if (value < localMaxPrice) {
+                                        setLocalMinPrice(value);
                                     }
                                 }}
                             />
@@ -121,13 +148,13 @@ const HotelFilters = ({
                             <input
                                 type="number"
                                 className="price-input-field"
-                                value={maxPriceValue}
-                                min={minPriceValue + 1}
-                                max={priceRange.maxPrice}
+                                value={localMaxPrice}
+                                min={localMinPrice + 1}
+                                max={rangeMax}
                                 onChange={(e) => {
-                                    const value = parseInt(e.target.value) || priceRange.maxPrice;
-                                    if (value > minPriceValue) {
-                                        onFilterChange('maxPrice', value);
+                                    const value = parseInt(e.target.value) || rangeMax;
+                                    if (value > localMinPrice) {
+                                        setLocalMaxPrice(value);
                                     }
                                 }}
                             />
@@ -140,34 +167,30 @@ const HotelFilters = ({
                         <div
                             className="slider-track-fill"
                             style={{
-                                left: `${((minPriceValue - priceRange.minPrice) / (priceRange.maxPrice - priceRange.minPrice)) * 100}%`,
-                                width: `${((maxPriceValue - minPriceValue) / (priceRange.maxPrice - priceRange.minPrice)) * 100}%`
+                                left: `${((localMinPrice - priceRange.minPrice) / (rangeMax - priceRange.minPrice)) * 100}%`,
+                                width: `${((localMaxPrice - localMinPrice) / (rangeMax - priceRange.minPrice)) * 100}%`
                             }}
                         />
                         <input
                             type="range"
                             className="slider slider-min"
                             min={priceRange.minPrice}
-                            max={priceRange.maxPrice}
-                            value={minPriceValue}
+                            max={rangeMax}
+                            value={localMinPrice}
                             onChange={(e) => {
-                                const value = parseInt(e.target.value);
-                                if (value < maxPriceValue) {
-                                    onFilterChange('minPrice', value);
-                                }
+                                const value = Math.min(parseInt(e.target.value), localMaxPrice - 1);
+                                setLocalMinPrice(value);
                             }}
                         />
                         <input
                             type="range"
                             className="slider slider-max"
                             min={priceRange.minPrice}
-                            max={priceRange.maxPrice}
-                            value={maxPriceValue}
+                            max={rangeMax}
+                            value={localMaxPrice}
                             onChange={(e) => {
-                                const value = parseInt(e.target.value);
-                                if (value > minPriceValue) {
-                                    onFilterChange('maxPrice', value);
-                                }
+                                const value = Math.max(parseInt(e.target.value), localMinPrice + 1);
+                                setLocalMaxPrice(value);
                             }}
                         />
                     </div>

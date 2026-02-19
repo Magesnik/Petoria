@@ -10,7 +10,7 @@ const ReviewSection = ({ hotelId }) => {
     const [error, setError] = useState(null);
     const [userReview, setUserReview] = useState({ rating: 5, reviewText: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { user } = useAuth();
+    const { user, isAdmin, isSuperAdmin } = useAuth();
     const { t } = useLanguage();
     const [averageRating, setAverageRating] = useState(0);
 
@@ -165,7 +165,7 @@ const ReviewSection = ({ hotelId }) => {
                             </div>
                             <p className="review-text">{review.reviewText}</p>
 
-                            {(user?.id === review.user.id || user?.role === 'Admin' || user?.role === 'SuperAdmin') && (
+                            {(user?.id === review.user.id || (isAdmin && isAdmin()) || (isSuperAdmin && isSuperAdmin())) && (
                                 <button
                                     onClick={() => handleDeleteReview(review.id)}
                                     className="btn-delete-review"

@@ -95,18 +95,18 @@
     gap: 0.25rem;
 }
 
-.price-label {
+.popup-price-label {
     font-size: 0.85rem;
-    color: #718096;
+    color: #1e293b;
 }
 
-.price-value {
+.popup-price-value {
     font-size: 1.25rem;
     font-weight: 700;
     color: #2563eb;
 }
 
-.price-night {
+.popup-price-night {
     font-size: 0.75rem;
     color: #718096;
 }
@@ -203,19 +203,40 @@
 }
 
 /* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .hotel-map-container {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .popup-title {
-        color: #2d3748;
-    }
-
-    .popup-details {
-        background: #edf2f7;
-    }
+[data-theme='dark'] .hotel-map-container {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
+
+[data-theme='dark'] .hotel-popup .leaflet-popup-content-wrapper {
+    background: #1e2535;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .hotel-popup .leaflet-popup-tip {
+    background: #1e2535;
+}
+
+[data-theme='dark'] .popup-title {
+    color: #e2e8f0;
+}
+
+[data-theme='dark'] .popup-location {
+    color: #94a3b8;
+}
+
+[data-theme='dark'] .popup-details {
+    background: #151c2c;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .popup-price-label {
+    color: #94a3b8;
+}
+
+[data-theme='dark'] .popup-price-night {
+    color: #94a3b8;
+}
+
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
@@ -236,7 +257,7 @@
         font-size: 1rem;
     }
 
-    .price-value {
+    .popup-price-value {
         font-size: 1.1rem;
     }
 

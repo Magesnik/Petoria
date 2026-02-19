@@ -115,11 +115,11 @@ const HotelMap = ({ hotels, onHotelClick }) => {
                                         </p>
                                         <div className="popup-details">
                                             <div className="popup-price">
-                                                <span className="price-label">Цена:</span>
-                                                <span className="price-value">
+                                                <span className="popup-price-label">Цена:</span>
+                                                <span className="popup-price-value">
                                                     ${hotel.pricePerNight}
                                                 </span>
-                                                <span className="price-night">/нощувка</span>
+                                                <span className="popup-price-night">/нощувка</span>
                                             </div>
                                             <div className="popup-rating">
                                                 <span className="rating-stars">⭐</span>
