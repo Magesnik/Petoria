@@ -277,6 +277,64 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Sort and View wrapper */
+.sort-and-view {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Sort Toolbar */
+.sort-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sort-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .sort-label {
+    color: #8892b0;
+}
+
+.sort-select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    background: white;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    max-width: 240px;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+[data-theme="dark"] .sort-select {
+    background: #1a1a2e;
+    border-color: #2d3748;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .sort-select:hover,
+[data-theme="dark"] .sort-select:focus {
+    border-color: #667eea;
+}
+
 .view-btn {
     padding: 10px 20px;
     border: none;

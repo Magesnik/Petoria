@@ -87,8 +87,8 @@ public class HotelsController : ControllerBase
         // Only show available hotels
         query = query.Where(h => h.IsAvailable);
 
-        // Include RoomTypes to check prices
         var today = DateTime.UtcNow;
+        var thirtyDaysAgo = today.AddDays(-30);
         
         var hotelsWithDiscounts = await query
             .Select(h => new
@@ -106,7 +106,14 @@ public class HotelsController : ControllerBase
                             .FirstOrDefault()
                     })
                     .OrderBy(rt => rt.PricePerNight)
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                ReviewCount = _context.HotelReviews.Count(r => r.HotelId == h.Id),
+                RecentReviewCount = _context.HotelReviews.Count(r => r.HotelId == h.Id && r.CreatedAt >= thirtyDaysAgo),
+                AvailableRoomsTotal = _context.RoomAvailabilities
+                    .Where(a => a.Date >= today.Date && a.Date <= today.Date.AddDays(30) && !a.IsBlocked)
+                    .Join(_context.RoomTypes.Where(rt => rt.HotelId == h.Id),
+                        a => a.RoomTypeId, rt => rt.Id, (a, rt) => a.AvailableCount)
+                    .Sum()
             })
             .OrderByDescending(h => h.Hotel.Rating)
             .ToListAsync();
@@ -151,7 +158,10 @@ public class HotelsController : ControllerBase
                     IsAvailable = hotel.IsAvailable,
                     CreatedById = hotel.CreatedById,
                     CreatedAt = hotel.CreatedAt,
-                    UpdatedAt = hotel.UpdatedAt
+                    UpdatedAt = hotel.UpdatedAt,
+                    ReviewCount = h.ReviewCount,
+                    RecentReviewCount = h.RecentReviewCount,
+                    AvailableRoomsTotal = h.AvailableRoomsTotal
                 };
             });
 

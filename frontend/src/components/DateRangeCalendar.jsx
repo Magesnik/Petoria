@@ -14,12 +14,20 @@ const DateRangeCalendar = ({
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectionMode, setSelectionMode] = useState('checkIn'); // 'checkIn' or 'checkOut'
 
+    // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
+    const toLocalDateStr = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const getAvailabilityForDate = (date) => {
         if (!selectedRoomType) return null;
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateStr(date);
         return availability.find(
             a => a.roomTypeId === selectedRoomType.id && a.date.split('T')[0] === dateStr
         );
@@ -40,7 +48,7 @@ const DateRangeCalendar = ({
     const handleDayClick = (date) => {
         if (date < today || isDateBlocked(date)) return;
 
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateStr(date);
 
         if (selectionMode === 'checkIn') {
             onDateChange(dateStr, null);
@@ -97,7 +105,9 @@ const DateRangeCalendar = ({
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '—';
-        const date = new Date(dateStr);
+        // Parse as local date to avoid UTC shifting
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
         return date.toLocaleDateString('bg-BG', { day: 'numeric', month: 'short' });
     };
 
@@ -144,7 +154,7 @@ const DateRangeCalendar = ({
                         return <div key={index} className="day-cell empty"></div>;
                     }
 
-                    const dateStr = date.toISOString().split('T')[0];
+                    const dateStr = toLocalDateStr(date);
                     const isPast = date < today;
                     const isBlocked = isDateBlocked(date);
                     const isCheckIn = checkInDate && dateStr === checkInDate;

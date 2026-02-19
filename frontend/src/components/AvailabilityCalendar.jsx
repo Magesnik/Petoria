@@ -11,6 +11,14 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
+    const toLocalDateStr = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     // Selection state for bulk edit
     const [selectionStart, setSelectionStart] = useState(null);
     const [selectionEnd, setSelectionEnd] = useState(null);
@@ -36,8 +44,8 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
             const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 2, 0);
 
-            const fromStr = startOfMonth.toISOString().split('T')[0];
-            const toStr = endOfMonth.toISOString().split('T')[0];
+            const fromStr = toLocalDateStr(startOfMonth);
+            const toStr = toLocalDateStr(endOfMonth);
 
             const data = await api.get(
                 `/hotels/${hotelId}/availability?from=${fromStr}&to=${toStr}`
@@ -53,7 +61,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
 
     const getAvailabilityForDate = (date) => {
         if (!selectedRoomType) return null;
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateStr(date);
         return availability.find(
             a => a.roomTypeId === selectedRoomType.id && a.date.split('T')[0] === dateStr
         );

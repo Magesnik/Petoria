@@ -30,4 +30,7 @@ public class HotelResponseDto
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public bool IsModerator { get; set; }
+    public int ReviewCount { get; set; }
+    public int RecentReviewCount { get; set; } // Last 30 days
+    public int AvailableRoomsTotal { get; set; }
 }

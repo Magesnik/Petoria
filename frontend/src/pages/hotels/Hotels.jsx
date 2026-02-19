@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -7,6 +7,57 @@ import HotelCard from '../../components/HotelCard';
 import HotelFilters from '../../components/HotelFilters';
 import HotelMap from '../../components/HotelMap';
 import './Hotels.css';
+
+const SORT_OPTIONS = [
+    { value: 'rating_desc', label: '⭐ Рейтинг висок→нисък' },
+    { value: 'rating_asc', label: '⭐ Рейтинг нисък→висок' },
+    { value: 'name_asc', label: '🔤 Азбучно А→Я' },
+    { value: 'name_desc', label: '🔤 Азбучно Я→А' },
+    { value: 'price_asc', label: '💰 Цена ниска→висока' },
+    { value: 'price_desc', label: '💰 Цена висока→ниска' },
+    { value: 'stars_desc', label: '🌟 Звезди 5→1' },
+    { value: 'stars_asc', label: '🌟 Звезди 1→5' },
+    { value: 'amenities_desc', label: '🛎️ Удобства повече→малко' },
+    { value: 'amenities_asc', label: '🛎️ Удобства малко→повече' },
+    { value: 'availability_desc', label: '🛏️ Наличност много→малко' },
+    { value: 'availability_asc', label: '🛏️ Наличност малко→много' },
+    { value: 'discount_desc', label: '🏷️ Отстъпка висока→ниска' },
+    { value: 'reviews_desc', label: '💬 Ревюта много→малко' },
+    { value: 'reviews_asc', label: '💬 Ревюта малко→повече' },
+    { value: 'recent_reviews_desc', label: '🕐 Скорошни ревюта (1 месец)' },
+    { value: 'best_value', label: '🏆 Best Value (цена + рейтинг)' },
+];
+
+function sortHotels(hotels, sortBy) {
+    const parseAmenities = (h) => {
+        try { return JSON.parse(h.amenities || '[]').length; } catch { return 0; }
+    };
+    const arr = [...hotels];
+    switch (sortBy) {
+        case 'name_asc': return arr.sort((a, b) => a.name.localeCompare(b.name));
+        case 'name_desc': return arr.sort((a, b) => b.name.localeCompare(a.name));
+        case 'price_asc': return arr.sort((a, b) => (a.displayPrice || 0) - (b.displayPrice || 0));
+        case 'price_desc': return arr.sort((a, b) => (b.displayPrice || 0) - (a.displayPrice || 0));
+        case 'rating_desc': return arr.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        case 'rating_asc': return arr.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+        case 'stars_desc': return arr.sort((a, b) => (b.starRating || 0) - (a.starRating || 0));
+        case 'stars_asc': return arr.sort((a, b) => (a.starRating || 0) - (b.starRating || 0));
+        case 'amenities_desc': return arr.sort((a, b) => parseAmenities(b) - parseAmenities(a));
+        case 'amenities_asc': return arr.sort((a, b) => parseAmenities(a) - parseAmenities(b));
+        case 'availability_desc': return arr.sort((a, b) => (b.availableRoomsTotal || 0) - (a.availableRoomsTotal || 0));
+        case 'availability_asc': return arr.sort((a, b) => (a.availableRoomsTotal || 0) - (b.availableRoomsTotal || 0));
+        case 'discount_desc': return arr.sort((a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0));
+        case 'reviews_desc': return arr.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
+        case 'reviews_asc': return arr.sort((a, b) => (a.reviewCount || 0) - (b.reviewCount || 0));
+        case 'recent_reviews_desc': return arr.sort((a, b) => (b.recentReviewCount || 0) - (a.recentReviewCount || 0));
+        case 'best_value': return arr.sort((a, b) => {
+            const scoreA = (a.rating || 0) * 20 - (a.displayPrice || 0) / 10;
+            const scoreB = (b.rating || 0) * 20 - (b.displayPrice || 0) / 10;
+            return scoreB - scoreA;
+        });
+        default: return arr;
+    }
+}
 
 const Hotels = () => {
     const { t } = useLanguage();
@@ -21,6 +72,7 @@ const Hotels = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [view, setView] = useState('grid'); // 'grid' or 'map'
     const [showMobileFilters, setShowMobileFilters] = useState(false);
+    const [sortBy, setSortBy] = useState('rating_desc');
     const [filters, setFilters] = useState({
         minPrice: '',
         maxPrice: '',
@@ -142,6 +194,8 @@ const Hotels = () => {
         e.preventDefault();
     };
 
+    const sortedHotels = useMemo(() => sortHotels(hotels, sortBy), [hotels, sortBy]);
+
     return (
         <div className="hotels-page">
 
@@ -205,21 +259,37 @@ const Hotels = () => {
                                 <span className="filter-icon">☰</span> {t('filters')}
                             </button>
                         </div>
-                        <div className="view-toggle">
-                            <button
-                                className={`view-btn ${view === 'grid' ? 'active' : ''}`}
-                                onClick={() => setView('grid')}
-                                title="Grid View"
-                            >
-                                ⊞ Grid
-                            </button>
-                            <button
-                                className={`view-btn ${view === 'map' ? 'active' : ''}`}
-                                onClick={() => setView('map')}
-                                title="Map View"
-                            >
-                                🗺️ Map
-                            </button>
+                        <div className="sort-and-view">
+                            {view === 'grid' && (
+                                <div className="sort-toolbar">
+                                    <label className="sort-label">🔽 Сортирай:</label>
+                                    <select
+                                        className="sort-select"
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                    >
+                                        {SORT_OPTIONS.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            <div className="view-toggle">
+                                <button
+                                    className={`view-btn ${view === 'grid' ? 'active' : ''}`}
+                                    onClick={() => setView('grid')}
+                                    title="Grid View"
+                                >
+                                    ⊞ Grid
+                                </button>
+                                <button
+                                    className={`view-btn ${view === 'map' ? 'active' : ''}`}
+                                    onClick={() => setView('map')}
+                                    title="Map View"
+                                >
+                                    🗺️ Map
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -258,9 +328,9 @@ const Hotels = () => {
                     )}
 
                     {/* Hotels Grid */}
-                    {!loading && !error && view === 'grid' && hotels.length > 0 && (
+                    {!loading && !error && view === 'grid' && sortedHotels.length > 0 && (
                         <div className="hotels-grid">
-                            {hotels.map((hotel) => (
+                            {sortedHotels.map((hotel) => (
                                 <HotelCard key={hotel.id} hotel={hotel} />
                             ))}
                         </div>

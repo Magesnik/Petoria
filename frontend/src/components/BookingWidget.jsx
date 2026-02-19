@@ -33,12 +33,21 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
     // State for loading and errors
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [unavailableReason, setUnavailableReason] = useState('');
 
     // Add to cart dialog
     const [cartDialogItem, setCartDialogItem] = useState(null);
 
+    // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
+    const toLocalDateStr = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     // Get today's date for min date attribute
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateStr(new Date());
 
     // Fetch room types when component mounts
     useEffect(() => {
@@ -55,11 +64,37 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
     // Calculate price when dates or room selection changes
     useEffect(() => {
         if (selectedRoomType && checkInDate && checkOutDate) {
-            calculatePrice();
+            // Validate availability: check every day in the range
+            const checkRange = () => {
+                const [y1, m1, d1] = checkInDate.split('-').map(Number);
+                const [y2, m2, d2] = checkOutDate.split('-').map(Number);
+                const start = new Date(y1, m1 - 1, d1);
+                const end = new Date(y2, m2 - 1, d2);
+                for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+                    const dateStr = toLocalDateStr(d);
+                    const record = availability.find(
+                        a => a.roomTypeId === selectedRoomType.id && a.date.split('T')[0] === dateStr
+                    );
+                    if (record) {
+                        if (record.isBlocked) return `Датата ${dateStr} е блокирана.`;
+                        if (record.availableCount === 0) return `На ${dateStr} няма налични стаи.`;
+                        if (record.availableCount < numberOfRooms) return `На ${dateStr} има само ${record.availableCount} стая/и (искате ${numberOfRooms}).`;
+                    }
+                }
+                return '';
+            };
+            const reason = checkRange();
+            setUnavailableReason(reason);
+            if (!reason) {
+                calculatePrice();
+            } else {
+                setPriceInfo(null);
+            }
         } else {
             setPriceInfo(null);
+            setUnavailableReason('');
         }
-    }, [selectedRoomType, checkInDate, checkOutDate, numberOfRooms]);
+    }, [selectedRoomType, checkInDate, checkOutDate, numberOfRooms, availability]);
 
     const fetchRoomTypes = async () => {
         try {
@@ -81,10 +116,10 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
     const fetchAvailability = async () => {
         try {
             // Fetch 90 days from today
-            const fromDate = new Date().toISOString().split('T')[0];
+            const fromDate = toLocalDateStr(new Date());
             const toDate = new Date();
             toDate.setDate(toDate.getDate() + 90);
-            const toDateStr = toDate.toISOString().split('T')[0];
+            const toDateStr = toLocalDateStr(toDate);
 
             const data = await api.get(
                 `/hotels/${hotelId}/availability?from=${fromDate}&to=${toDateStr}`
@@ -163,6 +198,26 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
         } catch (err) {
             setError(err.message || t('checkoutError'));
         }
+    };
+
+    const checkDateRangeAvailability = (checkIn, checkOut, rooms) => {
+        if (!selectedRoomType || !checkIn || !checkOut) return '';
+        const [y1, m1, d1] = checkIn.split('-').map(Number);
+        const [y2, m2, d2] = checkOut.split('-').map(Number);
+        const start = new Date(y1, m1 - 1, d1);
+        const end = new Date(y2, m2 - 1, d2);
+        for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+            const dateStr = toLocalDateStr(d);
+            const record = availability.find(
+                a => a.roomTypeId === selectedRoomType.id && a.date.split('T')[0] === dateStr
+            );
+            if (record) {
+                if (record.isBlocked) return `Датата ${dateStr} е блокирана.`;
+                if (record.availableCount === 0) return `На ${dateStr} няма налични стаи.`;
+                if (record.availableCount < rooms) return `На ${dateStr} има само ${record.availableCount} стая/и (искате ${rooms}).`;
+            }
+        }
+        return '';
     };
 
     const isDateBlocked = (date) => {
@@ -264,18 +319,25 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
                                 +
                             </button>
                         </div>
-                        <small className="rooms-available">
-                            {t('availableColon')} {selectedRoomType.totalRooms} {t('roomsOfType')}
-                        </small>
                     </div>
                 )}
 
                 {/* Availability Indicator */}
                 {checkInDate && checkOutDate && selectedRoomType && (
                     <div className="booking-section availability-section">
-                        <div className={`availability-badge ${priceInfo ? 'available' : 'checking'}`}>
-                            {priceInfo ? `✓ ${t('available')}` : `⏳ ${t('checking')}`}
-                        </div>
+                        {unavailableReason ? (
+                            <div className="availability-badge unavailable">
+                                ⛔ {unavailableReason}
+                            </div>
+                        ) : priceInfo ? (
+                            <div className="availability-badge available">
+                                ✓ {t('available')}
+                            </div>
+                        ) : (
+                            <div className="availability-badge checking">
+                                ⏳ {t('checking')}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -315,7 +377,7 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
                 <button
                     className="btn-book"
                     onClick={handleAddToCart}
-                    disabled={!selectedRoomType || !checkInDate || !checkOutDate || !user}
+                    disabled={!selectedRoomType || !checkInDate || !checkOutDate || !user || !!unavailableReason}
                 >
                     {priceInfo
                         ? `🛒 ${t('addToCart')} — ${convertAndFormat(priceInfo.totalPrice)}`

@@ -43,7 +43,8 @@ import About from './pages/public/About';
 import Deals from './pages/public/Deals';
 import Support from './pages/public/Support';
 
-import Header from './components/Header'; // Added import
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
                         <Route path="/payment/success" element={<PaymentSuccess />} />
                         <Route path="/payment/cancel" element={<PaymentCancel />} />
                       </Routes>
+                      <Footer />
                     </div>
                   </Router>
                 </CartProvider>

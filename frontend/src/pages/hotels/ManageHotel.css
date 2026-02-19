@@ -24,6 +24,11 @@
     margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .header-left {
@@ -139,18 +144,29 @@
     color: #10b981;
 }
 
+[data-theme='dark'] .manage-header {
+    background: rgba(30, 35, 60, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
 /* Tabs */
 .tabs {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
     overflow-x: auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 [data-theme='dark'] .tabs {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30, 35, 60, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
 }
 
 .tab {
