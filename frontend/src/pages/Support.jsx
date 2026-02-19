@@ -26,9 +26,7 @@ const Support = () => {
         try {
             await api.post('/support/messages', formData);
 
-            if (!response.ok) {
-                throw new Error('Failed to send message');
-            }
+
 
             setSubmitMessage(t('messageSent'));
             setFormData({

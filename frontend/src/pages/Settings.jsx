@@ -99,7 +99,7 @@ const Settings = () => {
 
             const data = await api.post('/profile/avatar', formData);
 
-            const fullAvatarUrl = `http://localhost:5150${data.avatarUrl}`;
+            const fullAvatarUrl = data.avatarUrl.startsWith('http') ? data.avatarUrl : `http://localhost:5150${data.avatarUrl}`;
             setAvatarPreview(fullAvatarUrl);
             // Update user in context
             login({ ...user, avatarUrl: fullAvatarUrl });

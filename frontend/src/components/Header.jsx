@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { useCart } from '../context/CartContext';
 import './Header.css';
 
 const Header = () => {
@@ -17,6 +18,7 @@ const Header = () => {
   const { language, toggleLanguage, t } = useLanguage();
   const { currency, changeCurrency, availableCurrencies } = useCurrency();
   const { user, logout, isAdmin, isSuperAdmin } = useAuth();
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -160,6 +162,10 @@ const Header = () => {
 
           {user ? (
             <div className="user-section" style={{ display: 'flex', alignItems: 'center' }}>
+              <Link to="/cart" className="nav-notification" title={t('cart')}>
+                🛒
+                {cartCount > 0 && <span className="notification-count">{cartCount}</span>}
+              </Link>
               <Link to="/my-messages" className="nav-notification">
                 🔔
                 {unreadCount > 0 && <span className="notification-count">{unreadCount}</span>}
@@ -173,7 +179,7 @@ const Header = () => {
                       <span>👤</span>
                     )}
                   </div>
-                  <span className="user-name">{user.firstName}</span>
+                  <span className="user-name">{user.firstName || user.email}</span>
                   <span className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`}>▼</span>
                 </button>
                 {dropdownOpen && (
@@ -182,8 +188,15 @@ const Header = () => {
                       <span className="dropdown-icon">❤️</span>
                       {t('favorites')}
                     </Link>
-                    <Link to="/purchase-history" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                    <Link to="/cart" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                       <span className="dropdown-icon">🛒</span>
+                      {t('cart')}
+                      {cartCount > 0 && (
+                        <span className="dropdown-cart-badge">{cartCount}</span>
+                      )}
+                    </Link>
+                    <Link to="/purchase-history" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                      <span className="dropdown-icon">🧾</span>
                       {t('purchaseHistory')}
                     </Link>
                     <Link to="/my-messages" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
@@ -266,7 +279,13 @@ const Header = () => {
               </div>
               <ul className="mobile-user-menu">
                 <li><Link to="/favorites" className="mobile-nav-link" onClick={closeMobileMenu}>❤️ {t('favorites')}</Link></li>
-                <li><Link to="/purchase-history" className="mobile-nav-link" onClick={closeMobileMenu}>🛒 {t('purchaseHistory')}</Link></li>
+                <li>
+                  <Link to="/cart" className="mobile-nav-link" onClick={closeMobileMenu}>
+                    🛒 {t('cart')}
+                    {cartCount > 0 && <span className="mobile-cart-badge">{cartCount}</span>}
+                  </Link>
+                </li>
+                <li><Link to="/purchase-history" className="mobile-nav-link" onClick={closeMobileMenu}>🧾 {t('purchaseHistory')}</Link></li>
                 <li><Link to="/settings" className="mobile-nav-link" onClick={closeMobileMenu}>⚙️ {t('settings')}</Link></li>
                 <li><Link to="/support" className="mobile-nav-link" onClick={closeMobileMenu}>💬 {t('support')}</Link></li>
                 <li><button onClick={handleLogout} className="mobile-nav-link logout-link">🚪 {t('logout')}</button></li>

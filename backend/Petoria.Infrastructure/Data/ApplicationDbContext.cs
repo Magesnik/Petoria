@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<HotelMessage> HotelMessages { get; set; }
     public DbSet<SupportMessage> SupportMessages { get; set; }
     public DbSet<HotelModerator> HotelModerators { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

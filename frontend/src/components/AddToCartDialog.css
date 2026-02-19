@@ -1,0 +1,207 @@
+.atc-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: atc-fade-in 0.2s ease;
+}
+
+@keyframes atc-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.atc-dialog {
+    background: var(--card-bg, #fff);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+    animation: atc-slide-up 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+}
+
+@keyframes atc-slide-up {
+    from {
+        transform: translateY(40px) scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.atc-check {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    animation: atc-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+
+@keyframes atc-pop {
+    from {
+        transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.atc-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary, #1a1a1a);
+    margin: 0 0 1.2rem;
+}
+
+.atc-item-info {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    background: var(--bg-secondary, #f8f9fa);
+    border-radius: 12px;
+    padding: 0.85rem;
+    margin-bottom: 1.4rem;
+    text-align: left;
+}
+
+.atc-hotel-img {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.atc-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.atc-hotel-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary, #1a1a1a);
+    margin: 0 0 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.atc-room-name {
+    font-size: 0.82rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0 0 0.2rem;
+}
+
+.atc-dates {
+    font-size: 0.82rem;
+    color: var(--text-secondary, #6b7280);
+    margin: 0 0 0.3rem;
+}
+
+.atc-price {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary, #6366f1);
+    margin: 0;
+}
+
+.atc-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-direction: column;
+}
+
+.atc-btn-continue {
+    padding: 0.75rem 1.2rem;
+    border: 2px solid var(--border, #e5e7eb);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary, #1a1a1a);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.atc-btn-continue:hover {
+    background: var(--bg-secondary, #f3f4f6);
+    border-color: var(--primary, #6366f1);
+    color: var(--primary, #6366f1);
+}
+
+.atc-btn-cart {
+    padding: 0.75rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.atc-btn-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] .atc-dialog {
+    background: #1e2235;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .atc-title {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .atc-item-info {
+    background: #252b40;
+}
+
+[data-theme="dark"] .atc-hotel-name {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .atc-room-name,
+[data-theme="dark"] .atc-dates {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .atc-price {
+    color: #a5b4fc;
+}
+
+[data-theme="dark"] .atc-btn-continue {
+    border-color: #374151;
+    color: #e2e8f0;
+    background: transparent;
+}
+
+[data-theme="dark"] .atc-btn-continue:hover {
+    background: #252b40;
+    border-color: #818cf8;
+    color: #818cf8;
+}

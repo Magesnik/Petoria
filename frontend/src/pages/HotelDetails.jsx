@@ -222,9 +222,9 @@ const HotelDetails = () => {
                     <div className="details-sidebar">
                         <BookingWidget
                             hotelId={parseInt(id)}
-                            onBookingComplete={(reservation) => {
-                                console.log('Booking completed:', reservation);
-                            }}
+                            hotelName={hotel.name}
+                            hotelImage={hotelImages[0]}
+                            onBookingComplete={() => { }}
                         />
 
                         <div className="contact-card">

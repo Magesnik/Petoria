@@ -41,7 +41,12 @@ public class CommentsController : ControllerBase
 
         if (includeReplies && c.Replies != null)
         {
-            dto.Replies = c.Replies.Select(r => MapToCommentResponse(r, currentUserId, false)).ToList();
+            // Pass true to recursively map nested replies
+            // ensure we rely on the data being loaded via Include
+            dto.Replies = c.Replies
+                .OrderBy(r => r.CreatedAt) // Ensure replies are ordered chronologically
+                .Select(r => MapToCommentResponse(r, currentUserId, true))
+                .ToList();
         }
 
         return dto;
@@ -57,10 +62,27 @@ public class CommentsController : ControllerBase
             .Where(c => c.HotelId == hotelId && c.ParentCommentId == null) // Only top-level comments
             .Include(c => c.User)
             .Include(c => c.Ratings)
+            // Depth 1
             .Include(c => c.Replies)
                 .ThenInclude(r => r.User)
             .Include(c => c.Replies)
                 .ThenInclude(r => r.Ratings)
+            // Depth 2
+            .Include(c => c.Replies)
+                .ThenInclude(r => r.Replies)
+                    .ThenInclude(rr => rr.User)
+            .Include(c => c.Replies)
+                .ThenInclude(r => r.Replies)
+                    .ThenInclude(rr => rr.Ratings)
+            // Depth 3
+            .Include(c => c.Replies)
+                .ThenInclude(r => r.Replies)
+                    .ThenInclude(rr => rr.Replies)
+                        .ThenInclude(rrr => rrr.User)
+            .Include(c => c.Replies)
+                .ThenInclude(r => r.Replies)
+                    .ThenInclude(rr => rr.Replies)
+                        .ThenInclude(rrr => rrr.Ratings)
             .OrderByDescending(c => c.Ratings.Count(r => r.IsLike) - c.Ratings.Count(r => !r.IsLike)) // Sort by net likes
             .ToListAsync();
 

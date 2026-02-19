@@ -17,6 +17,7 @@ const AdminDashboard = () => {
     const [userDetails, setUserDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchModeratorTerm, setSearchModeratorTerm] = useState('');
     const [error, setError] = useState(null);
     const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
     const [activeDashboardTab, setActiveDashboardTab] = useState('users');
@@ -122,6 +123,12 @@ const AdminDashboard = () => {
         u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         u.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const filteredModerators = moderators.filter(m =>
+        m.userFullName?.toLowerCase().includes(searchModeratorTerm.toLowerCase()) ||
+        m.userEmail?.toLowerCase().includes(searchModeratorTerm.toLowerCase()) ||
+        m.hotelName?.toLowerCase().includes(searchModeratorTerm.toLowerCase())
     );
 
     if (!isSuperAdmin()) {
@@ -282,7 +289,7 @@ const AdminDashboard = () => {
                                         >
                                             <div className="user-avatar">
                                                 {u.avatarUrl ? (
-                                                    <img src={`http://localhost:5150${u.avatarUrl}`} alt={u.firstName} />
+                                                    <img src={u.avatarUrl.startsWith('http') ? u.avatarUrl : `http://localhost:5150${u.avatarUrl}`} alt={u.firstName} />
                                                 ) : (
                                                     <span>{u.firstName?.[0] || u.email?.[0] || '?'}</span>
                                                 )}
@@ -308,28 +315,39 @@ const AdminDashboard = () => {
                         )}
 
                         {activeDashboardTab === 'moderators' && (
-                            <div className="moderators-list">
-                                {moderators.length === 0 ? (
-                                    <p className="empty-message">{t('noModerators') || 'No moderators assigned'}</p>
-                                ) : (
-                                    moderators.map(m => (
-                                        <div key={m.id} className="moderator-card-admin">
-                                            <div className="moderator-info">
-                                                <strong>{m.userFullName}</strong>
-                                                <span>{m.userEmail}</span>
-                                                <small>{t('moderates') || 'Moderates'}: {m.hotelName}</small>
+                            <>
+                                <div className="panel-header">
+                                    <input
+                                        type="text"
+                                        placeholder={t('searchModerators') || 'Search moderators...'}
+                                        value={searchModeratorTerm}
+                                        onChange={(e) => setSearchModeratorTerm(e.target.value)}
+                                        className="search-input"
+                                    />
+                                </div>
+                                <div className="moderators-list">
+                                    {filteredModerators.length === 0 ? (
+                                        <p className="empty-message">{t('noModerators') || 'No moderators assigned'}</p>
+                                    ) : (
+                                        filteredModerators.map(m => (
+                                            <div key={m.id} className="moderator-card-admin">
+                                                <div className="moderator-info">
+                                                    <strong>{m.userFullName}</strong>
+                                                    <span>{m.userEmail}</span>
+                                                    <small>{t('moderates') || 'Moderates'}: {m.hotelName}</small>
+                                                </div>
+                                                <button
+                                                    className="btn-revoke"
+                                                    onClick={() => handleRemoveModeratorRole(m.id)}
+                                                    title={t('revokeModerator') || 'Revoke'}
+                                                >
+                                                    ❌
+                                                </button>
                                             </div>
-                                            <button
-                                                className="btn-revoke"
-                                                onClick={() => handleRemoveModeratorRole(m.id)}
-                                                title={t('revokeModerator') || 'Revoke'}
-                                            >
-                                                ❌
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </>
                         )}
                     </div>
 
@@ -342,7 +360,7 @@ const AdminDashboard = () => {
                             <div className="user-profile">
                                 <div className="profile-avatar">
                                     {userDetails.avatarUrl ? (
-                                        <img src={`http://localhost:5150${userDetails.avatarUrl}`} alt={userDetails.firstName} />
+                                        <img src={userDetails.avatarUrl.startsWith('http') ? userDetails.avatarUrl : `http://localhost:5150${userDetails.avatarUrl}`} alt={userDetails.firstName} />
                                     ) : (
                                         <span>{userDetails.firstName?.[0] || userDetails.email?.[0] || '?'}</span>
                                     )}
