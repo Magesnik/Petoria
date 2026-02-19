@@ -71,9 +71,9 @@ public class ProfileController : ControllerBase
             return NotFound();
         }
 
-        // Map DTO → Entity (update)
-        user.FirstName = request.FirstName;
-        user.LastName = request.LastName;
+        // Map DTO → Entity (update only provided fields)
+        if (!string.IsNullOrEmpty(request.FirstName)) user.FirstName = request.FirstName;
+        if (!string.IsNullOrEmpty(request.LastName)) user.LastName = request.LastName;
 
         // Update preferences if provided
         if (!string.IsNullOrEmpty(request.Theme)) user.Theme = request.Theme;

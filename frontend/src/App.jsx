@@ -34,6 +34,8 @@ import Settings from './pages/user/Settings';
 import Favorites from './pages/user/Favorites';
 import PurchaseHistory from './pages/user/PurchaseHistory';
 import MyMessages from './pages/user/MyMessages';
+import PaymentSuccess from './pages/user/PaymentSuccess';
+import PaymentCancel from './pages/user/PaymentCancel';
 
 // Public
 import Home from './pages/public/Home';
@@ -79,6 +81,8 @@ function App() {
                         <Route path="/my-messages" element={<MyMessages />} />
                         <Route path="/admin/support-messages" element={<AdminSupportMessages />} />
                         <Route path="/cart" element={<Cart />} />
+                        <Route path="/payment/success" element={<PaymentSuccess />} />
+                        <Route path="/payment/cancel" element={<PaymentCancel />} />
                       </Routes>
                     </div>
                   </Router>

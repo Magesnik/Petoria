@@ -35,26 +35,41 @@ const Cart = () => {
         }
         setCheckoutLoading(true);
         setCheckoutError('');
-        setCheckoutSuccess('');
         try {
-            for (const item of cartItems) {
-                await api.post('/reservations', {
+            // Store cart items in sessionStorage so PaymentSuccess can confirm them
+            sessionStorage.setItem('pendingCartItems', JSON.stringify(
+                cartItems.map(item => ({
                     hotelId: item.hotelId,
                     roomTypeId: item.roomTypeId,
                     checkInDate: item.checkInDate,
                     checkOutDate: item.checkOutDate,
                     numberOfRooms: item.numberOfRooms,
-                });
-            }
-            setCheckoutSuccess(t('checkoutSuccess'));
-            await clearCart();
-            setTimeout(() => navigate('/purchase-history'), 2000);
+                }))
+            ));
+
+            const data = await api.post('/stripe/create-checkout-session', {
+                items: cartItems.map(item => ({
+                    cartItemId: item.id,
+                    hotelId: item.hotelId,
+                    hotelName: item.hotelName,
+                    roomTypeId: item.roomTypeId,
+                    roomTypeName: item.roomTypeName,
+                    checkInDate: item.checkInDate,
+                    checkOutDate: item.checkOutDate,
+                    numberOfRooms: item.numberOfRooms,
+                    totalPrice: item.totalPrice,
+                })),
+                frontendBaseUrl: window.location.origin,
+            });
+
+            // Redirect to Stripe Checkout
+            window.location.href = data.url;
         } catch (err) {
             setCheckoutError(err.message || t('checkoutError'));
-        } finally {
             setCheckoutLoading(false);
         }
     };
+
 
     if (cartLoading) {
         return (

@@ -419,4 +419,111 @@ public class ReservationsController : ControllerBase
 
         return Ok(new { message = "Reservation cancelled successfully" });
     }
+
+    // POST: api/reservations/confirm-cart - Create reservations after successful Stripe payment
+    [HttpPost("confirm-cart")]
+    [Authorize]
+    public async Task<IActionResult> ConfirmCart([FromBody] ConfirmCartRequest request)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var createdReservations = new List<int>();
+
+        foreach (var item in request.Items)
+        {
+            var hotel = await _context.Hotels.FindAsync(item.HotelId);
+            if (hotel == null) continue;
+
+            var roomType = await _context.RoomTypes
+                .FirstOrDefaultAsync(rt => rt.Id == item.RoomTypeId && rt.HotelId == item.HotelId);
+            if (roomType == null) continue;
+
+            // Calculate total price with discounts
+            var discounts = await _context.RoomDiscounts
+                .Where(d => d.RoomTypeId == item.RoomTypeId &&
+                            d.EndDate >= item.CheckInDate.Date &&
+                            d.StartDate <= item.CheckOutDate.Date)
+                .ToListAsync();
+
+            decimal totalPrice = 0;
+            for (var date = item.CheckInDate.Date; date < item.CheckOutDate.Date; date = date.AddDays(1))
+            {
+                var discount = discounts
+                    .Where(d => d.StartDate.Date <= date && d.EndDate.Date >= date)
+                    .OrderByDescending(d => d.DiscountPercentage)
+                    .FirstOrDefault();
+
+                var dayPrice = discount != null
+                    ? roomType.PricePerNight * (1 - discount.DiscountPercentage / 100m)
+                    : roomType.PricePerNight;
+
+                totalPrice += dayPrice;
+            }
+            totalPrice *= item.NumberOfRooms;
+
+            var reservation = new Reservation
+            {
+                UserId = userId,
+                HotelId = item.HotelId,
+                RoomTypeId = item.RoomTypeId,
+                CheckInDate = item.CheckInDate.Date,
+                CheckOutDate = item.CheckOutDate.Date,
+                NumberOfRooms = item.NumberOfRooms,
+                TotalPrice = totalPrice,
+                Status = "Confirmed",
+                Notes = $"Stripe payment",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.Reservations.Add(reservation);
+
+            // Update availability
+            for (var date = item.CheckInDate.Date; date < item.CheckOutDate.Date; date = date.AddDays(1))
+            {
+                var availability = await _context.RoomAvailabilities
+                    .FirstOrDefaultAsync(ra => ra.RoomTypeId == item.RoomTypeId && ra.Date == date);
+
+                if (availability != null)
+                {
+                    availability.AvailableCount -= item.NumberOfRooms;
+                    availability.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    _context.RoomAvailabilities.Add(new RoomAvailability
+                    {
+                        RoomTypeId = item.RoomTypeId,
+                        Date = date,
+                        AvailableCount = roomType.TotalRooms - item.NumberOfRooms,
+                        IsBlocked = false,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            createdReservations.Add(reservation.Id);
+        }
+
+        return Ok(new { message = "Reservations confirmed successfully", reservationIds = createdReservations });
+    }
 }
+
+public class ConfirmCartRequest
+{
+    public List<ConfirmCartItem> Items { get; set; } = new();
+}
+
+public class ConfirmCartItem
+{
+    public int HotelId { get; set; }
+    public int RoomTypeId { get; set; }
+    public DateTime CheckInDate { get; set; }
+    public DateTime CheckOutDate { get; set; }
+    public int NumberOfRooms { get; set; }
+}
+
