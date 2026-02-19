@@ -5,6 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
 import RoomTypeManager from '../../components/RoomTypeManager';
+import DiscountManager from '../../components/DiscountManager';
+import PromoCodeManager from '../../components/PromoCodeManager';
 import AvailabilityCalendar from '../../components/AvailabilityCalendar';
 import './ManageHotel.css';
 
@@ -130,7 +132,11 @@ const ManageHotel = () => {
             setShowAddModerator(false);
             fetchModerators();
         } catch (err) {
-            setError(err.message || t('errorAddingModerator') || 'Грешка при добавяне на модератор');
+            if (err.message === 'User with this email not found') {
+                setError(t('userNotFound'));
+            } else {
+                setError(err.message || t('errorAddingModerator') || 'Грешка при добавяне на модератор');
+            }
         }
     };
 
@@ -433,6 +439,12 @@ const ManageHotel = () => {
                                     </div>
                                 )}
                             </div>
+
+                            <hr className="section-divider" />
+
+                            {/* Promo Codes Section */}
+                            <PromoCodeManager hotelId={parseInt(id)} />
+
                         </div>
                     )}
                 </div>

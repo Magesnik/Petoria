@@ -24,6 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SupportMessage> SupportMessages { get; set; }
     public DbSet<HotelModerator> HotelModerators { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
+    public DbSet<PromoCode> PromoCodes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -56,5 +57,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<HotelModerator>()
             .HasIndex(hm => new { hm.HotelId, hm.UserId })
             .IsUnique();
+
+        // Configure PromoCode
+        builder.Entity<PromoCode>()
+            .HasIndex(p => new { p.HotelId, p.Code })
+            .IsUnique(); // Unique code per hotel
+
+        builder.Entity<PromoCode>()
+            .Property(p => p.DiscountPercentage)
+            .HasColumnType("decimal(5,2)");
     }
 }

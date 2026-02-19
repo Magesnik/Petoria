@@ -308,6 +308,21 @@
     border-color: var(--primary-color);
 }
 
+[data-theme='dark'] .currency-select {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-light);
+}
+
+[data-theme='dark'] .currency-select:focus {
+    border-color: var(--primary-color);
+}
+
+[data-theme='dark'] .currency-select option {
+    background-color: #020c1b;
+    color: var(--text-light);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .settings-page {
