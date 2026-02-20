@@ -56,6 +56,10 @@ public class Hotel
     [MaxLength(1000)]
     public string RoomTypes { get; set; } = "[]";
 
+    // JSON array of cancellation policies (days before -> refund percentage)
+    [MaxLength(2000)]
+    public string CancellationPolicies { get; set; } = "[]";
+
     public bool IsAvailable { get; set; } = true;
 
     // Set by SuperAdmin to globally hide and lock the hotel

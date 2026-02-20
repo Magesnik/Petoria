@@ -47,5 +47,8 @@ public class CreateHotelDto
     [MaxLength(1000)]
     public string RoomTypes { get; set; } = "[]";
 
+    [MaxLength(2000)]
+    public string CancellationPolicies { get; set; } = "[]";
+
     public bool IsAvailable { get; set; } = true;
 }

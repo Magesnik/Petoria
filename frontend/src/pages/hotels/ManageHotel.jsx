@@ -64,7 +64,8 @@ const ManageHotel = () => {
                 city: data.city,
                 country: data.country,
                 isAvailable: data.isAvailable,
-                starRating: data.starRating || 3
+                starRating: data.starRating || 3,
+                cancellationPolicies: data.cancellationPolicies ? JSON.parse(data.cancellationPolicies) : []
             });
         } catch (err) {
             setError(t('errorLoadingHotel'));
@@ -96,7 +97,8 @@ const ManageHotel = () => {
         try {
             await api.put(`/hotels/${id}`, {
                 ...hotel,
-                ...editData
+                ...editData,
+                cancellationPolicies: JSON.stringify(editData.cancellationPolicies)
             });
 
             setSuccess(t('savedSuccessfully'));
@@ -234,12 +236,20 @@ const ManageHotel = () => {
                         📅 {t('availabilityTab')}
                     </button>
                     {(hotel.createdById === user?.id || user?.roles?.includes('SuperAdmin')) && (
-                        <button
-                            className={`tab ${activeTab === 'moderators' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('moderators')}
-                        >
-                            🛡️ {t('moderatorsTab') || 'Модератори'}
-                        </button>
+                        <>
+                            <button
+                                className={`tab ${activeTab === 'moderators' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('moderators')}
+                            >
+                                🛡️ {t('moderatorsTab') || 'Модератори'}
+                            </button>
+                            <button
+                                className={`tab ${activeTab === 'promocodes' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('promocodes')}
+                            >
+                                🎟️ {t('promoCodesTab') || 'Промо кодове'}
+                            </button>
+                        </>
                     )}
                 </div>
 
@@ -277,6 +287,23 @@ const ManageHotel = () => {
                                         <div className="info-item full-width">
                                             <label>{t('description')}</label>
                                             <p>{hotel.description || t('noDescription')}</p>
+                                        </div>
+
+                                        <div className="info-item full-width">
+                                            <label>{t('cancellationPolicies') || 'Политики за отмяна'}</label>
+                                            {hotel.cancellationPolicies && JSON.parse(hotel.cancellationPolicies).length > 0 ? (
+                                                <ul className="policies-list">
+                                                    {JSON.parse(hotel.cancellationPolicies)
+                                                        .sort((a, b) => b.daysBefore - a.daysBefore)
+                                                        .map((policy, index) => (
+                                                            <li key={index}>
+                                                                До {policy.daysBefore} дни преди настаняване: <strong>{policy.refundPercentage}% възстановяване</strong>
+                                                            </li>
+                                                        ))}
+                                                </ul>
+                                            ) : (
+                                                <p>{t('noCancellationPolicies') || 'Няма зададени правила за отмяна (безплатно до последния момент)'}</p>
+                                            )}
                                         </div>
                                     </div>
                                     <button className="btn-edit" onClick={() => setIsEditing(true)}>
@@ -351,6 +378,71 @@ const ManageHotel = () => {
                                                 onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                                                 rows="4"
                                             />
+                                        </div>
+
+                                        <div className="form-group full-width">
+                                            <label>{t('cancellationPolicies') || 'Политики за отмяна'}</label>
+                                            <div className="dynamic-list">
+                                                {editData.cancellationPolicies.map((policy, index) => (
+                                                    <div key={index} className="dynamic-item policy-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                                                        <span>До</span>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={policy.daysBefore}
+                                                            onChange={(e) => {
+                                                                const newPolicies = [...editData.cancellationPolicies];
+                                                                const val = parseInt(e.target.value);
+                                                                newPolicies[index].daysBefore = isNaN(val) ? 0 : val;
+                                                                setEditData({ ...editData, cancellationPolicies: newPolicies });
+                                                            }}
+                                                            style={{ width: '70px', padding: '5px' }}
+                                                        />
+                                                        <span>дни:</span>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            max="100"
+                                                            value={policy.refundPercentage}
+                                                            onChange={(e) => {
+                                                                const newPolicies = [...editData.cancellationPolicies];
+                                                                const val = parseInt(e.target.value);
+                                                                newPolicies[index].refundPercentage = isNaN(val) ? 0 : val;
+                                                                setEditData({ ...editData, cancellationPolicies: newPolicies });
+                                                            }}
+                                                            style={{ width: '70px', padding: '5px' }}
+                                                        />
+                                                        <span>% възстановяване</span>
+                                                        <button
+                                                            type="button"
+                                                            className="btn-remove"
+                                                            onClick={() => {
+                                                                const newPolicies = editData.cancellationPolicies.filter((_, i) => i !== index);
+                                                                setEditData({ ...editData, cancellationPolicies: newPolicies });
+                                                            }}
+                                                            style={{ marginLeft: 'auto' }}
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="btn-add"
+                                                onClick={() => {
+                                                    setEditData({
+                                                        ...editData,
+                                                        cancellationPolicies: [...editData.cancellationPolicies, { daysBefore: 7, refundPercentage: 100 }]
+                                                    });
+                                                }}
+                                                style={{ marginTop: '10px' }}
+                                            >
+                                                ➕ {t('addCancellationPolicy') || 'Добави правило'}
+                                            </button>
+                                            <p className="hint-text" style={{ fontSize: '0.85em', color: '#666', marginTop: '5px' }}>
+                                                Пример: 60 дни преди настаняване -&gt; 100% възстановяване на сумата. За липсващи дни до самата дата на настаняване (0 дни) се приема 0% (без възстановяване). Ако нямате въведени правила, приемаме, че отмяната е винаги 100% безплатна.
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="edit-actions">
@@ -440,11 +532,13 @@ const ManageHotel = () => {
                                 )}
                             </div>
 
-                            <hr className="section-divider" />
+                        </div>
+                    )}
 
-                            {/* Promo Codes Section */}
+                    {/* Promo Codes Tab */}
+                    {activeTab === 'promocodes' && (
+                        <div className="promocodes-section">
                             <PromoCodeManager hotelId={parseInt(id)} />
-
                         </div>
                     )}
                 </div>

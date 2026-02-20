@@ -186,7 +186,8 @@ const CreateHotel = () => {
                 imageUrl: formData.imageUrl || '',
                 images: JSON.stringify(uploadedImageUrls),
                 amenities: JSON.stringify(amenities),
-                roomTypes: '[]' // Empty for now, will be managed separately
+                roomTypes: '[]', // Empty for now, will be managed separately
+                cancellationPolicies: '[]'
             };
 
             await api.post('/hotels', hotelData);
