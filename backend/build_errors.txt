@@ -1,0 +1,30 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Petoria.Constants -> C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria.Constants\bin\Debug\net9.0\Petoria.Constants.dll
+  Petoria.Infrastructure -> C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria.Infrastructure\bin\Debug\net9.0\Petoria.Infrastructure.dll
+  Petoria.Core -> C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria.Core\bin\Debug\net9.0\Petoria.Core.dll
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\DTOs\PromoCode\CreatePromoCodeDto.cs(8,19): warning CS8618: Non-nullable property 'Code' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\DTOs\PromoCode\PromoCodeDto.cs(7,19): warning CS8618: Non-nullable property 'Code' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\SupportMessagesController.cs(54,26): warning CS8602: Dereference of a possibly null reference. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\SupportMessagesController.cs(56,29): warning CS8601: Possible null reference assignment. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\SupportMessagesController.cs(108,33): warning CS8601: Possible null reference assignment. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\PromoCodesController.cs(47,27): error CS0266: Cannot implicitly convert type 'int?' to 'int'. An explicit conversion exists (are you missing a cast?) [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\PromoCodesController.cs(47,27): warning CS8629: Nullable value type may be null. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\PromoCodesController.cs(102,23): error CS0266: Cannot implicitly convert type 'int?' to 'int'. An explicit conversion exists (are you missing a cast?) [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\HotelsController.cs(424,26): warning CS8602: Dereference of a possibly null reference. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+
+Build FAILED.
+
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\DTOs\PromoCode\CreatePromoCodeDto.cs(8,19): warning CS8618: Non-nullable property 'Code' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\DTOs\PromoCode\PromoCodeDto.cs(7,19): warning CS8618: Non-nullable property 'Code' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\SupportMessagesController.cs(54,26): warning CS8602: Dereference of a possibly null reference. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\SupportMessagesController.cs(56,29): warning CS8601: Possible null reference assignment. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\SupportMessagesController.cs(108,33): warning CS8601: Possible null reference assignment. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\PromoCodesController.cs(47,27): warning CS8629: Nullable value type may be null. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\HotelsController.cs(424,26): warning CS8602: Dereference of a possibly null reference. [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\PromoCodesController.cs(47,27): error CS0266: Cannot implicitly convert type 'int?' to 'int'. An explicit conversion exists (are you missing a cast?) [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Controllers\PromoCodesController.cs(102,23): error CS0266: Cannot implicitly convert type 'int?' to 'int'. An explicit conversion exists (are you missing a cast?) [C:\Users\magesnik\My Drive\Дипломна\Petoria\backend\Petoria\Petoria.csproj]
+    7 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:01.50

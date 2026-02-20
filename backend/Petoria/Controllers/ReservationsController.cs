@@ -431,6 +431,18 @@ public class ReservationsController : ControllerBase
 
         var createdReservations = new List<int>();
 
+        // Find promo code
+        PromoCode promo = null;
+        if (!string.IsNullOrEmpty(request.PromoCode))
+        {
+            promo = await _context.PromoCodes.FirstOrDefaultAsync(p => p.Code == request.PromoCode);
+            if (promo != null && (!promo.IsActive || promo.CurrentActivations >= promo.MaxActivations || promo.ExpirationDate <= DateTime.UtcNow))
+            {
+                promo = null; // invalid
+            }
+        }
+        bool promoUsed = false;
+
         foreach (var item in request.Items)
         {
             var hotel = await _context.Hotels.FindAsync(item.HotelId);
@@ -462,6 +474,13 @@ public class ReservationsController : ControllerBase
                 totalPrice += dayPrice;
             }
             totalPrice *= item.NumberOfRooms;
+
+            // Apply global or hotel-specific promo code discount
+            if (promo != null && (promo.HotelId == null || promo.HotelId == item.HotelId))
+            {
+                totalPrice = totalPrice * (1 - promo.DiscountPercentage / 100m);
+                promoUsed = true;
+            }
 
             var reservation = new Reservation
             {
@@ -509,6 +528,14 @@ public class ReservationsController : ControllerBase
             createdReservations.Add(reservation.Id);
         }
 
+        // Increment promo code usage if it was successfully applied to at least one reservation
+        if (promoUsed && promo != null)
+        {
+            promo.CurrentActivations++;
+            _context.PromoCodes.Update(promo);
+            await _context.SaveChangesAsync();
+        }
+
         return Ok(new { message = "Reservations confirmed successfully", reservationIds = createdReservations });
     }
 }
@@ -516,6 +543,7 @@ public class ReservationsController : ControllerBase
 public class ConfirmCartRequest
 {
     public List<ConfirmCartItem> Items { get; set; } = new();
+    public string? PromoCode { get; set; }
 }
 
 public class ConfirmCartItem

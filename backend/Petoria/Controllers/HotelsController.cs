@@ -155,6 +155,7 @@ public class HotelsController : ControllerBase
                     Images = hotel.Images,
                     Amenities = hotel.Amenities,
                     RoomTypes = hotel.RoomTypes,
+                    CancellationPolicies = hotel.CancellationPolicies,
                     IsAvailable = hotel.IsAvailable,
                     IsSuspendedBySuperAdmin = hotel.IsSuspendedBySuperAdmin,
                     CreatedById = hotel.CreatedById,
@@ -238,6 +239,7 @@ public class HotelsController : ControllerBase
             Images = hotel.Images,
             Amenities = hotel.Amenities,
             RoomTypes = hotel.RoomTypes,
+            CancellationPolicies = hotel.CancellationPolicies,
             IsAvailable = hotel.IsAvailable,
             CreatedById = hotel.CreatedById,
             CreatedAt = hotel.CreatedAt,
@@ -294,6 +296,7 @@ public class HotelsController : ControllerBase
                 Images = h.Hotel.Images,
                 Amenities = h.Hotel.Amenities,
                 RoomTypes = h.Hotel.RoomTypes,
+                CancellationPolicies = h.Hotel.CancellationPolicies,
                 IsAvailable = h.Hotel.IsAvailable,
                 CreatedById = h.Hotel.CreatedById,
                 CreatedAt = h.Hotel.CreatedAt,
@@ -598,6 +601,7 @@ public class HotelsController : ControllerBase
                 Images = dto.Images,
                 Amenities = dto.Amenities,
                 RoomTypes = dto.RoomTypes,
+                CancellationPolicies = dto.CancellationPolicies,
                 // Force inactive by default until rooms/prices are added
                 IsAvailable = false,
                 CreatedById = userId,
@@ -687,6 +691,7 @@ public class HotelsController : ControllerBase
         existingHotel.ImageUrl = dto.ImageUrl;
         existingHotel.Images = dto.Images;
         existingHotel.Amenities = dto.Amenities;
+        existingHotel.CancellationPolicies = dto.CancellationPolicies;
         // RoomTypes are managed via separate controller usually, but if passed here, ignore or handle carefully. 
         // We generally don't update connection via UpdateHotelDto for RoomTypes as it's complex.
         // exisingHotel.RoomTypes = dto.RoomTypes; // Avoid updating detailed navigation property here if not needed

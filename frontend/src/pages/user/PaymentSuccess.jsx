@@ -16,6 +16,7 @@ const PaymentSuccess = () => {
         const confirm = async () => {
             try {
                 const raw = sessionStorage.getItem('pendingCartItems');
+                const appliedPromo = sessionStorage.getItem('appliedPromoCode');
                 if (!raw) {
                     // No pending items — maybe user landed here directly
                     setStatus('success');
@@ -24,8 +25,12 @@ const PaymentSuccess = () => {
                 }
 
                 const items = JSON.parse(raw);
-                await api.post('/reservations/confirm-cart', { items });
+                await api.post('/reservations/confirm-cart', {
+                    items,
+                    promoCode: appliedPromo || null
+                });
                 sessionStorage.removeItem('pendingCartItems');
+                sessionStorage.removeItem('appliedPromoCode');
                 await clearCart();
                 setStatus('success');
                 setTimeout(() => navigate('/purchase-history'), 3500);

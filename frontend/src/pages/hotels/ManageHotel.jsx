@@ -406,8 +406,10 @@ const ManageHotel = () => {
                                                             value={policy.refundPercentage}
                                                             onChange={(e) => {
                                                                 const newPolicies = [...editData.cancellationPolicies];
-                                                                const val = parseInt(e.target.value);
-                                                                newPolicies[index].refundPercentage = isNaN(val) ? 0 : val;
+                                                                let val = parseInt(e.target.value);
+                                                                if (isNaN(val)) val = 0;
+                                                                if (val > 100) val = 100;
+                                                                newPolicies[index].refundPercentage = val;
                                                                 setEditData({ ...editData, cancellationPolicies: newPolicies });
                                                             }}
                                                             style={{ width: '70px', padding: '5px' }}

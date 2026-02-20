@@ -39,7 +39,15 @@ const PromoCodeManager = ({ hotelId }) => {
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        let { name, value } = e.target;
+
+        if (name === 'discountPercentage') {
+            const num = parseFloat(value);
+            if (!isNaN(num) && num > 100) {
+                value = '100';
+            }
+        }
+
         setFormData(prev => ({
             ...prev,
             [name]: value

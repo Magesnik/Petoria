@@ -476,5 +476,8 @@
     "errorLoadingPromoCodes": "Грешка при зареждане на промо кодовете",
     "errorSavingPromoCode": "Грешка при запазване на промо кода",
     "errorDeletingPromoCode": "Грешка при изтриване на промо кода",
-    "noPromoCodes": "Няма намерени промо кодове."
+    "noPromoCodes": "Няма намерени промо кодове.",
+    "cancellationPolicies": "Политики за отмяна",
+    "addCancellationPolicy": "Добави правило",
+    "promoCodesTab": "Промо кодове"
 }

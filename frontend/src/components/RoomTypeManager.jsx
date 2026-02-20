@@ -121,17 +121,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         });
     };
 
-    const handleInitializeAvailability = async () => {
-        try {
-            await api.post(
-                `/hotels/${hotelId}/availability/initialize?daysAhead=90`
-            );
 
-            setSuccess(t('availabilityInitialized'));
-        } catch (err) {
-            setError(err.message || t('error'));
-        }
-    };
 
     if (loading) {
         return <div className="room-manager loading">{t('loading')}</div>;
@@ -141,14 +131,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         <div className="room-manager">
             <div className="room-manager-header">
                 <h3>🛏️ {t('roomManagement')}</h3>
-                {roomTypes.length > 0 && (
-                    <button
-                        className="btn-initialize"
-                        onClick={handleInitializeAvailability}
-                    >
-                        📅 {t('initializeAvailability')}
-                    </button>
-                )}
+
             </div>
 
             {error && <div className="room-error">{error}</div>}

@@ -482,5 +482,8 @@
     "errorLoadingPromoCodes": "Error loading promo codes",
     "errorSavingPromoCode": "Error saving promo code",
     "errorDeletingPromoCode": "Error deleting promo code",
-    "noPromoCodes": "No promo codes found."
+    "noPromoCodes": "No promo codes found.",
+    "cancellationPolicies": "Cancellation Policies",
+    "addCancellationPolicy": "Add Cancellation Policy",
+    "promoCodesTab": "Promo Codes"
 }

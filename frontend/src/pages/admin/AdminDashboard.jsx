@@ -3,6 +3,7 @@ import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import GlobalPromoCodes from './GlobalPromoCodes';
 
 import './AdminDashboard.css';
 
@@ -23,6 +24,7 @@ const AdminDashboard = () => {
     const [error, setError] = useState(null);
     const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
     const [activeDashboardTab, setActiveDashboardTab] = useState('users');
+    const [showPromoCodes, setShowPromoCodes] = useState(false);
 
     const getStatusLabel = (status) => {
         switch (status?.toLowerCase()) {
@@ -176,6 +178,23 @@ const AdminDashboard = () => {
                 <div className="dashboard-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
                         <h1>🛡️ {t('superAdminDashboard')}</h1>
+                        <button
+                            className="promo-codes-head-btn"
+                            onClick={() => {
+                                setShowPromoCodes(true);
+                                setUserDetails(null);
+                            }}
+                            title={t('globalPromoCodes') || 'Глобални Промо Кодове'}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '1.5rem',
+                                cursor: 'pointer',
+                                position: 'relative'
+                            }}
+                        >
+                            🏷️
+                        </button>
                         <button
                             className="notification-bell-btn"
                             onClick={() => navigate('/admin/support-messages')}
@@ -418,7 +437,18 @@ const AdminDashboard = () => {
 
                     </div>
 
-                    {userDetails && (
+                    {showPromoCodes ? (
+                        <div className="details-panel" style={{ overflowY: 'auto', position: 'relative' }}>
+                            <button
+                                className="close-btn"
+                                onClick={() => setShowPromoCodes(false)}
+                                style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}
+                            >
+                                ×
+                            </button>
+                            <GlobalPromoCodes />
+                        </div>
+                    ) : userDetails ? (
                         <div className="details-panel">
                             <div className="panel-header">
                                 <h2>{t('userDetails')}</h2>
@@ -549,7 +579,7 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </>

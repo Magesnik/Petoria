@@ -19,9 +19,22 @@ const Cart = () => {
     const [promoCode, setPromoCode] = useState('');
     const [promoApplied, setPromoApplied] = useState(false);
     const [promoError, setPromoError] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState(null);
 
-    // API response uses item.totalPrice directly (not nested in priceInfo)
-    const total = cartItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    const getDisplayItem = (item) => {
+        if (!appliedPromo) return item;
+        const applies = appliedPromo.hotelId === null || appliedPromo.hotelId === item.hotelId;
+        if (!applies) return item;
+
+        return {
+            ...item,
+            originalPrice: item.originalPrice > item.totalPrice ? item.originalPrice : item.totalPrice,
+            totalPrice: item.totalPrice * (1 - appliedPromo.discountPercentage / 100)
+        };
+    };
+
+    const displayItems = cartItems.map(getDisplayItem);
+    const total = displayItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '';
@@ -38,7 +51,7 @@ const Cart = () => {
         try {
             // Store cart items in sessionStorage so PaymentSuccess can confirm them
             sessionStorage.setItem('pendingCartItems', JSON.stringify(
-                cartItems.map(item => ({
+                displayItems.map(item => ({
                     hotelId: item.hotelId,
                     roomTypeId: item.roomTypeId,
                     checkInDate: item.checkInDate,
@@ -47,8 +60,14 @@ const Cart = () => {
                 }))
             ));
 
+            if (promoApplied && appliedPromo) {
+                sessionStorage.setItem('appliedPromoCode', appliedPromo.code);
+            } else {
+                sessionStorage.removeItem('appliedPromoCode');
+            }
+
             const data = await api.post('/stripe/create-checkout-session', {
-                items: cartItems.map(item => ({
+                items: displayItems.map(item => ({
                     cartItemId: item.id,
                     hotelId: item.hotelId,
                     hotelName: item.hotelName,
@@ -106,7 +125,7 @@ const Cart = () => {
                 ) : (
                     <div className="cart-layout">
                         <div className="cart-items-list">
-                            {cartItems.map(item => (
+                            {displayItems.map(item => (
                                 <div key={item.id} className="cart-item-card">
                                     {item.hotelImageUrl && (
                                         <img
@@ -154,7 +173,7 @@ const Cart = () => {
                         <div className="cart-summary">
                             <h2 className="cart-summary-title">{t('orderSummary')}</h2>
                             <div className="cart-summary-rows">
-                                {cartItems.map(item => (
+                                {displayItems.map(item => (
                                     <div key={item.id} className="cart-summary-row">
                                         <span className="cart-summary-label">{item.hotelName}</span>
                                         <span>{convertAndFormat(item.totalPrice || 0)}</span>
@@ -193,16 +212,38 @@ const Cart = () => {
                                     <button
                                         className="cart-promo-btn"
                                         disabled={!promoCode.trim() || promoApplied}
-                                        onClick={() => {
-                                            // TODO: connect to backend discount validation
-                                            setPromoError(t('invalidPromoCode') || 'Невалиден промо код');
+                                        onClick={async () => {
+                                            try {
+                                                setPromoError('');
+                                                const res = await api.get(`/promocodes/validate?code=${promoCode}`);
+                                                setAppliedPromo(res);
+                                                setPromoApplied(true);
+                                            } catch (err) {
+                                                setPromoError(err.message || t('invalidPromoCode') || 'Невалиден промо код');
+                                                setAppliedPromo(null);
+                                                setPromoApplied(false);
+                                            }
                                         }}
                                     >
                                         {promoApplied ? '✓' : (t('apply') || 'Добави')}
                                     </button>
                                 </div>
                                 {promoError && <p className="cart-promo-error">{promoError}</p>}
-                                {promoApplied && <p className="cart-promo-success">✓ {t('promoApplied') || 'Промо кодът е приложен!'}</p>}
+                                {promoApplied && (
+                                    <div className="cart-promo-success" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span>✓ {t('promoApplied') || 'Промо кодът е приложен!'} (-{appliedPromo?.discountPercentage}%)</span>
+                                        <button
+                                            onClick={() => {
+                                                setAppliedPromo(null);
+                                                setPromoApplied(false);
+                                                setPromoCode('');
+                                            }}
+                                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

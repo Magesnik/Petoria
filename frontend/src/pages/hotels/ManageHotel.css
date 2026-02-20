@@ -320,11 +320,11 @@
 }
 
 [data-theme='dark'] .info-edit select option {
-    background-color: #fff;
-    color: #000;
+    background-color: #1e233c;
+    color: #fff;
 }
 
-/* Fallback for select options - force black text on white bg */
+/* Fallback for select options - force black text on white bg for light theme */
 .info-edit select option {
     color: #000;
     background-color: #fff;

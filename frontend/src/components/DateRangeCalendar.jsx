@@ -156,12 +156,18 @@ const DateRangeCalendar = ({
 
                     const dateStr = toLocalDateStr(date);
                     const isPast = date < today;
-                    const isBlocked = isDateBlocked(date);
+
                     const isCheckIn = checkInDate && dateStr === checkInDate;
                     const isCheckOut = checkOutDate && dateStr === checkOutDate;
                     const isInRange = isDateInRange(date);
                     const avail = getAvailabilityForDate(date);
                     const availableCount = avail?.availableCount ?? selectedRoomType?.totalRooms ?? 0;
+
+                    // A date is structurally blocked from selection if it's explicitly blocked OR has 0 rooms.
+                    const isZeroAvailable = availableCount === 0;
+                    const isExplicitlyBlocked = avail?.isBlocked;
+                    const isBlockedForSelection = isExplicitlyBlocked || isZeroAvailable;
+
                     const hasDiscount = avail?.discountPercentage > 0;
 
                     return (
@@ -169,22 +175,23 @@ const DateRangeCalendar = ({
                             key={index}
                             className={`day-cell 
                                 ${isPast ? 'past' : ''} 
-                                ${isBlocked ? 'blocked' : ''}
+                                ${isExplicitlyBlocked ? 'blocked' : ''}
+                                ${isZeroAvailable && !isExplicitlyBlocked && !isPast ? 'full blocked' : ''}
                                 ${isCheckIn ? 'check-in' : ''}
                                 ${isCheckOut ? 'check-out' : ''}
                                 ${isInRange ? 'in-range' : ''}
-                                ${!isPast && !isBlocked ? 'available' : ''}
-                                ${hasDiscount && !isPast && !isBlocked ? 'discounted' : ''}
+                                ${!isPast && !isExplicitlyBlocked && availableCount > 0 ? 'available' : ''}
+                                ${hasDiscount && !isPast && !isExplicitlyBlocked && availableCount > 0 ? 'discounted' : ''}
                             `}
-                            onClick={() => handleDayClick(date)}
+                            onClick={() => !isBlockedForSelection && handleDayClick(date)}
                         >
-                            {hasDiscount && !isPast && !isBlocked && (
+                            {hasDiscount && !isPast && !isExplicitlyBlocked && (
                                 <span className="discount-badge">-{avail.discountPercentage}%</span>
                             )}
                             <span className="day-number">{date.getDate()}</span>
-                            {selectedRoomType && !isPast && !isBlocked && (
-                                <span className="availability-indicator">
-                                    {availableCount > 0 ? `${availableCount}` : ''}
+                            {selectedRoomType && !isPast && !isExplicitlyBlocked && (
+                                <span className={`availability-indicator ${isZeroAvailable ? 'full' : ''}`}>
+                                    {!isZeroAvailable ? `${availableCount}` : 'Заето'}
                                 </span>
                             )}
                         </div>

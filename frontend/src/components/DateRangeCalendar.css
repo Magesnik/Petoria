@@ -148,6 +148,15 @@
     border-color: rgba(102, 126, 234, 0.5);
 }
 
+.date-range-calendar .day-cell.full {
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.date-range-calendar .day-cell.full:not(.past):hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
 .date-range-calendar .day-cell.check-in,
 .date-range-calendar .day-cell.check-out {
     background: linear-gradient(135deg, #667eea, #764ba2);
@@ -188,6 +197,12 @@
     background: rgba(16, 185, 129, 0.15);
     padding: 1px 4px;
     border-radius: 3px;
+}
+
+.date-range-calendar .availability-indicator.full {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    font-weight: 700;
 }
 
 .date-range-calendar .day-cell.blocked .day-number {
