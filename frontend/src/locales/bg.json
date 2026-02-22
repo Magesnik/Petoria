@@ -479,5 +479,14 @@
     "noPromoCodes": "Няма намерени промо кодове.",
     "cancellationPolicies": "Политики за отмяна",
     "addCancellationPolicy": "Добави правило",
-    "promoCodesTab": "Промо кодове"
+    "promoCodesTab": "Промо кодове",
+    "sbHotelName": "Име на хотел",
+    "sbFindHotel": "Намери хотел",
+    "sbCountry": "Държава",
+    "sbPleaseSelect": "Моля изберете",
+    "sbAmenity": "Избор на удобство",
+    "sbCheckIn": "Настаняване",
+    "sbNights": "Нощувки",
+    "sbGuests": "Гости",
+    "sbSearch": "Търсене →"
 }

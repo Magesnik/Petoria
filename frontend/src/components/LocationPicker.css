@@ -101,6 +101,19 @@
     border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Invert map tiles for a dark mode effect */
+[data-theme='dark'] .location-picker-map .leaflet-layer,
+[data-theme='dark'] .location-picker-map .leaflet-control-zoom-in,
+[data-theme='dark'] .location-picker-map .leaflet-control-zoom-out,
+[data-theme='dark'] .location-picker-map .leaflet-control-attribution {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+/* Background of the map container behind the tiles */
+[data-theme='dark'] .location-picker-map.leaflet-container {
+    background-color: #1a1a1a;
+}
+
 [data-theme="dark"] .location-picker-instructions {
     background: rgba(255, 255, 255, 0.05);
 }

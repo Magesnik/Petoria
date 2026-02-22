@@ -183,12 +183,16 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
             <MapContainer
                 center={mapCenter}
                 zoom={13}
+                minZoom={2}
+                maxBounds={L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180))}
                 className="location-picker-map"
                 scrollWheelZoom={true}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    noWrap={true}
+                    bounds={L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180))}
                 />
 
                 <MapClickHandler onLocationSelect={handleMapClick} />

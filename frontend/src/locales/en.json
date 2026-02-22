@@ -485,5 +485,14 @@
     "noPromoCodes": "No promo codes found.",
     "cancellationPolicies": "Cancellation Policies",
     "addCancellationPolicy": "Add Cancellation Policy",
-    "promoCodesTab": "Promo Codes"
+    "promoCodesTab": "Promo Codes",
+    "sbHotelName": "Hotel Name",
+    "sbFindHotel": "Find a hotel",
+    "sbCountry": "Country",
+    "sbPleaseSelect": "Please select",
+    "sbAmenity": "Choose amenity",
+    "sbCheckIn": "Check-in",
+    "sbNights": "Nights",
+    "sbGuests": "Guests",
+    "sbSearch": "Search →"
 }

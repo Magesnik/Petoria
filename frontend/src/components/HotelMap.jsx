@@ -81,12 +81,16 @@ const HotelMap = ({ hotels, onHotelClick }) => {
                 <MapContainer
                     center={defaultCenter}
                     zoom={defaultZoom}
+                    minZoom={2}
+                    maxBounds={[[-90, -180], [90, 180]]}
                     className="leaflet-map"
                     whenReady={() => setMapReady(true)}
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        noWrap={true}
+                        bounds={[[-90, -180], [90, 180]]}
                     />
 
                     <MarkerClusterGroup

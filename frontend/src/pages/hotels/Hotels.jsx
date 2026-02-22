@@ -1,8 +1,8 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../../components/Footer';
 import HotelCard from '../../components/HotelCard';
 import HotelFilters from '../../components/HotelFilters';
 import HotelMap from '../../components/HotelMap';
@@ -69,24 +69,77 @@ const Hotels = () => {
     const [priceRange, setPriceRange] = useState({ minPrice: 0, maxPrice: 1000 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const queryParams = new useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const navState = location.state || {};
+
+    const [searchQuery, setSearchQuery] = useState(() => {
+        if (location.search || location.state) {
+            return navState.search || queryParams.get('search') || '';
+        }
+        const saved = localStorage.getItem('petoria_hotel_filters');
+        if (saved) {
+            try { return JSON.parse(saved).searchQuery || ''; } catch { return ''; }
+        }
+        return '';
+    });
+
     const [view, setView] = useState('grid'); // 'grid' or 'map'
     const [showMobileFilters, setShowMobileFilters] = useState(false);
-    const [sortBy, setSortBy] = useState('rating_desc');
-    const [filters, setFilters] = useState({
-        minPrice: '',
-        maxPrice: '',
-        city: '',
-        country: '',
-        amenities: [],
-        minRating: null,
-        starRating: []
+    const [sortBy, setSortBy] = useState(() => {
+        const saved = localStorage.getItem('petoria_hotel_filters');
+        if (saved) {
+            try { return JSON.parse(saved).sortBy || 'rating_desc'; } catch { return 'rating_desc'; }
+        }
+        return 'rating_desc';
+    });
+
+    const [filters, setFilters] = useState(() => {
+        const defaultFilters = {
+            minPrice: '', maxPrice: '', city: '', country: '', amenities: [],
+            minRating: null, starRating: [], checkInDate: '', nights: '', guests: ''
+        };
+
+        if (location.search || location.state) {
+            defaultFilters.country = navState.country || queryParams.get('country') || '';
+            defaultFilters.amenities = navState.amenities ? (Array.isArray(navState.amenities) ? navState.amenities : [navState.amenities]) : (queryParams.get('amenities') ? queryParams.get('amenities').split(',') : []);
+            defaultFilters.checkInDate = navState.checkInDate || queryParams.get('checkInDate') || '';
+            defaultFilters.nights = navState.nights || (queryParams.get('nights') ? parseInt(queryParams.get('nights'), 10) : '');
+            defaultFilters.guests = navState.guests || (queryParams.get('guests') ? parseInt(queryParams.get('guests'), 10) : '');
+            return defaultFilters;
+        }
+
+        const saved = localStorage.getItem('petoria_hotel_filters');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.filters) return { ...defaultFilters, ...parsed.filters };
+            } catch { return defaultFilters; }
+        }
+        return defaultFilters;
     });
 
     // Fetch filter data on mount
     useEffect(() => {
         fetchFilterData();
+
+        // Clear history state and url parameters so a page refresh doesn't replay the search
+        // and user doesn't see long URLs
+        if (location.search || location.state) {
+            navigate('/hotels', { replace: true });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Save filters to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('petoria_hotel_filters', JSON.stringify({
+            searchQuery,
+            filters,
+            sortBy
+        }));
+    }, [searchQuery, filters, sortBy]);
 
     // Fetch hotels when filters or search changes
     useEffect(() => {
@@ -132,6 +185,9 @@ const Hotels = () => {
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
             if (filters.starRating && filters.starRating.length > 0) params.append('starRating', filters.starRating.join(','));
+            if (filters.checkInDate) params.append('checkInDate', filters.checkInDate);
+            if (filters.nights) params.append('nights', filters.nights);
+            if (filters.guests) params.append('guests', filters.guests);
 
             const data = await api.get(`/hotels?${params.toString()}`);
             setHotels(data);
@@ -159,6 +215,9 @@ const Hotels = () => {
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
             if (filters.starRating && filters.starRating.length > 0) params.append('starRating', filters.starRating.join(','));
+            if (filters.checkInDate) params.append('checkInDate', filters.checkInDate);
+            if (filters.nights) params.append('nights', filters.nights);
+            if (filters.guests) params.append('guests', filters.guests);
 
             const data = await api.get(`/hotels/map?${params.toString()}`);
             setMapHotels(data);
@@ -185,9 +244,13 @@ const Hotels = () => {
             country: '',
             amenities: [],
             minRating: null,
-            starRating: []
+            starRating: [],
+            checkInDate: '',
+            nights: '',
+            guests: ''
         });
         setSearchQuery('');
+        localStorage.removeItem('petoria_hotel_filters');
     };
 
     const handleSearch = (e) => {
@@ -337,8 +400,6 @@ const Hotels = () => {
                     )}
                 </main>
             </div>
-
-            <Footer />
         </div>
     );
 };

@@ -33,7 +33,10 @@ public class HotelsController : ControllerBase
         [FromQuery] string? country,
         [FromQuery] string? amenities,
         [FromQuery] decimal? minRating,
-        [FromQuery] string? starRating)
+        [FromQuery] string? starRating,
+        [FromQuery] DateTime? checkInDate,
+        [FromQuery] int? nights,
+        [FromQuery] int? guests)
     {
         var query = _context.Hotels.AsQueryable();
 
@@ -82,6 +85,20 @@ public class HotelsController : ControllerBase
             {
                 query = query.Where(h => stars.Contains(h.StarRating));
             }
+        }
+
+        // Filter by capacity and availability
+        if (guests.HasValue || (checkInDate.HasValue && nights.HasValue && nights.Value > 0))
+        {
+            query = query.Where(h => _context.RoomTypes.Any(rt => 
+                rt.HotelId == h.Id &&
+                (!guests.HasValue || rt.Capacity >= guests.Value) &&
+                (!checkInDate.HasValue || !nights.HasValue || nights.Value <= 0 ||
+                    !rt.Availabilities.Any(a => 
+                        a.Date >= checkInDate.Value.Date && 
+                        a.Date < checkInDate.Value.Date.AddDays(nights.Value) && 
+                        (a.AvailableCount <= 0 || a.IsBlocked)))
+            ));
         }
 
         // Only show available hotels that are not suspended by SuperAdmin
@@ -448,7 +465,10 @@ public class HotelsController : ControllerBase
         [FromQuery] string? country,
         [FromQuery] string? amenities,
         [FromQuery] decimal? minRating,
-        [FromQuery] string? starRating)
+        [FromQuery] string? starRating,
+        [FromQuery] DateTime? checkInDate,
+        [FromQuery] int? nights,
+        [FromQuery] int? guests)
     {
         var query = _context.Hotels.AsQueryable();
 
@@ -493,6 +513,20 @@ public class HotelsController : ControllerBase
             {
                 query = query.Where(h => stars.Contains(h.StarRating));
             }
+        }
+
+        // Filter by capacity and availability
+        if (guests.HasValue || (checkInDate.HasValue && nights.HasValue && nights.Value > 0))
+        {
+            query = query.Where(h => _context.RoomTypes.Any(rt => 
+                rt.HotelId == h.Id &&
+                (!guests.HasValue || rt.Capacity >= guests.Value) &&
+                (!checkInDate.HasValue || !nights.HasValue || nights.Value <= 0 ||
+                    !rt.Availabilities.Any(a => 
+                        a.Date >= checkInDate.Value.Date && 
+                        a.Date < checkInDate.Value.Date.AddDays(nights.Value) && 
+                        (a.AvailableCount <= 0 || a.IsBlocked)))
+            ));
         }
 
         // Only show available hotels

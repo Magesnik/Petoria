@@ -237,6 +237,19 @@
     color: #94a3b8;
 }
 
+/* Invert map tiles for a dark mode effect */
+[data-theme='dark'] .hotel-map-container .leaflet-layer,
+[data-theme='dark'] .hotel-map-container .leaflet-control-zoom-in,
+[data-theme='dark'] .hotel-map-container .leaflet-control-zoom-out,
+[data-theme='dark'] .hotel-map-container .leaflet-control-attribution {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+/* Background of the map container behind the tiles */
+[data-theme='dark'] .hotel-map-container .leaflet-container {
+    background-color: #1a1a1a;
+}
+
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {

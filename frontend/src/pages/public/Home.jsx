@@ -2,6 +2,7 @@
 import { useLanguage } from '../../context/LanguageContext';
 
 import Footer from '../../components/Footer';
+import SearchBar from '../../components/SearchBar';
 import './Home.css';
 
 const Home = () => {
@@ -16,14 +17,8 @@ const Home = () => {
                 <div className="hero-content">
                     <h1>{t('heroTitle')} <br /> <span>{t('heroSubtitle')}</span></h1>
                     <p>{t('heroText')}</p>
-
-                    <div className="search-box">
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder={t('searchPlaceholder')}
-                        />
-                        <button className="btn-search">{t('searchBtn')}</button>
+                    <div className="search-container-wrapper" style={{ marginTop: '2rem' }}>
+                        <SearchBar />
                     </div>
                 </div>
             </section>

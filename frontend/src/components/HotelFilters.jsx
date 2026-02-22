@@ -120,6 +120,45 @@ const HotelFilters = ({
                 </button>
             </div>
 
+            {/* Dates & Guests Filter */}
+            <div className="filter-section">
+                <label className="filter-label">Настаняване и Гости</label>
+
+                <div style={{ marginBottom: '10px' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>Дата на настаняване</label>
+                    <input
+                        type="date"
+                        className="filter-search-input"
+                        value={filters.checkInDate || ''}
+                        onChange={(e) => onFilterChange('checkInDate', e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                    />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>Нощувки</label>
+                        <input
+                            type="number"
+                            className="filter-search-input"
+                            value={filters.nights || ''}
+                            onChange={(e) => onFilterChange('nights', parseInt(e.target.value) || '')}
+                            min="1"
+                        />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>Гости</label>
+                        <input
+                            type="number"
+                            className="filter-search-input"
+                            value={filters.guests || ''}
+                            onChange={(e) => onFilterChange('guests', parseInt(e.target.value) || '')}
+                            min="1"
+                        />
+                    </div>
+                </div>
+            </div>
+
             {/* Price Range Slider */}
             <div className="filter-section">
                 <label className="filter-label">{t('priceRangePerNight')}</label>
