@@ -201,6 +201,100 @@ public class HotelsController : ControllerBase
         return Ok(result.ToList());
     }
 
+    // GET: api/hotels/popular-destinations
+    [HttpGet("popular-destinations")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<PopularDestinationDto>>> GetPopularDestinations()
+    {
+        var destinations = new List<PopularDestinationDto>();
+        
+        // 1. Group reservations by Hotel City & Country to find top 3
+        var popularCities = await _context.Reservations
+            .Include(r => r.Hotel)
+            .Where(r => r.Hotel != null && r.Status == "Confirmed" && !r.Hotel.IsSuspendedBySuperAdmin && r.Hotel.IsAvailable)
+            .GroupBy(r => new { r.Hotel!.City, r.Hotel.Country })
+            .Select(g => new 
+            {
+                g.Key.City,
+                g.Key.Country,
+                ReservationCount = g.Count()
+            })
+            .OrderByDescending(x => x.ReservationCount)
+            .Take(3)
+            .ToListAsync();
+
+        if (popularCities.Any())
+        {
+            foreach (var dest in popularCities)
+            {
+                var repHotel = await _context.Hotels
+                    .Where(h => h.City == dest.City && h.Country == dest.Country && !string.IsNullOrEmpty(h.ImageUrl) && !h.IsSuspendedBySuperAdmin && h.IsAvailable)
+                    .OrderByDescending(h => h.Rating)
+                    .FirstOrDefaultAsync();
+
+                if (repHotel == null) continue;
+
+                var minPrice = await _context.RoomTypes
+                    .Include(rt => rt.Hotel)
+                    .Where(rt => rt.Hotel!.City == dest.City && rt.Hotel.Country == dest.Country && !rt.Hotel.IsSuspendedBySuperAdmin && rt.Hotel.IsAvailable)
+                    .MinAsync(rt => (decimal?)rt.PricePerNight) ?? 0;
+
+                destinations.Add(new PopularDestinationDto
+                {
+                    HotelId = repHotel.Id,
+                    City = dest.City,
+                    Country = dest.Country,
+                    ImageUrl = repHotel.ImageUrl,
+                    StartingPrice = minPrice,
+                    ReservationCount = dest.ReservationCount
+                });
+            }
+        }
+        else 
+        {
+            // Fallback: Pick top 3 highest-rated cities if no reservations exist
+            var topRatedCities = await _context.Hotels
+                .Where(h => !h.IsSuspendedBySuperAdmin && h.IsAvailable && !string.IsNullOrEmpty(h.ImageUrl))
+                .GroupBy(h => new { h.City, h.Country })
+                .Select(g => new
+                {
+                    g.Key.City,
+                    g.Key.Country,
+                    MaxRating = g.Max(h => h.Rating)
+                })
+                .OrderByDescending(x => x.MaxRating)
+                .Take(3)
+                .ToListAsync();
+
+            foreach (var c in topRatedCities)
+            {
+                var repHotel = await _context.Hotels
+                    .Where(h => h.City == c.City && h.Country == c.Country && !string.IsNullOrEmpty(h.ImageUrl) && !h.IsSuspendedBySuperAdmin && h.IsAvailable)
+                    .OrderByDescending(h => h.Rating)
+                    .FirstOrDefaultAsync();
+
+                if (repHotel == null) continue; 
+
+                var minPrice = await _context.RoomTypes
+                    .Include(rt => rt.Hotel)
+                    .Where(rt => rt.Hotel!.City == c.City && rt.Hotel.Country == c.Country && !rt.Hotel.IsSuspendedBySuperAdmin && rt.Hotel.IsAvailable)
+                    .MinAsync(rt => (decimal?)rt.PricePerNight) ?? 0;
+
+                destinations.Add(new PopularDestinationDto
+                {
+                    HotelId = repHotel.Id,
+                    City = c.City,
+                    Country = c.Country,
+                    ImageUrl = repHotel.ImageUrl,
+                    StartingPrice = minPrice,
+                    ReservationCount = 0
+                });
+            }
+        }
+
+        return Ok(destinations);
+    }
+
     // GET: api/hotels/5
     [HttpGet("{id}")]
     public async Task<ActionResult<HotelResponseDto>> GetHotel(int id)

@@ -1,5 +1,7 @@
-﻿import React from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { api } from '../../utils/api';
 
 import Footer from '../../components/Footer';
 import SearchBar from '../../components/SearchBar';
@@ -7,6 +9,28 @@ import './Home.css';
 
 const Home = () => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
+    const [popularDestinations, setPopularDestinations] = useState([]);
+    const [loadingDestinations, setLoadingDestinations] = useState(true);
+
+    useEffect(() => {
+        const fetchPopularDestinations = async () => {
+            try {
+                const data = await api.get('/hotels/popular-destinations');
+                setPopularDestinations(data);
+            } catch (error) {
+                console.error("Failed to load popular destinations", error);
+            } finally {
+                setLoadingDestinations(false);
+            }
+        };
+
+        fetchPopularDestinations();
+    }, []);
+
+    const handleDestinationClick = (hotelId) => {
+        navigate(`/hotel/${hotelId}`);
+    };
 
     return (
         <div className="home">
@@ -27,32 +51,38 @@ const Home = () => {
             <section className="featured container">
                 <h2 className="section-title">{t('popularDestinations')}</h2>
                 <div className="featured-grid">
-                    <div className="card">
-                        <div className="card-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')" }}></div>
-                        <div className="card-content">
-                            <h3>{t('destMaldives')}</h3>
-                            <p>{t('destMaldivesDesc')}</p>
-                            <div className="card-price">{t('from')} $250/{t('night')}</div>
-                        </div>
-                    </div>
-
-                    <div className="card">
-                        <div className="card-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')" }}></div>
-                        <div className="card-content">
-                            <h3>{t('destSantorini')}</h3>
-                            <p>{t('destSantoriniDesc')}</p>
-                            <div className="card-price">{t('from')} $180/{t('night')}</div>
-                        </div>
-                    </div>
-
-                    <div className="card">
-                        <div className="card-image" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')" }}></div>
-                        <div className="card-content">
-                            <h3>{t('destBali')}</h3>
-                            <p>{t('destBaliDesc')}</p>
-                            <div className="card-price">{t('from')} $120/{t('night')}</div>
-                        </div>
-                    </div>
+                    {loadingDestinations ? (
+                        /* Skeleton loaders */
+                        Array.from({ length: 3 }).map((_, idx) => (
+                            <div className="card" key={idx} style={{ opacity: 0.7 }}>
+                                <div className="card-image" style={{ backgroundColor: '#e2e8f0' }}></div>
+                                <div className="card-content">
+                                    <h3 style={{ width: '60%', height: '24px', backgroundColor: '#e2e8f0', marginBottom: '10px' }}></h3>
+                                    <p style={{ width: '100%', height: '16px', backgroundColor: '#e2e8f0', marginBottom: '5px' }}></p>
+                                    <p style={{ width: '80%', height: '16px', backgroundColor: '#e2e8f0', marginBottom: '15px' }}></p>
+                                    <div style={{ width: '40%', height: '20px', backgroundColor: '#e2e8f0' }}></div>
+                                </div>
+                            </div>
+                        ))
+                    ) : popularDestinations.length > 0 ? (
+                        popularDestinations.map((dest, idx) => (
+                            <div
+                                className="card"
+                                key={idx}
+                                onClick={() => handleDestinationClick(dest.hotelId)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <div className="card-image" style={{ backgroundImage: `url('${dest.imageUrl}')` }}></div>
+                                <div className="card-content">
+                                    <h3>{dest.city}, {dest.country}</h3>
+                                    <p>{t('discoverStaysIn')} {dest.city}.</p>
+                                    <div className="card-price">{t('from')} ${dest.startingPrice}/{t('night')}</div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>{t('noDestinationsFound', 'No destinations found.')}</p>
+                    )}
                 </div>
             </section>
 

@@ -43,11 +43,13 @@
 
 /* Footer Logo */
 .footer-logo {
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: 800;
     color: var(--primary-color);
     letter-spacing: -0.5px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    margin-top: -5px;
+    /* slight optical adjustment */
 }
 
 [data-theme='dark'] .footer-logo {
@@ -63,6 +65,7 @@
     line-height: 1.6;
     margin-bottom: 25px;
     font-size: 0.95rem;
+    max-width: 90%;
 }
 
 [data-theme='dark'] .footer-description {
@@ -102,61 +105,72 @@
 
 /* Footer Title */
 .footer-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-dark);
     margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
 }
 
 [data-theme='dark'] .footer-title {
     color: var(--text-light);
 }
 
-/* Footer Links */
-.footer-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.footer-links li a,
-.footer-contact li a {
-    color: #64748b;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    display: inline-block;
-}
-
-[data-theme='dark'] .footer-links li a,
-[data-theme='dark'] .footer-contact li a {
-    color: rgba(230, 241, 255, 0.7);
-}
-
-.footer-links li a:hover {
-    color: var(--accent-color);
-    transform: translateX(5px);
-}
-
-/* Footer Contact */
+/* Footer Links & Contact (Standardized Heights) */
+.footer-links,
 .footer-contact {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
+    /* exactly same gap for all informative lists */
 }
 
+.footer-links li a {
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: inline-block;
+    line-height: 1.4;
+}
+
+.footer-contact li a,
+.footer-contact li span:not(.contact-icon) {
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.85rem;
+    /* Make it smaller */
+    transition: all 0.2s ease;
+    display: inline-block;
+    line-height: 1.4;
+}
+
+[data-theme='dark'] .footer-links li a,
+[data-theme='dark'] .footer-contact li a,
+[data-theme='dark'] .footer-contact li span:not(.contact-icon) {
+    color: rgba(230, 241, 255, 0.7);
+}
+
+.footer-links li a:hover,
+.footer-contact li a:hover {
+    color: var(--accent-color);
+    transform: translateX(5px);
+}
+
+/* Footer Contact */
 .footer-contact li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* Align accurately */
     gap: 10px;
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    /* Reduced to match child elements */
 }
 
 [data-theme='dark'] .footer-contact li {
@@ -164,14 +178,20 @@
 }
 
 .contact-icon {
-    font-size: 1.2rem;
+    font-size: 0.8rem;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', inherit;
+    line-height: 1;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     color: var(--accent-color);
-}
-
-.footer-contact li a:hover {
-    color: var(--accent-color);
-    transform: none;
+    margin-top: 2px;
+    transform: scale(0.65);
+    /* Force hardware scale down to ensure they are small */
+    transform-origin: center center;
 }
 
 /* Footer Bottom */
