@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { api } from '../../utils/api';
 
-import Footer from '../../components/Footer';
+
 import SearchBar from '../../components/SearchBar';
 import './Home.css';
 
@@ -86,7 +86,7 @@ const Home = () => {
                 </div>
             </section>
 
-            <Footer />
+
         </div>
     );
 };

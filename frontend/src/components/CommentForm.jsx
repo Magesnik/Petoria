@@ -59,6 +59,7 @@ const CommentForm = ({ hotelId, parentCommentId = null, onCommentSubmitted, onCa
                 onChange={(e) => setText(e.target.value)}
                 rows={parentCommentId ? 3 : 4}
                 disabled={submitting}
+                maxLength={500}
             />
             {error && <div className="comment-error">{error}</div>}
             <div className="comment-form-actions">

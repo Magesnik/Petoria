@@ -118,6 +118,7 @@ const ReviewSection = ({ hotelId }) => {
                                 onChange={(e) => setUserReview({ ...userReview, reviewText: e.target.value })}
                                 placeholder={t('shareYourExperience')}
                                 required
+                                maxLength={500}
                             />
                             <button type="submit" disabled={isSubmitting} className="btn-submit">
                                 {isSubmitting ? t('loading') : t('submitReview')}

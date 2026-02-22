@@ -201,6 +201,8 @@ textarea {
 .review-text {
     color: #4a5568;
     line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 [data-theme="dark"] .review-text {

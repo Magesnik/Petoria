@@ -9,13 +9,13 @@ namespace Petoria.Core.DTOs.Discount;
 /// </summary>
 public class UpdateDiscountDto
 {
-    [Required(ErrorMessage = "Началната дата е задължителна")]
+    [Required(ErrorMessage = ValidationConstants.Discount.StartDateRequired)]
     public DateTime StartDate { get; set; }
 
-    [Required(ErrorMessage = "Крайната дата е задължителна")]
+    [Required(ErrorMessage = ValidationConstants.Discount.EndDateRequired)]
     public DateTime EndDate { get; set; }
 
-    [Required(ErrorMessage = "Процентът на отстъпка е задължителен")]
-    [Range(ValidationConstants.Discount.PercentageMin, ValidationConstants.Discount.PercentageMax, ErrorMessage = "Отстъпката трябва да бъде между 1% и 99%")]
+    [Required(ErrorMessage = ValidationConstants.Discount.PercentageRequired)]
+    [Range(ValidationConstants.Discount.PercentageMin, ValidationConstants.Discount.PercentageMax, ErrorMessage = ValidationConstants.Discount.PercentageRangeError)]
     public int DiscountPercentage { get; set; }
 }

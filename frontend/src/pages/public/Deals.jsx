@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../../components/Footer';
+
 import './Deals.css';
 
 const Deals = () => {
@@ -267,7 +267,7 @@ const Deals = () => {
                 )}
             </div>
 
-            <Footer />
+
         </div>
     );
 };

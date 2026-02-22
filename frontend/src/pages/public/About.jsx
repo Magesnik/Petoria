@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 
-import Footer from '../../components/Footer';
+
 import './About.css';
 
 const About = () => {
@@ -116,7 +116,7 @@ const About = () => {
                 </section>
             </div>
 
-            <Footer />
+
         </div>
     );
 };

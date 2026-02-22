@@ -8,10 +8,10 @@ namespace Petoria.Core.DTOs.Profile;
 /// </summary>
 public class UpdateProfileDto
 {
-    [MaxLength(ValidationConstants.User.FirstNameMaxLength, ErrorMessage = "Името не може да надвишава 100 символа")]
+    [MaxLength(ValidationConstants.User.FirstNameMaxLength, ErrorMessage = ValidationConstants.User.FirstNameMaxLengthError)]
     public string? FirstName { get; set; }
 
-    [MaxLength(ValidationConstants.User.LastNameMaxLength, ErrorMessage = "Фамилията не може да надвишава 100 символа")]
+    [MaxLength(ValidationConstants.User.LastNameMaxLength, ErrorMessage = ValidationConstants.User.LastNameMaxLengthError)]
     public string? LastName { get; set; }
 
     public string? Theme { get; set; }

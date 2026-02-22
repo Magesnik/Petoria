@@ -9,10 +9,10 @@ namespace Petoria.Core.DTOs.Review;
 /// </summary>
 public class CreateReviewDto
 {
-    [Required(ErrorMessage = "Рейтингът е задължителен")]
-    [Range(ValidationConstants.HotelReview.RatingMin, ValidationConstants.HotelReview.RatingMax, ErrorMessage = "Рейтингът трябва да бъде между 1 и 5")]
+    [Required(ErrorMessage = ValidationConstants.HotelReview.RatingRequired)]
+    [Range(ValidationConstants.HotelReview.RatingMin, ValidationConstants.HotelReview.RatingMax, ErrorMessage = ValidationConstants.HotelReview.RatingRangeError)]
     public int Rating { get; set; }
 
-    [MaxLength(ValidationConstants.HotelReview.CommentMaxLength, ErrorMessage = "Ревюто не може да надвишава 2000 символа")]
+    [MaxLength(ValidationConstants.HotelReview.CommentMaxLength, ErrorMessage = ValidationConstants.HotelReview.CommentMaxLengthError)]
     public string ReviewText { get; set; } = string.Empty;
 }

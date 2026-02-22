@@ -8,16 +8,16 @@ namespace Petoria.Core.DTOs.Availability;
 /// </summary>
 public class BulkAvailabilityRequestDto
 {
-    [Required(ErrorMessage = "RoomTypeId е задължителен")]
+    [Required(ErrorMessage = ValidationConstants.Availability.RoomTypeRequired)]
     public int RoomTypeId { get; set; }
 
-    [Required(ErrorMessage = "Началната дата е задължителна")]
+    [Required(ErrorMessage = ValidationConstants.Availability.StartDateRequired)]
     public DateTime StartDate { get; set; }
 
-    [Required(ErrorMessage = "Крайната дата е задължителна")]
+    [Required(ErrorMessage = ValidationConstants.Availability.EndDateRequired)]
     public DateTime EndDate { get; set; }
 
-    [Required(ErrorMessage = "Броят свободни стаи е задължителен")]
-    [Range(ValidationConstants.Availability.AvailableCountMin, ValidationConstants.Availability.AvailableCountMax, ErrorMessage = "Броят стаи трябва да бъде между 0 и 1000")]
+    [Required(ErrorMessage = ValidationConstants.Availability.AvailableCountRequired)]
+    [Range(ValidationConstants.Availability.AvailableCountMin, ValidationConstants.Availability.AvailableCountMax, ErrorMessage = ValidationConstants.Availability.AvailableCountRangeError)]
     public int AvailableCount { get; set; }
 }

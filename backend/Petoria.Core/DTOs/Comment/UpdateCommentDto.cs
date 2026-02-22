@@ -9,8 +9,8 @@ namespace Petoria.Core.DTOs.Comment;
 /// </summary>
 public class UpdateCommentDto
 {
-    [Required(ErrorMessage = "Текстът на коментара е задължителен")]
-    [MinLength(ValidationConstants.Comment.ContentMinLength, ErrorMessage = "Коментарът не може да бъде празен")]
-    [MaxLength(ValidationConstants.Comment.ContentMaxLength, ErrorMessage = "Коментарът не може да надвишава 2000 символа")]
+    [Required(ErrorMessage = ValidationConstants.Comment.ContentRequired)]
+    [MinLength(ValidationConstants.Comment.ContentMinLength, ErrorMessage = ValidationConstants.Comment.ContentMinLengthError)]
+    [MaxLength(ValidationConstants.Comment.ContentMaxLength, ErrorMessage = ValidationConstants.Comment.ContentMaxLengthError)]
     public string Text { get; set; } = string.Empty;
 }

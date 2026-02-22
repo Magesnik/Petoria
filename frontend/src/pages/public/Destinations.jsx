@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 
-import Footer from '../../components/Footer';
+
 import './Home.css';
 
 const Destinations = () => {
@@ -13,7 +13,7 @@ const Destinations = () => {
                     <p>Скоро...</p>
                 </div>
             </div>
-            <Footer />
+
         </div>
     );
 };

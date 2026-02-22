@@ -11,21 +11,21 @@ namespace Petoria.Core.DTOs.Hotel;
 /// </summary>
 public class UpdateHotelDto
 {
-    [Required(ErrorMessage = "Името на хотела е задължително")]
-    [MaxLength(ValidationConstants.Hotel.NameMaxLength, ErrorMessage = "Името не може да надвишава 200 символа")]
+    [Required(ErrorMessage = ValidationConstants.Hotel.NameRequired)]
+    [MaxLength(ValidationConstants.Hotel.NameMaxLength, ErrorMessage = ValidationConstants.Hotel.NameMaxLengthError)]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(ValidationConstants.Hotel.DescriptionMaxLength, ErrorMessage = "Описанието не може да надвишава 2000 символа")]
+    [MaxLength(ValidationConstants.Hotel.DescriptionMaxLength, ErrorMessage = ValidationConstants.Hotel.DescriptionMaxLengthError)]
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Локацията е задължителна")]
-    [MaxLength(ValidationConstants.Hotel.LocationMaxLength, ErrorMessage = "Локацията не може да надвишава 300 символа")]
+    [Required(ErrorMessage = ValidationConstants.Hotel.LocationRequired)]
+    [MaxLength(ValidationConstants.Hotel.LocationMaxLength, ErrorMessage = ValidationConstants.Hotel.LocationMaxLengthError)]
     public string Location { get; set; } = string.Empty;
 
-    [MaxLength(ValidationConstants.Hotel.CityMaxLength)]
+    [MaxLength(ValidationConstants.Hotel.CityMaxLength, ErrorMessage = ValidationConstants.Hotel.CityMaxLengthError)]
     public string City { get; set; } = string.Empty;
 
-    [MaxLength(ValidationConstants.Hotel.CountryMaxLength)]
+    [MaxLength(ValidationConstants.Hotel.CountryMaxLength, ErrorMessage = ValidationConstants.Hotel.CountryMaxLengthError)]
     public string Country { get; set; } = string.Empty;
 
     public decimal? Latitude { get; set; }
@@ -34,7 +34,7 @@ public class UpdateHotelDto
 
 
 
-    [Range(ValidationConstants.Hotel.StarRatingMin, ValidationConstants.Hotel.StarRatingMax, ErrorMessage = "Звездният рейтинг трябва да бъде между 1 и 5")]
+    [Range(ValidationConstants.Hotel.StarRatingMin, ValidationConstants.Hotel.StarRatingMax, ErrorMessage = ValidationConstants.Hotel.StarRatingRangeError)]
     public int StarRating { get; set; } = 3;
 
     [MaxLength(ValidationConstants.Hotel.ImageUrlMaxLength)]
