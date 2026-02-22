@@ -10,7 +10,7 @@ namespace Petoria.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "SuperAdmin")]
+[Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
 public class AdminController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;

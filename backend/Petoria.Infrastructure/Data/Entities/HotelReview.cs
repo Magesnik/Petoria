@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Petoria.Constants;
 namespace Petoria.Infrastructure.Data.Entities;
 
 public class HotelReview
@@ -14,10 +15,10 @@ public class HotelReview
     [Required]
     public string UserId { get; set; } = string.Empty;
 
-    [Range(1, 5)]
+    [Range(ValidationConstants.HotelReview.RatingMin, ValidationConstants.HotelReview.RatingMax)]
     public int Rating { get; set; }
 
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.HotelReview.CommentMaxLength)]
     public string ReviewText { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

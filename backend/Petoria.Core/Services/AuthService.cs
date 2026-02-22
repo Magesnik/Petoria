@@ -85,8 +85,8 @@ public class AuthService : IAuthService
                 // Assign SuperAdmin role to specific email
                 if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
                 {
-                    await _userManager.AddToRoleAsync(user, "SuperAdmin");
-                    await _userManager.AddToRoleAsync(user, "Admin");
+                    await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.SuperAdmin);
+                    await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.Admin);
                 }
             }
             else
@@ -94,13 +94,13 @@ public class AuthService : IAuthService
                 // User exists - ensure pepi.200712@gmail.com has SuperAdmin role
                 if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!await _userManager.IsInRoleAsync(user, "SuperAdmin"))
+                    if (!await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
                     {
-                        await _userManager.AddToRoleAsync(user, "SuperAdmin");
+                        await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.SuperAdmin);
                     }
-                    if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                    if (!await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.Admin))
                     {
-                        await _userManager.AddToRoleAsync(user, "Admin");
+                        await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.Admin);
                     }
                 }
             }
@@ -142,15 +142,15 @@ public class AuthService : IAuthService
     public async Task InitializeRolesAndAdminAsync()
     {
         // Create Admin role if it doesn't exist
-        if (!await _roleManager.RoleExistsAsync("Admin"))
+        if (!await _roleManager.RoleExistsAsync(Petoria.Constants.Roles.Admin))
         {
-            await _roleManager.CreateAsync(new IdentityRole("Admin"));
+            await _roleManager.CreateAsync(new IdentityRole(Petoria.Constants.Roles.Admin));
         }
 
         // Create SuperAdmin role if it doesn't exist
-        if (!await _roleManager.RoleExistsAsync("SuperAdmin"))
+        if (!await _roleManager.RoleExistsAsync(Petoria.Constants.Roles.SuperAdmin))
         {
-            await _roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+            await _roleManager.CreateAsync(new IdentityRole(Petoria.Constants.Roles.SuperAdmin));
         }
 
         // Check if admin user exists
@@ -172,15 +172,15 @@ public class AuthService : IAuthService
             var result = await _userManager.CreateAsync(adminUser, "123456Q@w");
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(adminUser, "Admin");
+                await _userManager.AddToRoleAsync(adminUser, Petoria.Constants.Roles.Admin);
             }
         }
         else
         {
             // Ensure existing admin user has Admin role
-            if (!await _userManager.IsInRoleAsync(adminUser, "Admin"))
+            if (!await _userManager.IsInRoleAsync(adminUser, Petoria.Constants.Roles.Admin))
             {
-                await _userManager.AddToRoleAsync(adminUser, "Admin");
+                await _userManager.AddToRoleAsync(adminUser, Petoria.Constants.Roles.Admin);
             }
         }
 
@@ -189,14 +189,14 @@ public class AuthService : IAuthService
         var superAdminUser = await _userManager.FindByEmailAsync(superAdminEmail);
         if (superAdminUser != null)
         {
-            if (!await _userManager.IsInRoleAsync(superAdminUser, "SuperAdmin"))
+            if (!await _userManager.IsInRoleAsync(superAdminUser, Petoria.Constants.Roles.SuperAdmin))
             {
-                await _userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+                await _userManager.AddToRoleAsync(superAdminUser, Petoria.Constants.Roles.SuperAdmin);
             }
             // Also ensure they have Admin role for backwards compatibility
-            if (!await _userManager.IsInRoleAsync(superAdminUser, "Admin"))
+            if (!await _userManager.IsInRoleAsync(superAdminUser, Petoria.Constants.Roles.Admin))
             {
-                await _userManager.AddToRoleAsync(superAdminUser, "Admin");
+                await _userManager.AddToRoleAsync(superAdminUser, Petoria.Constants.Roles.Admin);
             }
         }
     }

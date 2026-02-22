@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Petoria.Infrastructure.Data.Entities;
+using Petoria.Constants;
+using Petoria.Infrastructure.Data.Entities;
 
 public class RoomType
 {
@@ -15,10 +16,10 @@ public class RoomType
     public Hotel? Hotel { get; set; }
 
     [Required]
-    [MaxLength(100)]
+    [MaxLength(ValidationConstants.RoomType.NameMaxLength)]
     public string Name { get; set; } = string.Empty;  // "Единична", "Двойна", "Апартамент"
 
-    [MaxLength(500)]
+    [MaxLength(ValidationConstants.RoomType.DescriptionMaxLength)]
     public string Description { get; set; } = string.Empty;
 
     [Required]
@@ -26,14 +27,14 @@ public class RoomType
     public decimal PricePerNight { get; set; }
 
     [Required]
-    [Range(1, 20)]
+    [Range(ValidationConstants.RoomType.CapacityMin, ValidationConstants.RoomType.CapacityMax)]
     public int Capacity { get; set; } = 2;  // Брой гости
 
     [Required]
-    [Range(1, 1000)]
+    [Range(ValidationConstants.RoomType.TotalRoomsMin, ValidationConstants.RoomType.TotalRoomsMax)]
     public int TotalRooms { get; set; } = 1;  // Колко стаи от този тип има
 
-    [MaxLength(500)]
+    [MaxLength(ValidationConstants.RoomType.ImageUrlMaxLength)]
     public string ImageUrl { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

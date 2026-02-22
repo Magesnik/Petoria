@@ -17,7 +17,7 @@ public class UploadController : ControllerBase
     }
 
     [HttpPost("image")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
         try
@@ -59,7 +59,7 @@ public class UploadController : ControllerBase
     }
 
     [HttpDelete("image/{publicId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> DeleteImage(string publicId)
     {
         try

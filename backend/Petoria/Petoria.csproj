@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Petoria.Core\Petoria.Core.csproj" />
     <ProjectReference Include="..\Petoria.Infrastructure\Petoria.Infrastructure.csproj" />
+    <ProjectReference Include="..\Petoria.Constants\Petoria.Constants.csproj" />
   </ItemGroup>
 
 </Project>

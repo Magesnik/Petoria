@@ -361,7 +361,7 @@ public class HotelsController : ControllerBase
 
     // GET: api/hotels/my - Get hotels created by current user
     [HttpGet("my")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetMyHotels()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -700,7 +700,7 @@ public class HotelsController : ControllerBase
 
     // POST: api/hotels
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<ActionResult<HotelResponseDto>> CreateHotel(CreateHotelDto dto)
     {
         try
@@ -779,7 +779,7 @@ public class HotelsController : ControllerBase
     }
     // PUT: api/hotels/5
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto)
     {
         var existingHotel = await _context.Hotels.FindAsync(id);
@@ -848,7 +848,7 @@ public class HotelsController : ControllerBase
 
     // DELETE: api/hotels/5
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> DeleteHotel(int id)
     {
         var hotel = await _context.Hotels.FindAsync(id);

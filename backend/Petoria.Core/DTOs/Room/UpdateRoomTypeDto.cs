@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Room;
 
@@ -9,24 +10,24 @@ namespace Petoria.Core.DTOs.Room;
 public class UpdateRoomTypeDto
 {
     [Required(ErrorMessage = "Името на типа стая е задължително")]
-    [MaxLength(100, ErrorMessage = "Името не може да надвишава 100 символа")]
+    [MaxLength(ValidationConstants.RoomType.NameMaxLength, ErrorMessage = "Името не може да надвишава 100 символа")]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(500, ErrorMessage = "Описанието не може да надвишава 500 символа")]
+    [MaxLength(ValidationConstants.RoomType.DescriptionMaxLength, ErrorMessage = "Описанието не може да надвишава 500 символа")]
     public string Description { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Цената на нощувка е задължителна")]
-    [Range(0.01, 100000, ErrorMessage = "Цената трябва да бъде между 0.01 и 100000")]
+    [Range(ValidationConstants.RoomType.PricePerNightMin, ValidationConstants.RoomType.PricePerNightMax, ErrorMessage = "Цената трябва да бъде между 0.01 и 100000")]
     public decimal PricePerNight { get; set; }
 
     [Required(ErrorMessage = "Капацитетът е задължителен")]
-    [Range(1, 20, ErrorMessage = "Капацитетът трябва да бъде между 1 и 20")]
+    [Range(ValidationConstants.RoomType.CapacityMin, ValidationConstants.RoomType.CapacityMax, ErrorMessage = "Капацитетът трябва да бъде между 1 и 20")]
     public int Capacity { get; set; } = 2;
 
     [Required(ErrorMessage = "Броят стаи е задължителен")]
-    [Range(1, 1000, ErrorMessage = "Броят стаи трябва да бъде между 1 и 1000")]
+    [Range(ValidationConstants.RoomType.TotalRoomsMin, ValidationConstants.RoomType.TotalRoomsMax, ErrorMessage = "Броят стаи трябва да бъде между 1 и 1000")]
     public int TotalRooms { get; set; } = 1;
 
-    [MaxLength(500)]
+    [MaxLength(ValidationConstants.RoomType.ImageUrlMaxLength)]
     public string ImageUrl { get; set; } = string.Empty;
 }

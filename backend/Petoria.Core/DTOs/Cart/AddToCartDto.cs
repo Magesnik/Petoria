@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Cart;
 
@@ -16,7 +17,7 @@ public class AddToCartDto
     [Required]
     public DateTime CheckOutDate { get; set; }
 
-    [Range(1, 20)]
+    [Range(ValidationConstants.RoomType.CapacityMin, ValidationConstants.RoomType.CapacityMax)]
     public int NumberOfRooms { get; set; } = 1;
 
     public decimal TotalPrice { get; set; }

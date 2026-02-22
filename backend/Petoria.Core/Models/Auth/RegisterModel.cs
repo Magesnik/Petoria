@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.Models.Auth;
 
@@ -15,6 +16,6 @@ public class RegisterModel
     public string Email { get; set; } = string.Empty;
 
     [Required]
-    [MinLength(6)]
+    [MinLength(ValidationConstants.User.PasswordMinLength)]
     public string Password { get; set; } = string.Empty;
 }

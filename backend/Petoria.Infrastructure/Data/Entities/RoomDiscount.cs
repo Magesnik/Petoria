@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
@@ -21,7 +22,7 @@ public class RoomDiscount
     public DateTime EndDate { get; set; }
 
     [Required]
-    [Range(1, 99)]
+    [Range(ValidationConstants.Discount.PercentageMin, ValidationConstants.Discount.PercentageMax)]
     public int DiscountPercentage { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

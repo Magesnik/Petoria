@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Petoria.Infrastructure.Data.Entities;
+using Petoria.Constants;
+using Petoria.Infrastructure.Data.Entities;
 
 public class Reservation
 {
@@ -26,7 +27,7 @@ public class Reservation
     [ForeignKey("RoomTypeId")]
     public RoomType? RoomType { get; set; }
 
-    [Range(1, 100)]
+    [Range(ValidationConstants.Reservation.RoomsMin, ValidationConstants.Reservation.RoomsMax)]
     public int NumberOfRooms { get; set; } = 1;  // How many rooms of this type
 
     [Required]
@@ -39,10 +40,10 @@ public class Reservation
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
 
-    [MaxLength(50)]
+    [MaxLength(ValidationConstants.Reservation.StatusMaxLength)]
     public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
 
-    [MaxLength(500)]
+    [MaxLength(ValidationConstants.Reservation.NotesMaxLength)]
     public string? Notes { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

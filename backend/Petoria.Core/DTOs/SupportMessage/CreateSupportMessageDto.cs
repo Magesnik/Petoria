@@ -1,15 +1,15 @@
 using System.ComponentModel.DataAnnotations;
-
+using Petoria.Constants;
 namespace Petoria.Core.DTOs.SupportMessage
 {
     public class CreateSupportMessageDto
     {
         [Required]
-        [MaxLength(200)]
+        [MaxLength(ValidationConstants.SupportMessage.SubjectMaxLength)]
         public string Subject { get; set; } = string.Empty;
 
         [Required]
-        [MinLength(10)]
+        [MinLength(ValidationConstants.SupportMessage.MessageMinLength)]
         public string Message { get; set; } = string.Empty;
     }
 }

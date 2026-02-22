@@ -59,7 +59,7 @@ public class PromoCodesController : ControllerBase
     }
 
     [HttpGet("promocodes/global")]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
     public async Task<ActionResult<IEnumerable<PromoCodeDto>>> GetGlobalPromoCodes()
     {
         var promoCodes = await _context.PromoCodes
@@ -83,7 +83,7 @@ public class PromoCodesController : ControllerBase
     }
 
     [HttpPost("promocodes/global")]
-    [Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
     public async Task<ActionResult<PromoCodeDto>> CreateGlobalPromoCode(CreatePromoCodeDto dto)
     {
         if (await _context.PromoCodes.AnyAsync(p => p.HotelId == null && p.Code == dto.Code))

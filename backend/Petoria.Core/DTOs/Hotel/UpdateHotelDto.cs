@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Hotel;
 
@@ -11,20 +12,20 @@ namespace Petoria.Core.DTOs.Hotel;
 public class UpdateHotelDto
 {
     [Required(ErrorMessage = "Името на хотела е задължително")]
-    [MaxLength(200, ErrorMessage = "Името не може да надвишава 200 символа")]
+    [MaxLength(ValidationConstants.Hotel.NameMaxLength, ErrorMessage = "Името не може да надвишава 200 символа")]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(2000, ErrorMessage = "Описанието не може да надвишава 2000 символа")]
+    [MaxLength(ValidationConstants.Hotel.DescriptionMaxLength, ErrorMessage = "Описанието не може да надвишава 2000 символа")]
     public string Description { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Локацията е задължителна")]
-    [MaxLength(300, ErrorMessage = "Локацията не може да надвишава 300 символа")]
+    [MaxLength(ValidationConstants.Hotel.LocationMaxLength, ErrorMessage = "Локацията не може да надвишава 300 символа")]
     public string Location { get; set; } = string.Empty;
 
-    [MaxLength(100)]
+    [MaxLength(ValidationConstants.Hotel.CityMaxLength)]
     public string City { get; set; } = string.Empty;
 
-    [MaxLength(100)]
+    [MaxLength(ValidationConstants.Hotel.CountryMaxLength)]
     public string Country { get; set; } = string.Empty;
 
     public decimal? Latitude { get; set; }
@@ -33,22 +34,22 @@ public class UpdateHotelDto
 
 
 
-    [Range(1, 5, ErrorMessage = "Звездният рейтинг трябва да бъде между 1 и 5")]
+    [Range(ValidationConstants.Hotel.StarRatingMin, ValidationConstants.Hotel.StarRatingMax, ErrorMessage = "Звездният рейтинг трябва да бъде между 1 и 5")]
     public int StarRating { get; set; } = 3;
 
-    [MaxLength(500)]
+    [MaxLength(ValidationConstants.Hotel.ImageUrlMaxLength)]
     public string ImageUrl { get; set; } = string.Empty;
 
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.Hotel.ImagesMaxLength)]
     public string Images { get; set; } = "[]";
 
-    [MaxLength(1000)]
+    [MaxLength(ValidationConstants.Hotel.AmenitiesMaxLength)]
     public string Amenities { get; set; } = "[]";
 
-    [MaxLength(1000)]
+    [MaxLength(ValidationConstants.Hotel.RoomTypesMaxLength)]
     public string RoomTypes { get; set; } = "[]";
 
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.Hotel.CancellationPoliciesMaxLength)]
     public string CancellationPolicies { get; set; } = "[]";
 
     public bool IsAvailable { get; set; } = true;

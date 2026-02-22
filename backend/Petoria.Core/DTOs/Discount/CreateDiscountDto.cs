@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Discount;
 
@@ -17,6 +18,6 @@ public class CreateDiscountDto
     public DateTime EndDate { get; set; }
 
     [Required(ErrorMessage = "Процентът на отстъпка е задължителен")]
-    [Range(1, 99, ErrorMessage = "Отстъпката трябва да бъде между 1% и 99%")]
+    [Range(ValidationConstants.Discount.PercentageMin, ValidationConstants.Discount.PercentageMax, ErrorMessage = "Отстъпката трябва да бъде между 1% и 99%")]
     public int DiscountPercentage { get; set; }
 }

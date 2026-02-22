@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Availability;
 
@@ -17,6 +18,6 @@ public class BulkAvailabilityRequestDto
     public DateTime EndDate { get; set; }
 
     [Required(ErrorMessage = "Броят свободни стаи е задължителен")]
-    [Range(0, 1000, ErrorMessage = "Броят стаи трябва да бъде между 0 и 1000")]
+    [Range(ValidationConstants.Availability.AvailableCountMin, ValidationConstants.Availability.AvailableCountMax, ErrorMessage = "Броят стаи трябва да бъде между 0 и 1000")]
     public int AvailableCount { get; set; }
 }

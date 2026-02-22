@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.DTOs.PromoCode;
 
@@ -8,14 +9,14 @@ public class CreatePromoCodeDto
     public string Code { get; set; }
 
     [Required]
-    [Range(0, 100)]
+    [Range(ValidationConstants.PromoCode.DiscountPercentageMin, ValidationConstants.PromoCode.DiscountPercentageMax)]
     public decimal DiscountPercentage { get; set; }
 
     [Required]
-    [Range(1, int.MaxValue)]
+    [Range(ValidationConstants.PromoCode.MaxUsesMin, int.MaxValue)]
     public int MaxActivations { get; set; }
 
     [Required]
-    [Range(1, 3650)]
+    [Range(ValidationConstants.PromoCode.ValidDaysMin, ValidationConstants.PromoCode.ValidDaysMax)]
     public int ValidDays { get; set; }
 }

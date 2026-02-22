@@ -78,7 +78,7 @@ public class RoomsController : ControllerBase
 
     // POST: api/hotels/5/rooms
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<ActionResult<RoomTypeResponseDto>> CreateRoomType(int hotelId, CreateRoomTypeDto dto)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -133,7 +133,7 @@ public class RoomsController : ControllerBase
 
     // PUT: api/hotels/5/rooms/1
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> UpdateRoomType(int hotelId, int id, UpdateRoomTypeDto dto)
     {
         var existingRoom = await _context.RoomTypes
@@ -170,7 +170,7 @@ public class RoomsController : ControllerBase
 
     // DELETE: api/hotels/5/rooms/1
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> DeleteRoomType(int hotelId, int id)
     {
         var roomType = await _context.RoomTypes

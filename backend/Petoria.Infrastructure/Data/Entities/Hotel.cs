@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Petoria.Infrastructure.Data.Entities;
+using Petoria.Constants;
+using Petoria.Infrastructure.Data.Entities;
 
 public class Hotel
 {
@@ -9,20 +10,20 @@ public class Hotel
     public int Id { get; set; }
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(ValidationConstants.Hotel.NameMaxLength)]
     public string Name { get; set; } = string.Empty;
 
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.Hotel.DescriptionMaxLength)]
     public string Description { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(300)]
+    [MaxLength(ValidationConstants.Hotel.LocationMaxLength)]
     public string Location { get; set; } = string.Empty;
 
-    [MaxLength(100)]
+    [MaxLength(ValidationConstants.Hotel.CityMaxLength)]
     public string City { get; set; } = string.Empty;
 
-    [MaxLength(100)]
+    [MaxLength(ValidationConstants.Hotel.CountryMaxLength)]
     public string Country { get; set; } = string.Empty;
 
     // Geographic coordinates for map display (nullable for existing hotels without coordinates)
@@ -35,29 +36,29 @@ public class Hotel
 
 
     [Column(TypeName = "decimal(2,1)")]
-    [Range(0, 5)]
+    [Range(ValidationConstants.Hotel.RatingMin, ValidationConstants.Hotel.RatingMax)]
     public decimal Rating { get; set; } = 0;
 
-    [Range(1, 5)]
+    [Range(ValidationConstants.Hotel.StarRatingMin, ValidationConstants.Hotel.StarRatingMax)]
     public int StarRating { get; set; } = 3;
 
-    [MaxLength(500)]
+    [MaxLength(ValidationConstants.Hotel.ImageUrlMaxLength)]
     public string ImageUrl { get; set; } = string.Empty;
 
     // JSON array of additional image URLs
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.Hotel.ImagesMaxLength)]
     public string Images { get; set; } = "[]";
 
     // JSON array of amenities
-    [MaxLength(1000)]
+    [MaxLength(ValidationConstants.Hotel.AmenitiesMaxLength)]
     public string Amenities { get; set; } = "[]";
 
     // JSON array of room types
-    [MaxLength(1000)]
+    [MaxLength(ValidationConstants.Hotel.RoomTypesMaxLength)]
     public string RoomTypes { get; set; } = "[]";
 
     // JSON array of cancellation policies (days before -> refund percentage)
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.Hotel.CancellationPoliciesMaxLength)]
     public string CancellationPolicies { get; set; } = "[]";
 
     public bool IsAvailable { get; set; } = true;

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+using Petoria.Constants;
 namespace Petoria.Infrastructure.Data.Entities;
 
 /// <summary>
@@ -17,7 +18,7 @@ public class HotelMessage
     public string UserId { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(ValidationConstants.HotelMessage.SubjectMaxLength)]
     public string Subject { get; set; } = string.Empty;
 
     [Required]

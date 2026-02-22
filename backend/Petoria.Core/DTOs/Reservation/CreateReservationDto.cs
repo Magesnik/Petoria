@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using Petoria.Constants;
 namespace Petoria.Core.DTOs.Reservation;
 
 /// <summary>
@@ -21,9 +21,9 @@ public class CreateReservationDto
     [Required(ErrorMessage = "Датата на напускане е задължителна")]
     public DateTime CheckOutDate { get; set; }
 
-    [Range(1, 100, ErrorMessage = "Броят стаи трябва да бъде между 1 и 100")]
+    [Range(ValidationConstants.Reservation.RoomsMin, ValidationConstants.Reservation.RoomsMax, ErrorMessage = "Броят стаи трябва да бъде между 1 и 100")]
     public int NumberOfRooms { get; set; } = 1;
 
-    [MaxLength(500, ErrorMessage = "Бележките не могат да надвишават 500 символа")]
+    [MaxLength(ValidationConstants.Reservation.NotesMaxLength, ErrorMessage = "Бележките не могат да надвишават 500 символа")]
     public string? Notes { get; set; }
 }

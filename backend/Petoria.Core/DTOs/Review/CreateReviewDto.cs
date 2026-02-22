@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Review;
 
@@ -9,9 +10,9 @@ namespace Petoria.Core.DTOs.Review;
 public class CreateReviewDto
 {
     [Required(ErrorMessage = "Рейтингът е задължителен")]
-    [Range(1, 5, ErrorMessage = "Рейтингът трябва да бъде между 1 и 5")]
+    [Range(ValidationConstants.HotelReview.RatingMin, ValidationConstants.HotelReview.RatingMax, ErrorMessage = "Рейтингът трябва да бъде между 1 и 5")]
     public int Rating { get; set; }
 
-    [MaxLength(2000, ErrorMessage = "Ревюто не може да надвишава 2000 символа")]
+    [MaxLength(ValidationConstants.HotelReview.CommentMaxLength, ErrorMessage = "Ревюто не може да надвишава 2000 символа")]
     public string ReviewText { get; set; } = string.Empty;
 }

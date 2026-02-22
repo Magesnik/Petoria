@@ -95,7 +95,7 @@ public class AvailabilityController : ControllerBase
 
     // POST: api/hotels/5/availability/bulk - Set availability for a date range
     [HttpPost("bulk")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> SetBulkAvailability(int hotelId, BulkAvailabilityRequestDto request)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -154,7 +154,7 @@ public class AvailabilityController : ControllerBase
 
     // PUT: api/hotels/5/availability/block - Block or unblock dates
     [HttpPut("block")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> BlockDates(int hotelId, BlockDatesRequestDto request)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -218,7 +218,7 @@ public class AvailabilityController : ControllerBase
 
     // POST: api/hotels/5/availability/initialize - Initialize availability for all room types
     [HttpPost("initialize")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
     public async Task<IActionResult> InitializeAvailability(int hotelId, [FromQuery] int daysAhead = 90)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);

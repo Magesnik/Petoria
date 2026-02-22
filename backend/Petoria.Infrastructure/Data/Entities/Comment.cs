@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Petoria.Constants;
 namespace Petoria.Infrastructure.Data.Entities;
 
 public class Comment
@@ -15,7 +16,7 @@ public class Comment
     public string UserId { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(2000)]
+    [MaxLength(ValidationConstants.Comment.ContentMaxLength)]
     public string Text { get; set; } = string.Empty;
 
     // For nested replies - null if top-level comment

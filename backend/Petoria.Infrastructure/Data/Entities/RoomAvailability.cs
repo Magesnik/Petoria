@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
@@ -19,7 +20,7 @@ public class RoomAvailability
     public DateTime Date { get; set; }
 
     [Required]
-    [Range(0, 1000)]
+    [Range(ValidationConstants.Availability.AvailableCountMin, ValidationConstants.Availability.AvailableCountMax)]
     public int AvailableCount { get; set; }  // Колко стаи са свободни на тази дата
 
     public bool IsBlocked { get; set; } = false;  // Админът може да блокира дати

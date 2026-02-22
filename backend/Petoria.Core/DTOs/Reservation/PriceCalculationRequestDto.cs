@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Reservation;
 
@@ -17,6 +18,6 @@ public class PriceCalculationRequestDto
     [Required(ErrorMessage = "Датата на напускане е задължителна")]
     public DateTime CheckOutDate { get; set; }
 
-    [Range(1, 100, ErrorMessage = "Броят стаи трябва да бъде между 1 и 100")]
+    [Range(ValidationConstants.Reservation.RoomsMin, ValidationConstants.Reservation.RoomsMax, ErrorMessage = "Броят стаи трябва да бъде между 1 и 100")]
     public int NumberOfRooms { get; set; } = 1;
 }

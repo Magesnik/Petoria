@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using Petoria.Constants;
 
 namespace Petoria.Infrastructure.Data.Entities
 {
@@ -12,7 +12,7 @@ namespace Petoria.Infrastructure.Data.Entities
         public string UserId { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(200)]
+        [MaxLength(ValidationConstants.SupportMessage.SubjectMaxLength)]
         public string Subject { get; set; } = string.Empty;
 
         [Required]

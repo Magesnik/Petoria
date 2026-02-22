@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using Petoria.Constants;
 namespace Petoria.Core.DTOs.Profile;
 
 /// <summary>
@@ -8,10 +8,10 @@ namespace Petoria.Core.DTOs.Profile;
 /// </summary>
 public class UpdateProfileDto
 {
-    [MaxLength(100, ErrorMessage = "Името не може да надвишава 100 символа")]
+    [MaxLength(ValidationConstants.User.FirstNameMaxLength, ErrorMessage = "Името не може да надвишава 100 символа")]
     public string? FirstName { get; set; }
 
-    [MaxLength(100, ErrorMessage = "Фамилията не може да надвишава 100 символа")]
+    [MaxLength(ValidationConstants.User.LastNameMaxLength, ErrorMessage = "Фамилията не може да надвишава 100 символа")]
     public string? LastName { get; set; }
 
     public string? Theme { get; set; }

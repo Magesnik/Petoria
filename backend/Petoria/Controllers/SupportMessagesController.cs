@@ -87,7 +87,7 @@ namespace Petoria.Controllers
 
         // GET: api/support/messages/admin
         [HttpGet("admin")]
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
         public async Task<ActionResult<IEnumerable<SupportMessageDto>>> GetAllMessages()
         {
             var messages = await _context.SupportMessages
@@ -114,7 +114,7 @@ namespace Petoria.Controllers
 
         // PUT: api/support/messages/{id}/answer
         [HttpPut("{id}/answer")]
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
         public async Task<IActionResult> AnswerMessage(int id, [FromBody] AnswerSupportMessageDto answerDto)
         {
             var message = await _context.SupportMessages.FindAsync(id);
@@ -133,7 +133,7 @@ namespace Petoria.Controllers
 
         // GET: api/support/messages/admin/unread-count
         [HttpGet("admin/unread-count")]
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
         public async Task<ActionResult<int>> GetAdminUnreadCount()
         {
             // Count messages that are NOT answered yet
