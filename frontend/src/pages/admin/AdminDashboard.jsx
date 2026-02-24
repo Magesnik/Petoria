@@ -184,7 +184,7 @@ const AdminDashboard = () => {
                                 setShowPromoCodes(true);
                                 setUserDetails(null);
                             }}
-                            title={t('globalPromoCodes') || 'Глобални Промо Кодове'}
+                            title={t('globalPromoCodes')}
                             style={{
                                 background: 'none',
                                 border: 'none',
@@ -312,7 +312,7 @@ const AdminDashboard = () => {
                                 className={`panel-tab ${activeDashboardTab === 'hotels' ? 'active' : ''}`}
                                 onClick={() => setActiveDashboardTab('hotels')}
                             >
-                                🏨 Хотели ({adminHotels.length})
+                                🏨 {t('hotels')} ({adminHotels.length})
                             </button>
                         </div>
 
@@ -401,7 +401,7 @@ const AdminDashboard = () => {
                                 <div className="panel-header">
                                     <input
                                         type="text"
-                                        placeholder="Търси хотел по име, град или имейл..."
+                                        placeholder={t('searchHotelsPlaceholder')}
                                         value={searchHotelTerm}
                                         onChange={(e) => setSearchHotelTerm(e.target.value)}
                                         className="search-input"
@@ -409,24 +409,24 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="hotels-admin-list">
                                     {filteredAdminHotels.length === 0 ? (
-                                        <p className="empty-message">Няма хотели</p>
+                                        <p className="empty-message">{t('noHotels')}</p>
                                     ) : (
                                         filteredAdminHotels.map(h => (
                                             <div key={h.id} className={`hotel-admin-card ${h.isSuspendedBySuperAdmin ? 'suspended' : ''}`}>
                                                 <div className="hotel-admin-info">
                                                     <strong>{h.name}</strong>
                                                     <span>📍 {h.city}, {h.country}</span>
-                                                    <small>👤 {h.ownerEmail || 'Неизвестен'}</small>
+                                                    <small>👤 {h.ownerEmail || t('unknown')}</small>
                                                     {h.isSuspendedBySuperAdmin && (
-                                                        <span className="badge-suspended">⛔ Спрян</span>
+                                                        <span className="badge-suspended">⛔ {t('suspended')}</span>
                                                     )}
                                                 </div>
                                                 <button
                                                     className={`btn-suspend ${h.isSuspendedBySuperAdmin ? 'btn-activate' : 'btn-deactivate'}`}
                                                     onClick={() => toggleHotelSuspend(h.id)}
-                                                    title={h.isSuspendedBySuperAdmin ? 'Активирай' : 'Деактивирай'}
+                                                    title={h.isSuspendedBySuperAdmin ? t('activate') : t('deactivate')}
                                                 >
-                                                    {h.isSuspendedBySuperAdmin ? '✅ Активирай' : '🚫 Деактивирай'}
+                                                    {h.isSuspendedBySuperAdmin ? `✅ ${t('activate')}` : `🚫 ${t('deactivate')}`}
                                                 </button>
                                             </div>
                                         ))

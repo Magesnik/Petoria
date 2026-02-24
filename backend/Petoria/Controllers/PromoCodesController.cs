@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Petoria.DTOs.PromoCode;
+using Petoria.Core.DTOs.PromoCode;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 using System.Security.Claims;

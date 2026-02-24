@@ -69,9 +69,9 @@ const GlobalPromoCodes = () => {
     return (
         <div className="global-promo-codes-panel">
             <div className="panel-header">
-                <h2>🏷️ {t('globalPromoCodes') || 'Global Promo Codes'}</h2>
+                <h2>🏷️ {t('globalPromoCodes')}</h2>
                 <button className="btn-create" onClick={() => setIsCreating(!isCreating)}>
-                    {isCreating ? 'Cancel' : (t('createPromoCode') || '+ Create')}
+                    {isCreating ? t('cancel') : (t('createPromoCode') || '+ Create')}
                 </button>
             </div>
 
@@ -82,7 +82,7 @@ const GlobalPromoCodes = () => {
                     <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>Code (e.g., SUMMER20)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>{t('codeExample')}</label>
                                 <input
                                     type="text"
                                     value={code}
@@ -92,7 +92,7 @@ const GlobalPromoCodes = () => {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>Discount %</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>{t('discountPercentageShort')}</label>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -105,7 +105,7 @@ const GlobalPromoCodes = () => {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>Max Activations</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>{t('maxActivations')}</label>
                                 <input
                                     type="number"
                                     min="1"
@@ -116,7 +116,7 @@ const GlobalPromoCodes = () => {
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>Valid Days</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-color)' }}>{t('validDays')}</label>
                                 <input
                                     type="number"
                                     min="1"
@@ -128,7 +128,7 @@ const GlobalPromoCodes = () => {
                             </div>
                         </div>
                         <button type="submit" style={{ padding: '0.8rem', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '1rem' }}>
-                            {t('save') || 'Save Promo Code'}
+                            {t('savePromoCode')}
                         </button>
                     </form>
                 </div>
@@ -141,11 +141,11 @@ const GlobalPromoCodes = () => {
                     promoCodes.map(promo => (
                         <div key={promo.id} className="promo-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                             <div className="promo-info">
-                                <strong style={{ fontSize: '1.2rem', color: 'var(--primary-color)', display: 'block', marginBottom: '0.5rem' }}>{promo.code} <span style={{ fontSize: '0.9rem', color: 'var(--text-color)', background: 'rgba(59, 130, 246, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{promo.discountPercentage}% OFF</span></strong>
+                                <strong style={{ fontSize: '1.2rem', color: 'var(--primary-color)', display: 'block', marginBottom: '0.5rem' }}>{promo.code} <span style={{ fontSize: '0.9rem', color: 'var(--text-color)', background: 'rgba(59, 130, 246, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem' }}>{promo.discountPercentage}% {t('off')}</span></strong>
                                 <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                    <span>Uses: {promo.currentActivations} / {promo.maxActivations}</span>
-                                    <span>Expires: {new Date(promo.expirationDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}</span>
-                                    <span style={{ color: promo.isActive ? 'green' : 'red', fontWeight: 'bold' }}>{promo.isActive ? 'Active' : 'Inactive'}</span>
+                                    <span>{t('activations')}: {promo.currentActivations} / {promo.maxActivations}</span>
+                                    <span>{t('expires')}: {new Date(promo.expirationDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}</span>
+                                    <span style={{ color: promo.isActive ? 'green' : 'red', fontWeight: 'bold' }}>{promo.isActive ? t('active') : t('inactive')}</span>
                                 </div>
                             </div>
                             <button className="btn-delete" onClick={() => handleDelete(promo.id)} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>

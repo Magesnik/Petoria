@@ -490,5 +490,16 @@
     "sbCheckIn": "Настаняване",
     "sbNights": "Нощувки",
     "sbGuests": "Гости",
-    "sbSearch": "Търсене →"
+    "sbSearch": "Търсене →",
+    "globalPromoCodes": "Глобални промо кодове",
+    "codeExample": "Код (напр. SUMMER20)",
+    "discountPercentageShort": "Отстъпка %",
+    "savePromoCode": "Запази промо код",
+    "off": "ОТСТЪПКА",
+    "searchHotelsPlaceholder": "Търси хотел по име, град или имейл...",
+    "noHotels": "Няма хотели",
+    "suspended": "Спрян",
+    "activate": "Активирай",
+    "deactivate": "Деактивирай",
+    "unknown": "Неизвестен"
 }

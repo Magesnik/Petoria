@@ -1,4 +1,4 @@
-namespace Petoria.DTOs.PromoCode;
+namespace Petoria.Core.DTOs.PromoCode;
 
 public class PromoCodeDto
 {

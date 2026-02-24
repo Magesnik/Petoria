@@ -496,5 +496,16 @@
     "sbCheckIn": "Check-in",
     "sbNights": "Nights",
     "sbGuests": "Guests",
-    "sbSearch": "Search →"
+    "sbSearch": "Search →",
+    "globalPromoCodes": "Global Promo Codes",
+    "codeExample": "Code (e.g., SUMMER20)",
+    "discountPercentageShort": "Discount %",
+    "savePromoCode": "Save Promo Code",
+    "off": "OFF",
+    "searchHotelsPlaceholder": "Search hotel by name, city or email...",
+    "noHotels": "No hotels",
+    "suspended": "Suspended",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "unknown": "Unknown"
 }
