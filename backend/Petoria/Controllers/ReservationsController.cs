@@ -12,10 +12,12 @@ namespace Petoria.Controllers;
 public class ReservationsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly Petoria.Core.Contracts.IEmailService _emailService;
 
-    public ReservationsController(ApplicationDbContext context)
+    public ReservationsController(ApplicationDbContext context, Petoria.Core.Contracts.IEmailService emailService)
     {
         _context = context;
+        _emailService = emailService;
     }
 
     // GET: api/reservations/my - Get current user's reservations
@@ -258,6 +260,90 @@ public class ReservationsController : ControllerBase
         };
 
         _context.Reservations.Add(reservation);
+        await _context.SaveChangesAsync();
+        
+        // Send email
+        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (!string.IsNullOrEmpty(userEmail))
+        {
+            try
+            {
+                var subject = $"Потвърждение на резервация в {hotel.Name}";
+                var body = $@"
+                    <div style=""font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;"">
+                        <div style=""max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"">
+                            
+                            <!-- Header -->
+                            <div style=""background-color: #2F61E6; padding: 25px; text-align: center;"">
+                                <h1 style=""color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;"">Petoria</h1>
+                            </div>
+                            
+                            <!-- Body -->
+                            <div style=""padding: 30px;"">
+                                <h2 style=""color: #2c3e50; font-size: 20px; margin-top: 0;"">Успешна резервация! 🎉</h2>
+                                <p style=""font-size: 16px; line-height: 1.5; color: #555;"">
+                                    Здравейте, <br><br>
+                                    Вашата резервация в <strong>{hotel.Name}</strong> е успешно потвърдена. Очакваме ви с нетърпение!
+                                </p>
+                                
+                                <!-- Details Card -->
+                                <div style=""background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; margin: 25px 0;"">
+                                    <h3 style=""margin-top: 0; color: #4a5568; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;"">Детайли за настаняването</h3>
+                                    
+                                    <table style=""width: 100%; border-collapse: collapse; margin-top: 15px;"">
+                                        <tr>
+                                            <td style=""padding: 8px 0; color: #718096; width: 40%;"">Тип стая:</td>
+                                            <td style=""padding: 8px 0; font-weight: 600; color: #2d3748;"">{roomType.Name}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 8px 0; color: #718096;"">Настаняване:</td>
+                                            <td style=""padding: 8px 0; font-weight: 600; color: #2d3748;"">{request.CheckInDate:dd.MM.yyyy}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 8px 0; color: #718096;"">Напускане:</td>
+                                            <td style=""padding: 8px 0; font-weight: 600; color: #2d3748;"">{request.CheckOutDate:dd.MM.yyyy}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 8px 0; color: #718096;"">Нощувки:</td>
+                                            <td style=""padding: 8px 0; font-weight: 600; color: #2d3748;"">{numberOfNights}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 8px 0; color: #718096;"">Брой стаи:</td>
+                                            <td style=""padding: 8px 0; font-weight: 600; color: #2d3748;"">{request.NumberOfRooms}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Total Price -->
+                                <div style=""background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; margin-bottom: 25px;"">
+                                    <p style=""margin: 0; color: #2b6cb0; font-size: 16px;"">
+                                        Обща цена: <strong>{totalPrice} лв.</strong>
+                                    </p>
+                                </div>
+                                
+                                <p style=""font-size: 15px; color: #718096; margin-bottom: 0;"">
+                                    Благодарим ви, че избрахте Petoria! За въпроси, свържете се с нас.
+                                </p>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style=""background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7;"">
+                                <p style=""margin: 0; color: #a0aec0; font-size: 13px;"">
+                                    &copy; {DateTime.UtcNow.Year} Petoria. Всички права запазени.
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </div>
+                ";
+                await _emailService.SendEmailAsync(userEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                // Log exception in production, but don't fail the reservation
+                Console.WriteLine($"Error sending email: {ex.Message}");
+            }
+        }
 
         // Update availability for all dates
         for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
@@ -417,6 +503,60 @@ public class ReservationsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
+        // Send email
+        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (!string.IsNullOrEmpty(userEmail))
+        {
+            try
+            {
+                var hotel = await _context.Hotels.FindAsync(reservation.HotelId);
+                var subject = $"Отмяна на резервация в {hotel?.Name ?? "хотела"}";
+                var body = $@"
+                    <div style=""font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;"">
+                        <div style=""max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"">
+                            
+                            <!-- Header -->
+                            <div style=""background-color: #e53e3e; padding: 25px; text-align: center;"">
+                                <h1 style=""color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;"">Petoria</h1>
+                            </div>
+                            
+                            <!-- Body -->
+                            <div style=""padding: 30px;"">
+                                <h2 style=""color: #2c3e50; font-size: 20px; margin-top: 0;"">Успешно отменена резервация</h2>
+                                <p style=""font-size: 16px; line-height: 1.5; color: #555;"">
+                                    Здравейте, <br><br>
+                                    Вашата резервация в <strong>{hotel?.Name ?? "хотела"}</strong> за периода <strong>{reservation.CheckInDate:dd.MM.yyyy} - {reservation.CheckOutDate:dd.MM.yyyy}</strong> беше успешно отменена.
+                                </p>
+                                
+                                <div style=""background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 15px; margin: 25px 0;"">
+                                    <p style=""margin: 0; color: #c05621; font-size: 15px;"">
+                                        Ако това е станало по погрешка или имате въпроси, моля не се колебайте да се свържете с нас възможно най-скоро.
+                                    </p>
+                                </div>
+                                
+                                <p style=""font-size: 15px; color: #718096; margin-bottom: 0;"">
+                                    Поздрави,<br/>Екипът на Petoria
+                                </p>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style=""background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7;"">
+                                <p style=""margin: 0; color: #a0aec0; font-size: 13px;"">
+                                    &copy; {DateTime.UtcNow.Year} Petoria. Всички права запазени.
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </div>
+                ";
+                await _emailService.SendEmailAsync(userEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending cancellation email: {ex.Message}");
+            }
+        }
+
         return Ok(new { message = "Reservation cancelled successfully" });
     }
 
@@ -534,6 +674,86 @@ public class ReservationsController : ControllerBase
             promo.CurrentActivations++;
             _context.PromoCodes.Update(promo);
             await _context.SaveChangesAsync();
+        }
+
+        // Send aggregated email
+        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (!string.IsNullOrEmpty(userEmail) && request.Items.Any())
+        {
+            try
+            {
+                var subject = "Успешна резервация през Petoria Cart";
+                
+                var htmlBody = @"
+                    <div style=""font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;"">
+                        <div style=""max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"">
+                            
+                            <!-- Header -->
+                            <div style=""background-color: #2F61E6; padding: 25px; text-align: center;"">
+                                <h1 style=""color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;"">Petoria</h1>
+                            </div>
+                            
+                            <!-- Body -->
+                            <div style=""padding: 30px;"">
+                                <h2 style=""color: #2c3e50; font-size: 20px; margin-top: 0;"">Успешна резервация! 🎉</h2>
+                                <p style=""font-size: 16px; line-height: 1.5; color: #555;"">
+                                    Здравейте, <br><br>
+                                    Благодарим ви, че избрахте Petoria. Вашите резервации са успешно потвърдени и платени. Ето детайлите:
+                                </p>";
+
+                foreach (var item in request.Items)
+                {
+                    var itemHotel = await _context.Hotels.FindAsync(item.HotelId);
+                    var itemRoomType = await _context.RoomTypes.FindAsync(item.RoomTypeId);
+                    
+                    if (itemHotel != null && itemRoomType != null)
+                    {
+                        var nights = (int)(item.CheckOutDate.Date - item.CheckInDate.Date).TotalDays;
+                        htmlBody += $@"
+                                <!-- Details Card -->
+                                <div style=""background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; margin: 15px 0;"">
+                                    <h3 style=""margin-top: 0; color: #2b6cb0; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;"">{itemHotel.Name}</h3>
+                                    
+                                    <table style=""width: 100%; border-collapse: collapse; margin-top: 10px;"">
+                                        <tr>
+                                            <td style=""padding: 6px 0; color: #718096; width: 40%; font-size: 15px;"">Стая:</td>
+                                            <td style=""padding: 6px 0; font-weight: 600; color: #2d3748; font-size: 15px;"">{itemRoomType.Name}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 6px 0; color: #718096; font-size: 15px;"">Период:</td>
+                                            <td style=""padding: 6px 0; font-weight: 600; color: #2d3748; font-size: 15px;"">{item.CheckInDate:dd.MM.yyyy} - {item.CheckOutDate:dd.MM.yyyy} ({nights} нощувки)</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 6px 0; color: #718096; font-size: 15px;"">Брой стаи:</td>
+                                            <td style=""padding: 6px 0; font-weight: 600; color: #2d3748; font-size: 15px;"">{item.NumberOfRooms}</td>
+                                        </tr>
+                                    </table>
+                                </div>";
+                    }
+                }
+
+                htmlBody += @"
+                                <p style=""font-size: 15px; color: #718096; margin-top: 25px; margin-bottom: 0;"">
+                                    Очакваме ви с нетърпение! За въпроси, свържете се с нас.
+                                </p>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style=""background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7;"">
+                                <p style=""margin: 0; color: #a0aec0; font-size: 13px;"">
+                                    &copy; " + DateTime.UtcNow.Year + @" Petoria. Всички права запазени.
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </div>";
+
+                await _emailService.SendEmailAsync(userEmail, subject, htmlBody);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending cart confirmation email: {ex.Message}");
+            }
         }
 
         return Ok(new { message = "Reservations confirmed successfully", reservationIds = createdReservations });

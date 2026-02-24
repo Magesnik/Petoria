@@ -36,10 +36,13 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 // Services
-// Services
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<Petoria.Core.Contracts.IAuthService, Petoria.Core.Services.AuthService>();
 builder.Services.AddScoped<Petoria.Core.Contracts.IPhotoService, Petoria.Core.Services.CloudinaryService>();
+builder.Services.AddScoped<Petoria.Core.Contracts.IEmailService, Petoria.Core.Services.EmailService>();
+
+// Configure strong-typed settings objects
+builder.Services.Configure<Petoria.Core.Models.Email.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 
 
 
