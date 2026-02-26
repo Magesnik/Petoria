@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Petoria.Core.DTOs.Reservation;
+using Petoria.Core.Models.Email;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
+using Petoria.Core.Utilities;
 
 namespace Petoria.Controllers;
 
@@ -13,11 +16,16 @@ public class ReservationsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly Petoria.Core.Contracts.IEmailService _emailService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public ReservationsController(ApplicationDbContext context, Petoria.Core.Contracts.IEmailService emailService)
+    public ReservationsController(
+        ApplicationDbContext context, 
+        Petoria.Core.Contracts.IEmailService emailService,
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _emailService = emailService;
+        _userManager = userManager;
     }
 
     // GET: api/reservations/my - Get current user's reservations
@@ -316,9 +324,22 @@ public class ReservationsController : ControllerBase
                                 
                                 <!-- Total Price -->
                                 <div style=""background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; margin-bottom: 25px;"">
-                                    <p style=""margin: 0; color: #2b6cb0; font-size: 16px;"">
-                                        Обща цена: <strong>{totalPrice} лв.</strong>
-                                    </p>
+                                    <table style=""width: 100%; border-collapse: collapse;"">
+                                        {(roomType.PricePerNight * request.NumberOfRooms * numberOfNights > totalPrice ? $@"
+                                        <tr>
+                                            <td style=""padding: 4px 0; color: #718096; font-size: 15px;"">Базова цена:</td>
+                                            <td style=""padding: 4px 0; color: #718096; font-size: 15px; text-decoration: line-through;"">{roomType.PricePerNight * request.NumberOfRooms * numberOfNights} лв.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style=""padding: 4px 0; color: #38a169; font-size: 15px;"">Спестено:</td>
+                                            <td style=""padding: 4px 0; color: #38a169; font-size: 15px;"">{roomType.PricePerNight * request.NumberOfRooms * numberOfNights - totalPrice} лв.</td>
+                                        </tr>
+                                        " : "")}
+                                        <tr>
+                                            <td style=""padding: 8px 0 0 0; color: #2b6cb0; font-size: 16px; font-weight: bold;"">Платена сума:</td>
+                                            <td style=""padding: 8px 0 0 0; color: #2b6cb0; font-size: 16px; font-weight: bold;"">{totalPrice} лв.</td>
+                                        </tr>
+                                    </table>
                                 </div>
                                 
                                 <p style=""font-size: 15px; color: #718096; margin-bottom: 0;"">
@@ -498,67 +519,84 @@ public class ReservationsController : ControllerBase
             }
         }
 
-        reservation.Status = "Cancelled";
-        reservation.UpdatedAt = DateTime.UtcNow;
+    reservation.Status = "Cancelled";
+    reservation.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
-
-        // Send email
-        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-        if (!string.IsNullOrEmpty(userEmail))
+    // Calculate Refund based on Hotel Cancellation Policies
+    var hotel = await _context.Hotels.FindAsync(reservation.HotelId);
+    decimal refundPercentage = 100m; // Default to 100% refund if no policies exist
+    int daysBeforeCheckIn = (int)Math.Floor((reservation.CheckInDate.Date - DateTime.UtcNow.Date).TotalDays);
+    
+    if (hotel != null && !string.IsNullOrEmpty(hotel.CancellationPolicies) && hotel.CancellationPolicies != "[]")
+    {
+        try 
         {
-            try
+            var policies = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(hotel.CancellationPolicies);
+            if (policies != null && policies.Any())
             {
-                var hotel = await _context.Hotels.FindAsync(reservation.HotelId);
-                var subject = $"Отмяна на резервация в {hotel?.Name ?? "хотела"}";
-                var body = $@"
-                    <div style=""font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;"">
-                        <div style=""max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"">
-                            
-                            <!-- Header -->
-                            <div style=""background-color: #e53e3e; padding: 25px; text-align: center;"">
-                                <h1 style=""color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;"">Petoria</h1>
-                            </div>
-                            
-                            <!-- Body -->
-                            <div style=""padding: 30px;"">
-                                <h2 style=""color: #2c3e50; font-size: 20px; margin-top: 0;"">Успешно отменена резервация</h2>
-                                <p style=""font-size: 16px; line-height: 1.5; color: #555;"">
-                                    Здравейте, <br><br>
-                                    Вашата резервация в <strong>{hotel?.Name ?? "хотела"}</strong> за периода <strong>{reservation.CheckInDate:dd.MM.yyyy} - {reservation.CheckOutDate:dd.MM.yyyy}</strong> беше успешно отменена.
-                                </p>
-                                
-                                <div style=""background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 15px; margin: 25px 0;"">
-                                    <p style=""margin: 0; color: #c05621; font-size: 15px;"">
-                                        Ако това е станало по погрешка или имате въпроси, моля не се колебайте да се свържете с нас възможно най-скоро.
-                                    </p>
-                                </div>
-                                
-                                <p style=""font-size: 15px; color: #718096; margin-bottom: 0;"">
-                                    Поздрави,<br/>Екипът на Petoria
-                                </p>
-                            </div>
-                            
-                            <!-- Footer -->
-                            <div style=""background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7;"">
-                                <p style=""margin: 0; color: #a0aec0; font-size: 13px;"">
-                                    &copy; {DateTime.UtcNow.Year} Petoria. Всички права запазени.
-                                </p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                ";
-                await _emailService.SendEmailAsync(userEmail, subject, body);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending cancellation email: {ex.Message}");
+                // Find the policy that matches (the smallest daysBefore that is >= daysBeforeCheckIn)
+                var activePolicy = policies
+                    .Where(p => (int)p.GetProperty("daysBefore").GetInt32() >= daysBeforeCheckIn)
+                    .OrderBy(p => (int)p.GetProperty("daysBefore").GetInt32())
+                    .FirstOrDefault();
+                    
+                if (activePolicy.ValueKind != System.Text.Json.JsonValueKind.Undefined)
+                {
+                    refundPercentage = (decimal)activePolicy.GetProperty("refundPercentage").GetInt32();
+                }
+                else if (daysBeforeCheckIn >= 0)
+                {
+                    // If they are closer to check-in than ANY policy, it depends on business logic.
+                    // The frontend prompt says: "За липсващи дни до самата дата на настаняване (0 дни) се приема 0% (без възстановяване)."
+                    // If they are cancelling closer than the strictest policy, refund is 0%.
+                    refundPercentage = 0m;
+                }
             }
         }
-
-        return Ok(new { message = "Reservation cancelled successfully" });
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error parsing cancellation policies: {ex.Message}");
+        }
     }
+
+    reservation.RefundAmount = Math.Round(reservation.TotalPrice * (refundPercentage / 100m), 2);
+    reservation.RetainedAmount = reservation.TotalPrice - reservation.RefundAmount;
+
+    await _context.SaveChangesAsync();
+
+    // Send email
+    var cancelUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+    if (!string.IsNullOrEmpty(userEmail) && !string.IsNullOrEmpty(cancelUserId))
+    {
+        try
+        {
+            var applicationUser = await _userManager.FindByIdAsync(cancelUserId);
+            var lang = applicationUser?.Language ?? "bg";
+
+            var ctx = new CancellationEmailContext
+            {
+                UserLanguage = lang,
+                HotelName = hotel?.Name ?? (lang == "en" ? "the hotel" : "хотела"),
+                CheckInDate = reservation.CheckInDate,
+                CheckOutDate = reservation.CheckOutDate,
+                RefundAmount = reservation.RefundAmount,
+                RefundPercentage = refundPercentage,
+                DaysBeforeCheckIn = daysBeforeCheckIn
+            };
+
+            var (subject, body) = EmailTemplateBuilder.BuildCancellationEmail(ctx);
+            await _emailService.SendEmailAsync(userEmail, subject, body);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending cancellation email: {ex.Message}");
+        }
+    }
+
+    return Ok(new { message = "Reservation cancelled successfully" });
+}
 
     // POST: api/reservations/confirm-cart - Create reservations after successful Stripe payment
     [HttpPost("confirm-cart")]
@@ -582,6 +620,8 @@ public class ReservationsController : ControllerBase
             }
         }
         bool promoUsed = false;
+        decimal grandTotalOriginal = 0;
+        decimal grandTotalPaid = 0;
 
         foreach (var item in request.Items)
         {
@@ -615,12 +655,18 @@ public class ReservationsController : ControllerBase
             }
             totalPrice *= item.NumberOfRooms;
 
+            // Before global/hotel promo code
+            grandTotalOriginal += totalPrice;
+
             // Apply global or hotel-specific promo code discount
             if (promo != null && (promo.HotelId == null || promo.HotelId == item.HotelId))
             {
                 totalPrice = totalPrice * (1 - promo.DiscountPercentage / 100m);
                 promoUsed = true;
             }
+
+            // After global/hotel promo code
+            grandTotalPaid += totalPrice;
 
             var reservation = new Reservation
             {
@@ -677,29 +723,24 @@ public class ReservationsController : ControllerBase
         }
 
         // Send aggregated email
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-        if (!string.IsNullOrEmpty(userEmail) && request.Items.Any())
+        
+        if (!string.IsNullOrEmpty(userEmail) && !string.IsNullOrEmpty(userIdStr) && request.Items.Any())
         {
             try
             {
-                var subject = "Успешна резервация през Petoria Cart";
-                
-                var htmlBody = @"
-                    <div style=""font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;"">
-                        <div style=""max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"">
-                            
-                            <!-- Header -->
-                            <div style=""background-color: #2F61E6; padding: 25px; text-align: center;"">
-                                <h1 style=""color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;"">Petoria</h1>
-                            </div>
-                            
-                            <!-- Body -->
-                            <div style=""padding: 30px;"">
-                                <h2 style=""color: #2c3e50; font-size: 20px; margin-top: 0;"">Успешна резервация! 🎉</h2>
-                                <p style=""font-size: 16px; line-height: 1.5; color: #555;"">
-                                    Здравейте, <br><br>
-                                    Благодарим ви, че избрахте Petoria. Вашите резервации са успешно потвърдени и платени. Ето детайлите:
-                                </p>";
+                var applicationUser = await _userManager.FindByIdAsync(userIdStr);
+                var lang = applicationUser?.Language ?? "bg";
+
+                var ctx = new ConfirmationEmailContext
+                {
+                    UserLanguage = lang,
+                    GrandTotalOriginal = grandTotalOriginal,
+                    GrandTotalPaid = grandTotalPaid,
+                    PromoCode = promoUsed && promo != null ? promo.Code : string.Empty,
+                    PromoCodeDiscountPercentage = promoUsed && promo != null ? promo.DiscountPercentage : null
+                };
 
                 foreach (var item in request.Items)
                 {
@@ -708,47 +749,19 @@ public class ReservationsController : ControllerBase
                     
                     if (itemHotel != null && itemRoomType != null)
                     {
-                        var nights = (int)(item.CheckOutDate.Date - item.CheckInDate.Date).TotalDays;
-                        htmlBody += $@"
-                                <!-- Details Card -->
-                                <div style=""background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; margin: 15px 0;"">
-                                    <h3 style=""margin-top: 0; color: #2b6cb0; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;"">{itemHotel.Name}</h3>
-                                    
-                                    <table style=""width: 100%; border-collapse: collapse; margin-top: 10px;"">
-                                        <tr>
-                                            <td style=""padding: 6px 0; color: #718096; width: 40%; font-size: 15px;"">Стая:</td>
-                                            <td style=""padding: 6px 0; font-weight: 600; color: #2d3748; font-size: 15px;"">{itemRoomType.Name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td style=""padding: 6px 0; color: #718096; font-size: 15px;"">Период:</td>
-                                            <td style=""padding: 6px 0; font-weight: 600; color: #2d3748; font-size: 15px;"">{item.CheckInDate:dd.MM.yyyy} - {item.CheckOutDate:dd.MM.yyyy} ({nights} нощувки)</td>
-                                        </tr>
-                                        <tr>
-                                            <td style=""padding: 6px 0; color: #718096; font-size: 15px;"">Брой стаи:</td>
-                                            <td style=""padding: 6px 0; font-weight: 600; color: #2d3748; font-size: 15px;"">{item.NumberOfRooms}</td>
-                                        </tr>
-                                    </table>
-                                </div>";
+                        ctx.Items.Add(new ConfirmationEmailItem
+                        {
+                            HotelName = itemHotel.Name,
+                            RoomTypeName = itemRoomType.Name,
+                            CheckInDate = item.CheckInDate,
+                            CheckOutDate = item.CheckOutDate,
+                            NumberOfRooms = item.NumberOfRooms
+                        });
                     }
                 }
 
-                htmlBody += @"
-                                <p style=""font-size: 15px; color: #718096; margin-top: 25px; margin-bottom: 0;"">
-                                    Очакваме ви с нетърпение! За въпроси, свържете се с нас.
-                                </p>
-                            </div>
-                            
-                            <!-- Footer -->
-                            <div style=""background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7;"">
-                                <p style=""margin: 0; color: #a0aec0; font-size: 13px;"">
-                                    &copy; " + DateTime.UtcNow.Year + @" Petoria. Всички права запазени.
-                                </p>
-                            </div>
-                            
-                        </div>
-                    </div>";
-
-                await _emailService.SendEmailAsync(userEmail, subject, htmlBody);
+                var (subject, body) = EmailTemplateBuilder.BuildConfirmationEmail(ctx);
+                await _emailService.SendEmailAsync(userEmail, subject, body);
             }
             catch (Exception ex)
             {

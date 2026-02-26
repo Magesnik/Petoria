@@ -35,7 +35,7 @@ public class AdminController : ControllerBase
             var favoritesCount = await _context.Favorites.CountAsync(f => f.UserId == user.Id);
             var reservationsCount = await _context.Reservations.CountAsync(r => r.UserId == user.Id);
             var totalSpent = await _context.Reservations
-                .Where(r => r.UserId == user.Id && r.Status == "Completed")
+                .Where(r => r.UserId == user.Id && (r.Status == "Completed" || r.Status == "Confirmed"))
                 .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
             var hotelsCreated = await _context.Hotels.CountAsync(h => h.CreatedById == user.Id);
             var commentsCount = await _context.Comments.CountAsync(c => c.UserId == user.Id && c.ParentCommentId == null);
@@ -142,7 +142,7 @@ public class AdminController : ControllerBase
             .ToListAsync();
 
         var totalSpent = await _context.Reservations
-            .Where(r => r.UserId == id && r.Status == "Completed")
+            .Where(r => r.UserId == id && (r.Status == "Completed" || r.Status == "Confirmed"))
             .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
 
         // Map Entity → Response DTO
@@ -228,8 +228,10 @@ public class AdminController : ControllerBase
         var totalFavorites = await _context.Favorites.CountAsync();
         var totalReservations = await _context.Reservations.CountAsync();
         var totalRevenue = await _context.Reservations
-            .Where(r => r.Status == "Completed")
-            .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
+            .SumAsync(r => 
+                (r.Status == "Completed" || r.Status == "Confirmed") ? r.TotalPrice : 
+                (r.Status == "Cancelled") ? r.RetainedAmount : 0
+            );
         var totalHotels = await _context.Hotels.CountAsync();
         var totalComments = await _context.Comments.CountAsync();
 

@@ -40,6 +40,12 @@ public class Reservation
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal RefundAmount { get; set; } = 0;
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal RetainedAmount { get; set; } = 0;
+
     [MaxLength(ValidationConstants.Reservation.StatusMaxLength)]
     public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
 

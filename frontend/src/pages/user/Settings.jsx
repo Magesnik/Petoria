@@ -305,6 +305,12 @@ const Settings = () => {
                                     required
                                 />
                             </div>
+                            <div className="form-group total-spent-display">
+                                <label>{t('totalSpent') || 'Total Spent'}</label>
+                                <div className="total-spent-value">
+                                    {(user?.totalSpent || 0).toFixed(2)} {currency || 'BGN'}
+                                </div>
+                            </div>
                             {message && <div className="success-message">{message}</div>}
                             <button type="submit" className="btn btn-primary">
                                 {t('saveChanges')}

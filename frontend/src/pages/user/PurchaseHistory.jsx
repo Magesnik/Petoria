@@ -16,6 +16,8 @@ const PurchaseHistory = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const [activeTab, setActiveTab] = useState('active'); // 'active', 'past', 'cancelled'
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
@@ -89,10 +91,29 @@ const PurchaseHistory = () => {
         });
     };
 
+    const now = new Date();
+    const activeReservations = reservations.filter(r =>
+        (r.status === 'Confirmed' || r.status === 'Pending') && new Date(r.checkOutDate) >= now
+    );
+    const pastReservations = reservations.filter(r =>
+        r.status === 'Completed' || (r.status === 'Confirmed' && new Date(r.checkOutDate) < now)
+    );
+    const cancelledReservations = reservations.filter(r =>
+        r.status === 'Cancelled'
+    );
+
+    const getDisplayedReservations = () => {
+        if (activeTab === 'active') return activeReservations;
+        if (activeTab === 'past') return pastReservations;
+        if (activeTab === 'cancelled') return cancelledReservations;
+        return [];
+    };
+
+    const displayedReservations = getDisplayedReservations();
+
     if (loading) {
         return (
             <>
-
                 <div className="purchase-history-page">
                     <div className="loading-state">
                         <div className="spinner"></div>
@@ -105,7 +126,6 @@ const PurchaseHistory = () => {
 
     return (
         <>
-
             <div className="purchase-history-page">
                 <div className="purchase-hero">
                     <h1>📋 {t('myReservations')}</h1>
@@ -113,9 +133,30 @@ const PurchaseHistory = () => {
                 </div>
 
                 <div className="purchase-container">
+                    <div className="purchase-tabs">
+                        <button
+                            className={`purchase-tab ${activeTab === 'active' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('active')}
+                        >
+                            {t('activeReservations') || 'Предстоящи'} ({activeReservations.length})
+                        </button>
+                        <button
+                            className={`purchase-tab ${activeTab === 'past' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('past')}
+                        >
+                            {t('pastReservations') || 'Минали'} ({pastReservations.length})
+                        </button>
+                        <button
+                            className={`purchase-tab ${activeTab === 'cancelled' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('cancelled')}
+                        >
+                            {t('cancelledReservations') || 'Отменени'} ({cancelledReservations.length})
+                        </button>
+                    </div>
+
                     {error && <div className="error-message">{error}</div>}
 
-                    {reservations.length === 0 ? (
+                    {displayedReservations.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon">🏨</div>
                             <h2>{t('noReservations')}</h2>
@@ -126,7 +167,7 @@ const PurchaseHistory = () => {
                         </div>
                     ) : (
                         <div className="reservations-list">
-                            {reservations.map((reservation) => (
+                            {displayedReservations.map((reservation) => (
                                 <div key={reservation.id} className={`reservation-card ${getStatusClass(reservation.status)}`}>
                                     <div className="reservation-image">
                                         <img
@@ -176,7 +217,7 @@ const PurchaseHistory = () => {
                                             <Link to={`/hotel/${reservation.hotelId}`} className="btn btn-view">
                                                 {t('viewHotel')}
                                             </Link>
-                                            {reservation.status?.toLowerCase() === 'confirmed' && (
+                                            {reservation.status?.toLowerCase() === 'confirmed' && new Date(reservation.checkInDate).setHours(23, 59, 59, 999) >= now.getTime() && (
                                                 <button
                                                     className="btn btn-cancel"
                                                     onClick={() => handleCancelReservation(reservation.id)}

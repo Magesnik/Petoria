@@ -14,5 +14,6 @@ public class ProfileResponseDto
     public string? Theme { get; set; }
     public string? Currency { get; set; }
     public string? Language { get; set; }
+    public decimal TotalSpent { get; set; }
     public List<string> Roles { get; set; } = new();
 }

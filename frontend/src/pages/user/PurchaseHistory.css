@@ -116,6 +116,54 @@
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
+/* Tabs */
+.purchase-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.purchase-tab {
+    padding: 12px 24px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.purchase-tab:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.purchase-tab.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] .purchase-tab {
+    background: rgba(0, 0, 0, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme='dark'] .purchase-tab:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .purchase-tab.active {
+    background: rgba(2, 12, 27, 0.95);
+    color: var(--text-light);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Reservations List */
 .reservations-list {
     display: flex;

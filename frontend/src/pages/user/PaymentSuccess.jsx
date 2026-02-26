@@ -25,12 +25,16 @@ const PaymentSuccess = () => {
                 }
 
                 const items = JSON.parse(raw);
+
+                // Clear storage immediately to prevent duplicate runs in StrictMode
+                sessionStorage.removeItem('pendingCartItems');
+                sessionStorage.removeItem('appliedPromoCode');
+
                 await api.post('/reservations/confirm-cart', {
                     items,
                     promoCode: appliedPromo || null
                 });
-                sessionStorage.removeItem('pendingCartItems');
-                sessionStorage.removeItem('appliedPromoCode');
+
                 await clearCart();
                 setStatus('success');
                 setTimeout(() => navigate('/purchase-history'), 3500);

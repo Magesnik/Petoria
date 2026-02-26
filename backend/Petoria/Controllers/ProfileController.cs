@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Petoria.Core.DTOs.Profile;
 using Petoria.Infrastructure.Data.Entities;
 
@@ -40,7 +41,18 @@ public class ProfileController : ControllerBase
 
         // Map Entity → Response DTO
         var roles = await _userManager.GetRolesAsync(user);
+
+        // Access database context directly or via service to get total spent
+        // We'll calculate it inline since we don't have a specific service for this injected in this action.
+        var dbContext = HttpContext.RequestServices.GetRequiredService<Petoria.Infrastructure.Data.ApplicationDbContext>();
         
+        var totalSpent = await dbContext.Reservations
+            .Where(r => r.UserId == userId)
+            .SumAsync(r => 
+                (r.Status == "Completed" || r.Status == "Confirmed") ? r.TotalPrice : 
+                (r.Status == "Cancelled") ? r.RetainedAmount : 0
+            );
+
         return Ok(new ProfileResponseDto
         {
             Id = user.Id,
@@ -51,6 +63,7 @@ public class ProfileController : ControllerBase
             Theme = user.Theme,
             Currency = user.Currency,
             Language = user.Language,
+            TotalSpent = totalSpent,
             Roles = roles.ToList()
         });
     }
