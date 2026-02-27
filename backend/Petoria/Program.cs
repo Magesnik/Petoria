@@ -112,6 +112,12 @@ using (var scope = app.Services.CreateScope())
     await authService.InitializeRolesAndAdminAsync();
 }
 
+// Seed demo data (only runs when the database is empty)
+using (var scope = app.Services.CreateScope())
+{
+    await Petoria.Infrastructure.Data.DatabaseSeeder.SeedAsync(scope.ServiceProvider);
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
