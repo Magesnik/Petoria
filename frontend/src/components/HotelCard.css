@@ -377,9 +377,6 @@
 
 /* Discount Badge */
 .discount-badge-card {
-    position: absolute;
-    top: 12px;
-    right: 12px;
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
     padding: 6px 12px;
@@ -387,8 +384,8 @@
     font-size: 14px;
     font-weight: 700;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    z-index: 3;
     animation: pulse 2s ease-in-out infinite;
+    align-self: flex-end;
 }
 
 @keyframes pulse {

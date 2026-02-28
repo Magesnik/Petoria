@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petoria.Infrastructure", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petoria.Constants", "Petoria.Constants\Petoria.Constants.csproj", "{4FB14FA3-9D8D-4A52-96B9-2E671F4B15C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Petoria.Tests", "Petoria.Tests\Petoria.Tests.csproj", "{4DDF3590-76A3-48FE-8F24-90FA26772D5B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{4FB14FA3-9D8D-4A52-96B9-2E671F4B15C8}.Release|x64.Build.0 = Release|Any CPU
 		{4FB14FA3-9D8D-4A52-96B9-2E671F4B15C8}.Release|x86.ActiveCfg = Release|Any CPU
 		{4FB14FA3-9D8D-4A52-96B9-2E671F4B15C8}.Release|x86.Build.0 = Release|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Debug|x64.Build.0 = Debug|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Debug|x86.Build.0 = Debug|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Release|x64.ActiveCfg = Release|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Release|x64.Build.0 = Release|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Release|x86.ActiveCfg = Release|Any CPU
+		{4DDF3590-76A3-48FE-8F24-90FA26772D5B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

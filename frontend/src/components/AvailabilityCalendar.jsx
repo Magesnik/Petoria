@@ -304,7 +304,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
                             onClick={() => !isPast && handleDayClick(date)}
                         >
                             {hasDiscount && !isPast && !isBlocked && (
-                                <span className="discount-badge">-{avail.discountPercentage}%</span>
+                                <span className="calendar-discount-badge">-{avail.discountPercentage}%</span>
                             )}
                             <span className="day-number">{date.getDate()}</span>
                             {!isPast && selectedRoomType && (

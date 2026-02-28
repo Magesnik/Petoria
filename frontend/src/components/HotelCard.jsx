@@ -5,9 +5,6 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useLanguage } from '../context/LanguageContext';
 import './HotelCard.css';
 
-// Add these styles to HotelCard.css (simulated via instruction, user should check CSS file or I should edit it directly if I had read it. Since I didn't read it, I will assume it needs these classes. Wait, I should read it first or just overwrite/append? I'll append to the component file if using styled-components, but this is CSS import. I should edit the CSS file. I haven't read HotelCard.css yet. Let me read it first to be safe, but I'll skip that to speed up and assume standard modification. actually, I cannot edit styles in JSX. I must edit the CSS file. I will list_dir to find it.)
-// Actually, I can just use inline styles or existing classes, but better to edit CSS.
-// I will just queue the CSS edit after this.
 
 const HotelCard = ({ hotel }) => {
     const navigate = useNavigate();
@@ -39,12 +36,12 @@ const HotelCard = ({ hotel }) => {
                 >
                     {isFavorite(hotel.id) ? '❤️' : '🤍'}
                 </button>
-                {hotel.hasDiscount && hotel.discountPercentage && (
-                    <div className="discount-badge-card">
-                        -{hotel.discountPercentage}%
-                    </div>
-                )}
                 <div className="hotel-badges">
+                    {hotel.hasDiscount && hotel.discountPercentage && (
+                        <div className="discount-badge-card">
+                            -{hotel.discountPercentage}%
+                        </div>
+                    )}
                     <div className="star-rating-badge">
                         {Array(hotel.starRating || 0).fill('★').join('')}
                     </div>
