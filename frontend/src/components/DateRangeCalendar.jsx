@@ -9,7 +9,7 @@ const DateRangeCalendar = ({
     onDateChange,
     availability = []
 }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectionMode, setSelectionMode] = useState('checkIn'); // 'checkIn' or 'checkOut'
 
@@ -107,7 +107,8 @@ const DateRangeCalendar = ({
         // Parse as local date to avoid UTC shifting
         const [year, month, day] = dateStr.split('-').map(Number);
         const date = new Date(year, month - 1, day);
-        return date.toLocaleDateString('bg-BG', { day: 'numeric', month: 'short' });
+        const locale = language === 'bg' ? 'bg-BG' : 'en-US';
+        return date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
     };
 
     return (
@@ -190,7 +191,7 @@ const DateRangeCalendar = ({
                             <span className="day-number">{date.getDate()}</span>
                             {selectedRoomType && !isPast && !isExplicitlyBlocked && (
                                 <span className={`availability-indicator ${isZeroAvailable ? 'full' : ''}`}>
-                                    {!isZeroAvailable ? `${availableCount}` : 'Заето'}
+                                    {!isZeroAvailable ? `${availableCount}` : t('legendBlocked')}
                                 </span>
                             )}
                         </div>
@@ -223,8 +224,8 @@ const DateRangeCalendar = ({
                 {!checkInDate
                     ? `👆 ${t('selectCheckInDate')}`
                     : !checkOutDate
-                        ? '👆 Изберете дата на напускане'
-                        : '✓ Датите са избрани'
+                        ? `👆 ${t('selectCheckOutDate')}`
+                        : `✓ ${t('datesSelected')}`
                 }
             </p>
         </div>

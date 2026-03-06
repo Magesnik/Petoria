@@ -9,23 +9,23 @@ import HotelMap from '../../components/HotelMap';
 import './Hotels.css';
 
 const SORT_OPTIONS = [
-    { value: 'rating_desc', label: '⭐ Рейтинг висок→нисък' },
-    { value: 'rating_asc', label: '⭐ Рейтинг нисък→висок' },
-    { value: 'name_asc', label: '🔤 Азбучно А→Я' },
-    { value: 'name_desc', label: '🔤 Азбучно Я→А' },
-    { value: 'price_asc', label: '💰 Цена ниска→висока' },
-    { value: 'price_desc', label: '💰 Цена висока→ниска' },
-    { value: 'stars_desc', label: '🌟 Звезди 5→1' },
-    { value: 'stars_asc', label: '🌟 Звезди 1→5' },
-    { value: 'amenities_desc', label: '🛎️ Удобства повече→малко' },
-    { value: 'amenities_asc', label: '🛎️ Удобства малко→повече' },
-    { value: 'availability_desc', label: '🛏️ Наличност много→малко' },
-    { value: 'availability_asc', label: '🛏️ Наличност малко→много' },
-    { value: 'discount_desc', label: '🏷️ Отстъпка висока→ниска' },
-    { value: 'reviews_desc', label: '💬 Ревюта много→малко' },
-    { value: 'reviews_asc', label: '💬 Ревюта малко→повече' },
-    { value: 'recent_reviews_desc', label: '🕐 Скорошни ревюта (1 месец)' },
-    { value: 'best_value', label: '🏆 Best Value (цена + рейтинг)' },
+    { value: 'rating_desc', labelKey: 'sortRatingDesc' },
+    { value: 'rating_asc', labelKey: 'sortRatingAsc' },
+    { value: 'name_asc', labelKey: 'sortNameAsc' },
+    { value: 'name_desc', labelKey: 'sortNameDesc' },
+    { value: 'price_asc', labelKey: 'sortPriceAsc' },
+    { value: 'price_desc', labelKey: 'sortPriceDesc' },
+    { value: 'stars_desc', labelKey: 'sortStarsDesc' },
+    { value: 'stars_asc', labelKey: 'sortStarsAsc' },
+    { value: 'amenities_desc', labelKey: 'sortAmenitiesDesc' },
+    { value: 'amenities_asc', labelKey: 'sortAmenitiesAsc' },
+    { value: 'availability_desc', labelKey: 'sortAvailabilityDesc' },
+    { value: 'availability_asc', labelKey: 'sortAvailabilityAsc' },
+    { value: 'discount_desc', labelKey: 'sortDiscountDesc' },
+    { value: 'reviews_desc', labelKey: 'sortReviewsDesc' },
+    { value: 'reviews_asc', labelKey: 'sortReviewsAsc' },
+    { value: 'recent_reviews_desc', labelKey: 'sortRecentReviewsDesc' },
+    { value: 'best_value', labelKey: 'sortBestValue' },
 ];
 
 function sortHotels(hotels, sortBy) {
@@ -325,14 +325,14 @@ const Hotels = () => {
                         <div className="sort-and-view">
                             {view === 'grid' && (
                                 <div className="sort-toolbar">
-                                    <label className="sort-label">🔽 Сортирай:</label>
+                                    <label className="sort-label">{t('sortByWithIcon')}</label>
                                     <select
                                         className="sort-select"
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
                                     >
                                         {SORT_OPTIONS.map(opt => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                                         ))}
                                     </select>
                                 </div>

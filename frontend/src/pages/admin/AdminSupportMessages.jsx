@@ -78,7 +78,7 @@ const AdminSupportMessages = () => {
             <div className="admin-container">
                 <div className="page-header">
                     <button className="btn-back" onClick={() => navigate('/admin')}>
-                        тЖР {t('backToDashboard')}
+                        ← {t('backToDashboard')}
                     </button>
                     <h1>{t('supportMessagesTitle')}</h1>
                 </div>
@@ -151,7 +151,7 @@ const AdminSupportMessages = () => {
                                                 className="btn-reply"
                                                 onClick={() => setReplyingTo(msg.id)}
                                             >
-                                                тЖйя╕П {t('reply')}
+                                                ↩ {t('reply')}
                                             </button>
                                         )}
                                     </div>

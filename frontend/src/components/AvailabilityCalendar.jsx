@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext';
 import './AvailabilityCalendar.css';
 
 const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false, onDateSelect }) => {
+    const { t, language } = useLanguage();
     const safeRoomTypes = Array.isArray(roomTypes) ? roomTypes : [];
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [availability, setAvailability] = useState([]);
@@ -140,15 +142,15 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             }
 
             setSuccess(discountPercentage > 0
-                ? 'Наличността и отстъпката са обновени успешно!'
-                : 'Наличността е обновена успешно!');
+                ? t('availabilityAndDiscountUpdated')
+                : t('availabilityUpdated'));
             setShowBulkEdit(false);
             setSelectionStart(null);
             setSelectionEnd(null);
             setDiscountPercentage(0);
             fetchAvailability();
         } catch (err) {
-            setError(err.message || 'Грешка при обновяване');
+            setError(err.message || t('errorUpdating'));
         }
     };
 
@@ -169,13 +171,13 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
                 }
             );
 
-            setSuccess(block ? 'Датите са блокирани!' : 'Датите са отблокирани!');
+            setSuccess(block ? t('datesBlocked') : t('datesUnblocked'));
             setShowBulkEdit(false);
             setSelectionStart(null);
             setSelectionEnd(null);
             fetchAvailability();
         } catch {
-            setError('Грешка при блокиране');
+            setError(t('errorBlocking'));
         }
     };
 
@@ -208,17 +210,20 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
     };
 
     const formatMonth = (date) => {
-        const months = ['Януари', 'Февруари', 'Март', 'Април', 'Май', 'Юни',
-            'Юли', 'Август', 'Септември', 'Октомври', 'Ноември', 'Декември'];
+        const months = [
+            t('monthJan'), t('monthFeb'), t('monthMar'), t('monthApr'),
+            t('monthMay'), t('monthJun'), t('monthJul'), t('monthAug'),
+            t('monthSep'), t('monthOct'), t('monthNov'), t('monthDec')
+        ];
         return `${months[date.getMonth()]} ${date.getFullYear()}`;
     };
 
     if (safeRoomTypes.length === 0) {
         return (
             <div className="availability-calendar empty">
-                <h3>📅 Календар за наличност</h3>
+                <h3>📅 {t('availabilityCalendar')}</h3>
                 <p className="empty-message">
-                    Моля, първо добавете типове стаи от таба "Стаи".
+                    {t('addRoomTypesFirst')}
                 </p>
             </div>
         );
@@ -229,14 +234,14 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
 
     return (
         <div className="availability-calendar">
-            <h3>📅 Календар за наличност</h3>
+            <h3>📅 {t('availabilityCalendar')}</h3>
 
             {error && <div className="calendar-error">{error}</div>}
             {success && <div className="calendar-success">{success}</div>}
 
             {/* Room Type Selector */}
             <div className="room-type-selector">
-                <label>Тип стая:</label>
+                <label>{t('roomType')}:</label>
                 <div className="room-type-buttons">
                     {safeRoomTypes.map(room => (
                         <button
@@ -250,7 +255,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
                             }}
                         >
                             {room.name}
-                            <span className="room-count">({room.totalRooms} стаи)</span>
+                            <span className="room-count">({room.totalRooms} {t('rooms')})</span>
                         </button>
                     ))}
                 </div>
@@ -265,13 +270,13 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
 
             {/* Calendar Grid */}
             <div className="calendar-grid">
-                <div className="day-header">Нд</div>
-                <div className="day-header">Пн</div>
-                <div className="day-header">Вт</div>
-                <div className="day-header">Ср</div>
-                <div className="day-header">Чт</div>
-                <div className="day-header">Пт</div>
-                <div className="day-header">Сб</div>
+                <div className="day-header">{t('weekdaySun')}</div>
+                <div className="day-header">{t('weekdayMon')}</div>
+                <div className="day-header">{t('weekdayTue')}</div>
+                <div className="day-header">{t('weekdayWed')}</div>
+                <div className="day-header">{t('weekdayThu')}</div>
+                <div className="day-header">{t('weekdayFri')}</div>
+                <div className="day-header">{t('weekdaySat')}</div>
 
                 {getDaysInMonth().map((date, index) => {
                     if (!date) {
@@ -317,19 +322,19 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             <div className="calendar-legend">
                 <div className="legend-item">
                     <span className="legend-color available"></span>
-                    <span>Налични стаи</span>
+                    <span>{t('availableRoomsCount')}</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-color discounted"></span>
-                    <span>С отстъпка</span>
+                    <span>{t('withDiscount')}</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-color full"></span>
-                    <span>Пълно</span>
+                    <span>{t('full')}</span>
                 </div>
                 <div className="legend-item">
                     <span className="legend-color blocked"></span>
-                    <span>Блокирано</span>
+                    <span>{t('blocked')}</span>
                 </div>
             </div>
 
@@ -337,12 +342,12 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             {showBulkEdit && selectionStart && selectionEnd && (
                 <div className="bulk-edit-panel">
                     <h4>
-                        Редактиране: {selectionStart.toLocaleDateString('bg-BG')} - {selectionEnd.toLocaleDateString('bg-BG')}
+                        {t('editing')}: {selectionStart.toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')} - {selectionEnd.toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
                     </h4>
 
                     <div className="bulk-edit-form">
                         <div className="form-group">
-                            <label>Брой налични стаи:</label>
+                            <label>{t('numberOfAvailableRooms')}</label>
                             <div className="count-selector">
                                 <button
                                     onClick={() => setBulkEditCount(Math.max(0, bulkEditCount - 1))}
@@ -364,11 +369,11 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
                                     +
                                 </button>
                             </div>
-                            <small>Максимум: {selectedRoomType?.totalRooms} стаи</small>
+                            <small>{t('maximum')}: {selectedRoomType?.totalRooms} {t('rooms')}</small>
                         </div>
 
                         <div className="form-group">
-                            <label>Отстъпка (%):</label>
+                            <label>{t('discountPercentage')}:</label>
                             <div className="count-selector">
                                 <button
                                     onClick={() => setDiscountPercentage(Math.max(0, discountPercentage - 5))}
@@ -390,25 +395,25 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
                                     +
                                 </button>
                             </div>
-                            <small>0% = без отстъпка, максимум 99%</small>
+                            <small>{t('discountHint')}</small>
                         </div>
 
                         <div className="bulk-actions">
                             <button className="btn-update" onClick={handleBulkUpdate}>
-                                ✓ Запази
+                                ✓ {t('save')}
                             </button>
                             <button className="btn-block" onClick={() => handleBlockDates(true)}>
-                                🚫 Блокирай
+                                🚫 {t('block')}
                             </button>
                             <button className="btn-unblock" onClick={() => handleBlockDates(false)}>
-                                ✓ Отблокирай
+                                ✓ {t('unblock')}
                             </button>
                             <button className="btn-cancel" onClick={() => {
                                 setShowBulkEdit(false);
                                 setSelectionStart(null);
                                 setSelectionEnd(null);
                             }}>
-                                Отказ
+                                {t('cancel')}
                             </button>
                         </div>
                     </div>
@@ -416,7 +421,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             )}
 
             <div className="calendar-instructions">
-                <p>💡 Кликнете върху две дати, за да изберете период и да зададете наличност.</p>
+                <p>💡 {t('calendarClickHint')}</p>
             </div>
         </div>
     );

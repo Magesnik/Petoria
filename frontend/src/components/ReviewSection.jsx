@@ -10,7 +10,7 @@ const ReviewSection = ({ hotelId }) => {
     const [userReview, setUserReview] = useState({ rating: 5, reviewText: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { user, isAdmin, isSuperAdmin } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [averageRating, setAverageRating] = useState(0);
 
     useEffect(() => {
@@ -70,7 +70,8 @@ const ReviewSection = ({ hotelId }) => {
     };
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('bg-BG', {
+        const locale = language === 'bg' ? 'bg-BG' : 'en-US';
+        return new Date(dateString).toLocaleDateString(locale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric'

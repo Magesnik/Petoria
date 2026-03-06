@@ -10,7 +10,7 @@ import './Deals.css';
 const Deals = () => {
     const navigate = useNavigate();
     const { convertAndFormat } = useCurrency();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [activeTab, setActiveTab] = useState('discounted');
     const [deals, setDeals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ const Deals = () => {
                 {loading ? (
                     <div className="deals-loading">
                         <div className="spinner"></div>
-                        <p>Зареждане на оферти...</p>
+                        <p>{t('loadingOffers')}</p>
                     </div>
                 ) : error ? (
                     <div className="deals-error">
@@ -96,7 +96,7 @@ const Deals = () => {
                     </div>
                 ) : deals.length === 0 ? (
                     <div className="deals-empty">
-                        <p>Няма налични оферти в момента</p>
+                        <p>{t('noOffersAvailable')}</p>
                     </div>
                 ) : (
                     <div className="deals-grid">
@@ -157,19 +157,19 @@ const Deals = () => {
                                                 {deal.availableRoomsCount === 1 ? (
                                                     <span className="critical">🔥 {t('lastRoom')}</span>
                                                 ) : (
-                                                    <span>⚠️ Само {deal.availableRoomsCount} стаи</span>
+                                                    <span>⚠️ {t('onlyFewRoomsLeft').replace('{{count}}', deal.availableRoomsCount)}</span>
                                                 )}
                                             </div>
 
                                             {/* Check-in date */}
                                             <p className="checkin-date">
-                                                📅 {t('checkInColon')} {new Date(deal.earliestAvailableDate).toLocaleDateString('bg-BG')}
+                                                📅 {t('checkInColon')} {new Date(deal.earliestAvailableDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
                                             </p>
 
                                             {/* 5% discount note if automatic */}
                                             {deal.discountPercentage === 5 && (
                                                 <p className="auto-discount-note">
-                                                    💡 Специална 5% отстъпка за първите 2 нощувки!
+                                                    💡 {t('specialDiscountNote')}
                                                 </p>
                                             )}
 

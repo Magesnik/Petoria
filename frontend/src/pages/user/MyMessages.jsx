@@ -8,7 +8,7 @@ import './MyMessages.css';
 
 const MyMessages = () => {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
 
     const [messages, setMessages] = useState([]);
@@ -115,7 +115,8 @@ const MyMessages = () => {
     };
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString();
+        const locale = language === 'bg' ? 'bg-BG' : 'en-US';
+        return new Date(dateString).toLocaleString(locale);
     };
 
     if (loading) {

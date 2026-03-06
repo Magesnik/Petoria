@@ -122,10 +122,10 @@ const HotelFilters = ({
 
             {/* Dates & Guests Filter */}
             <div className="filter-section">
-                <label className="filter-label">Настаняване и Гости</label>
+                <label className="filter-label">{t('accommodationAndGuests')}</label>
 
                 <div style={{ marginBottom: '10px' }}>
-                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>Дата на настаняване</label>
+                    <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>{t('checkInDate')}</label>
                     <input
                         type="date"
                         className="filter-search-input"
@@ -137,7 +137,7 @@ const HotelFilters = ({
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                     <div style={{ flex: 1 }}>
-                        <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>Нощувки</label>
+                        <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>{t('nightsLabel')}</label>
                         <input
                             type="number"
                             className="filter-search-input"
@@ -147,7 +147,7 @@ const HotelFilters = ({
                         />
                     </div>
                     <div style={{ flex: 1 }}>
-                        <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>Гости</label>
+                        <label style={{ fontSize: '0.8rem', color: '#666', display: 'block', marginBottom: '4px' }}>{t('guestsLabel')}</label>
                         <input
                             type="number"
                             className="filter-search-input"

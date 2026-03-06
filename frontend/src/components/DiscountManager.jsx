@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext';
 import './DiscountManager.css';
 
 const DiscountManager = ({ hotelId, roomTypes }) => {
+    const { t, language } = useLanguage();
     const [discounts, setDiscounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -26,7 +28,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
             const data = await api.get(`/hotels/${hotelId}/discounts`);
             setDiscounts(data);
         } catch (err) {
-            setError('Грешка при зареждане на отстъпки');
+            setError(t('errorLoadingDiscounts'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -40,17 +42,17 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
 
         // Validation
         if (!formData.roomTypeId || !formData.startDate || !formData.endDate || !formData.discountPercentage) {
-            setError('Всички полета са задължителни');
+            setError(t('allFieldsRequired'));
             return;
         }
 
         if (new Date(formData.endDate) <= new Date(formData.startDate)) {
-            setError('Крайната дата трябва да е след началната');
+            setError(t('endDateAfterStartDate'));
             return;
         }
 
         if (formData.discountPercentage < 1 || formData.discountPercentage > 99) {
-            setError('Отстъпката трябва да е между 1% и 99%');
+            setError(t('discountRangeError'));
             return;
         }
 
@@ -61,11 +63,11 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                 await api.post(`/hotels/${hotelId}/discounts`, formData);
             }
 
-            setSuccess(editingId ? 'Отстъпката е актуализирана!' : 'Отстъпката е създадена!');
+            setSuccess(editingId ? t('discountUpdated') : t('discountCreated'));
             resetForm();
             fetchDiscounts();
         } catch (err) {
-            setError(err.message || 'Грешка при запазване');
+            setError(err.message || t('errorSaving'));
             console.error(err);
         }
     };
@@ -82,17 +84,17 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Сигурни ли сте, че искате да изтриете тази отстъпка?')) {
+        if (!window.confirm(t('confirmDeleteDiscount'))) {
             return;
         }
 
         try {
             await api.delete(`/discounts/${id}`);
 
-            setSuccess('Отстъпката е изтрита!');
+            setSuccess(t('discountDeleted'));
             fetchDiscounts();
         } catch (err) {
-            setError('Грешка при изтриване');
+            setError(t('errorDeletingDiscount'));
             console.error(err);
         }
     };
@@ -120,7 +122,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
     };
 
     if (loading) {
-        return <div className="discount-loading">Зареждане...</div>;
+        return <div className="discount-loading">{t('loading')}</div>;
     }
 
     return (
@@ -129,12 +131,12 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
             {success && <div className="message success">{success}</div>}
 
             <div className="discount-header">
-                <h3>💰 Управление на отстъпки</h3>
+                <h3>💰 {t('manageDiscounts')}</h3>
                 <button
                     className="btn-add-discount"
                     onClick={() => setShowForm(!showForm)}
                 >
-                    {showForm ? '✕ Отказ' : '+ Добави отстъпка'}
+                    {showForm ? `✕ ${t('cancel')}` : `+ ${t('addDiscount')}`}
                 </button>
             </div>
 
@@ -144,30 +146,30 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                     <form onSubmit={handleSubmit} className="discount-form">
                         <div className="form-row">
                             <div className="form-group">
-                                <label>Тип стая</label>
+                                <label>{t('roomType')}</label>
                                 <select
                                     value={formData.roomTypeId}
                                     onChange={(e) => setFormData({ ...formData, roomTypeId: e.target.value })}
                                     required
                                 >
-                                    <option value="">Избери стая...</option>
+                                    <option value="">{t('chooseRoom')}</option>
                                     {roomTypes.map(rt => (
                                         <option key={rt.id} value={rt.id}>
-                                            {rt.name} - {rt.pricePerNight} лв/нощ
+                                            {rt.name} - {rt.pricePerNight} {t('perNight')}
                                         </option>
                                     ))}
                                 </select>
                             </div>
 
                             <div className="form-group">
-                                <label>Отстъпка (%)</label>
+                                <label>{t('discountPercentage')}</label>
                                 <input
                                     type="number"
                                     min="1"
                                     max="99"
                                     value={formData.discountPercentage}
                                     onChange={(e) => setFormData({ ...formData, discountPercentage: e.target.value })}
-                                    placeholder="напр. 25"
+                                    placeholder={t('discountExample')}
                                     required
                                 />
                             </div>
@@ -175,7 +177,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
 
                         <div className="form-row">
                             <div className="form-group">
-                                <label>Начална дата</label>
+                                <label>{t('startDate')}</label>
                                 <input
                                     type="date"
                                     value={formData.startDate}
@@ -185,7 +187,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                             </div>
 
                             <div className="form-group">
-                                <label>Крайна дата</label>
+                                <label>{t('endDate')}</label>
                                 <input
                                     type="date"
                                     value={formData.endDate}
@@ -197,10 +199,10 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
 
                         <div className="form-actions">
                             <button type="button" className="btn-cancel" onClick={resetForm}>
-                                Отказ
+                                {t('cancel')}
                             </button>
                             <button type="submit" className="btn-save">
-                                💾 {editingId ? 'Актуализирай' : 'Създай'}
+                                💾 {editingId ? t('updateProfile') : t('create')}
                             </button>
                         </div>
                     </form>
@@ -211,8 +213,8 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
             <div className="discounts-list">
                 {discounts.length === 0 ? (
                     <div className="no-discounts">
-                        <p>📭 Няма създадени отстъпки</p>
-                        <p className="hint">Използвайте бутона по-горе за да добавите отстъпка</p>
+                        <p>📭 {t('noDiscounts')}</p>
+                        <p className="hint">{t('useButtonToAddDiscount')}</p>
                     </div>
                 ) : (
                     <div className="discounts-grid">
@@ -228,10 +230,10 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                                         -{discount.discountPercentage}%
                                     </div>
                                     <div className="discount-status">
-                                        {isDiscountActive(discount) && <span className="status-tag active">⚡ Активна</span>}
-                                        {isDiscountExpired(discount) && <span className="status-tag expired">⏱️ Изтекла</span>}
+                                        {isDiscountActive(discount) && <span className="status-tag active">⚡ {t('activeTag')}</span>}
+                                        {isDiscountExpired(discount) && <span className="status-tag expired">⏱️ {t('expiredTag')}</span>}
                                         {!isDiscountActive(discount) && !isDiscountExpired(discount) && (
-                                            <span className="status-tag upcoming">📅 Предстояща</span>
+                                            <span className="status-tag upcoming">📅 {t('upcomingTag')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -240,10 +242,10 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                                     <h4>{discount.roomTypeName}</h4>
                                     <div className="discount-dates">
                                         <p>
-                                            <strong>От:</strong> {new Date(discount.startDate).toLocaleDateString('bg-BG')}
+                                            <strong>{t('from')}:</strong> {new Date(discount.startDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
                                         </p>
                                         <p>
-                                            <strong>До:</strong> {new Date(discount.endDate).toLocaleDateString('bg-BG')}
+                                            <strong>{t('to')}:</strong> {new Date(discount.endDate).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
                                         </p>
                                     </div>
                                 </div>
@@ -252,14 +254,14 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
                                     <button
                                         className="btn-edit-small"
                                         onClick={() => handleEdit(discount)}
-                                        title="Редактирай"
+                                        title={t('edit')}
                                     >
                                         ✏️
                                     </button>
                                     <button
                                         className="btn-delete-small"
                                         onClick={() => handleDelete(discount.id)}
-                                        title="Изтрий"
+                                        title={t('delete')}
                                     >
                                         🗑️
                                     </button>
