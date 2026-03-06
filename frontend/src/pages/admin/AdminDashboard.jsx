@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { api } from '../../utils/api';
+import { api, getAssetUrl } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -336,7 +336,7 @@ const AdminDashboard = () => {
                                         >
                                             <div className="user-avatar">
                                                 {u.avatarUrl ? (
-                                                    <img src={u.avatarUrl.startsWith('http') ? u.avatarUrl : `http://localhost:5150${u.avatarUrl}`} alt={u.firstName} />
+                                                    <img src={getAssetUrl(u.avatarUrl)} alt={u.firstName} />
                                                 ) : (
                                                     <span>{u.firstName?.[0] || u.email?.[0] || '?'}</span>
                                                 )}
@@ -457,7 +457,7 @@ const AdminDashboard = () => {
                             <div className="user-profile">
                                 <div className="profile-avatar">
                                     {userDetails.avatarUrl ? (
-                                        <img src={userDetails.avatarUrl.startsWith('http') ? userDetails.avatarUrl : `http://localhost:5150${userDetails.avatarUrl}`} alt={userDetails.firstName} />
+                                        <img src={getAssetUrl(userDetails.avatarUrl)} alt={userDetails.firstName} />
                                     ) : (
                                         <span>{userDetails.firstName?.[0] || userDetails.email?.[0] || '?'}</span>
                                     )}

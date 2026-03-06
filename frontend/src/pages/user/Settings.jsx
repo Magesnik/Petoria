@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef } from 'react';
-import { api } from '../../utils/api';
+import { api, getAssetUrl } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -99,7 +99,7 @@ const Settings = () => {
 
             const data = await api.post('/profile/avatar', formData);
 
-            const fullAvatarUrl = data.avatarUrl.startsWith('http') ? data.avatarUrl : `http://localhost:5150${data.avatarUrl}`;
+            const fullAvatarUrl = getAssetUrl(data.avatarUrl);
             setAvatarPreview(fullAvatarUrl);
             // Update user in context
             login({ ...user, avatarUrl: fullAvatarUrl });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
+import { api, getAssetUrl } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import './ReviewSection.css';
@@ -142,10 +142,7 @@ const ReviewSection = ({ hotelId }) => {
                                     <div className="reviewer-avatar">
                                         {review.user.avatarUrl ? (
                                             <img
-                                                src={review.user.avatarUrl.startsWith('http')
-                                                    ? review.user.avatarUrl
-                                                    : `http://localhost:5150${review.user.avatarUrl}`
-                                                }
+                                                src={getAssetUrl(review.user.avatarUrl)}
                                                 alt={review.user.firstName}
                                             />
                                         ) : (

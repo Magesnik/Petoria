@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { api } from '../../utils/api';
+import { api, getAssetUrl } from '../../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useLanguage } from '../../context/LanguageContext';
@@ -31,9 +31,7 @@ const Register = () => {
             const data = await api.post('/auth/register', formData);
 
             // Store token with avatar URL
-            const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
-                ? `http://localhost:5150${data.avatarUrl}`
-                : data.avatarUrl;
+            const avatarUrl = getAssetUrl(data.avatarUrl);
 
             login({
                 id: data.id,
@@ -56,9 +54,7 @@ const Register = () => {
             const data = await api.post('/auth/google-login', { googleToken: credentialResponse.credential });
 
             // Store token with avatar URL
-            const avatarUrl = data.avatarUrl && data.avatarUrl.startsWith('/uploads/')
-                ? `http://localhost:5150${data.avatarUrl}`
-                : data.avatarUrl;
+            const avatarUrl = getAssetUrl(data.avatarUrl);
 
             login({
                 id: data.id,

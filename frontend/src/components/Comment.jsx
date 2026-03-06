@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { api } from '../utils/api';
+import { api, getAssetUrl } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import CommentForm from './CommentForm';
 import './Comment.css';
@@ -87,7 +87,7 @@ const Comment = ({ comment, hotelId, onDeleted, onRatingUpdated }) => {
                     <div className="author-avatar">
                         {comment.avatarUrl ? (
                             <img
-                                src={comment.avatarUrl.startsWith('http') ? comment.avatarUrl : `http://localhost:5150${comment.avatarUrl}`}
+                                src={getAssetUrl(comment.avatarUrl)}
                                 alt={comment.firstName}
                             />
                         ) : (

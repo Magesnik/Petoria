@@ -1,6 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:5150/api';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5150') + '/api';
+
+/**
+ * Returns a full URL for a static asset (e.g. uploaded avatar image).
+ * Handles both absolute URLs (from Cloudinary etc.) and relative paths from the backend.
+ */
+export const getAssetUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return (import.meta.env.VITE_API_URL || 'http://localhost:5150') + path;
+};
 
 /**
  * Custom fetch wrapper that automatically includes credentials (cookies)

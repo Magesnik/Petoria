@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { api } from '../utils/api';
+import { api, getAssetUrl } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
             if (data) {
                 // Fix avatar URL if it's a relative path
                 if (data.avatarUrl && data.avatarUrl.startsWith('/uploads/')) {
-                    data.avatarUrl = `http://localhost:5150${data.avatarUrl}`;
+                    data.avatarUrl = getAssetUrl(data.avatarUrl);
                 }
                 setUser(data);
             } else {
