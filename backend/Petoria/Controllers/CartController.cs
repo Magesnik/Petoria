@@ -31,26 +31,27 @@ public class CartController : ControllerBase
             .Include(c => c.RoomType)
             .Where(c => c.UserId == userId)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CartItemResponseDto
-            {
-                Id = c.Id,
-                HotelId = c.HotelId,
-                HotelName = c.Hotel != null ? c.Hotel.Name : "",
-                HotelImageUrl = c.Hotel != null ? c.Hotel.ImageUrl : "",
-                RoomTypeId = c.RoomTypeId,
-                RoomTypeName = c.RoomType != null ? c.RoomType.Name : "",
-                CheckInDate = c.CheckInDate,
-                CheckOutDate = c.CheckOutDate,
-                NumberOfNights = (int)(c.CheckOutDate - c.CheckInDate).TotalDays,
-                NumberOfRooms = c.NumberOfRooms,
-                PricePerNight = c.RoomType != null ? c.RoomType.PricePerNight : 0,
-                TotalPrice = c.TotalPrice,
-                OriginalPrice = c.OriginalPrice,
-                CreatedAt = c.CreatedAt
-            })
             .ToListAsync();
 
-        return Ok(items);
+        var responseItems = items.Select(c => new CartItemResponseDto
+        {
+            Id = c.Id,
+            HotelId = c.HotelId,
+            HotelName = c.Hotel != null ? c.Hotel.Name : "",
+            HotelImageUrl = c.Hotel != null ? c.Hotel.ImageUrl : "",
+            RoomTypeId = c.RoomTypeId,
+            RoomTypeName = c.RoomType != null ? c.RoomType.Name : "",
+            CheckInDate = c.CheckInDate,
+            CheckOutDate = c.CheckOutDate,
+            NumberOfNights = (int)(c.CheckOutDate - c.CheckInDate).TotalDays,
+            NumberOfRooms = c.NumberOfRooms,
+            PricePerNight = c.RoomType != null ? c.RoomType.PricePerNight : 0,
+            TotalPrice = c.TotalPrice,
+            OriginalPrice = c.OriginalPrice,
+            CreatedAt = c.CreatedAt
+        }).ToList();
+
+        return Ok(responseItems);
     }
 
     // POST: api/cart - Add item to cart
