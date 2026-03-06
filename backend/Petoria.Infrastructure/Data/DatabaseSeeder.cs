@@ -19,6 +19,7 @@ public static class DatabaseSeeder
     {
         var db = services.GetRequiredService<ApplicationDbContext>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
         // Only seed when the Hotels table is completely empty
         if (await db.Hotels.AnyAsync())
@@ -27,7 +28,7 @@ public static class DatabaseSeeder
         // ----------------------------------------------------------------
         // 1. Users  (password = "Test123!")
         // ----------------------------------------------------------------
-        var users = await SeedUsersAsync(userManager);
+        var users = await SeedUsersAsync(userManager, roleManager);
 
         // ----------------------------------------------------------------
         // 2. Hotels
@@ -112,8 +113,17 @@ public static class DatabaseSeeder
     // -----------------------------------------------------------------------
     // 1. Users
     // -----------------------------------------------------------------------
-    private static async Task<List<ApplicationUser>> SeedUsersAsync(UserManager<ApplicationUser> userManager)
+    private static async Task<List<ApplicationUser>> SeedUsersAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
+        var roles = new[] { Roles.Admin, Roles.User, Roles.HotelModerator };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
         var usersToCreate = new[]
         {
             new ApplicationUser
