@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
                 // 200 OK but null data means not logged in
                 setUser(null);
             }
-        } catch (error) {
+        } catch {
             // 401 or other error means not logged in
             // console.debug("Not authenticated or session expired");
             setUser(null);

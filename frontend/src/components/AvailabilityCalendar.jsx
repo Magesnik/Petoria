@@ -7,7 +7,6 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [availability, setAvailability] = useState([]);
     const [selectedRoomType, setSelectedRoomType] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -39,7 +38,6 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
     }, [selectedRoomType, currentMonth]);
 
     const fetchAvailability = async () => {
-        setLoading(true);
         try {
             const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
             const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 2, 0);
@@ -54,8 +52,6 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             setAvailability(data);
         } catch (err) {
             console.error('Error fetching availability:', err);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -178,7 +174,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             setSelectionStart(null);
             setSelectionEnd(null);
             fetchAvailability();
-        } catch (err) {
+        } catch {
             setError('Грешка при блокиране');
         }
     };

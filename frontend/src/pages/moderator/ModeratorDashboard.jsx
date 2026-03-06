@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './ModeratorDashboard.css'; // We'll create this CSS
@@ -9,7 +9,6 @@ const ModeratorDashboard = () => {
     const [unreadCounts, setUnreadCounts] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
     const { t } = useLanguage();
 
     useEffect(() => {

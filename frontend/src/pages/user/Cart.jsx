@@ -8,14 +8,13 @@ import { api } from '../../utils/api';
 import './Cart.css';
 
 const Cart = () => {
-    const { cartItems, removeFromCart, clearCart, cartLoading } = useCart();
+    const { cartItems, removeFromCart, cartLoading } = useCart();
     const { t } = useLanguage();
     const { convertAndFormat } = useCurrency();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [checkoutError, setCheckoutError] = useState('');
-    const [checkoutSuccess, setCheckoutSuccess] = useState('');
     const [promoCode, setPromoCode] = useState('');
     const [promoApplied, setPromoApplied] = useState(false);
     const [promoError, setPromoError] = useState('');
@@ -113,7 +112,6 @@ const Cart = () => {
                 </div>
 
                 {checkoutError && <div className="cart-error">{checkoutError}</div>}
-                {checkoutSuccess && <div className="cart-success">{checkoutSuccess}</div>}
 
                 {cartItems.length === 0 ? (
                     <div className="cart-empty">

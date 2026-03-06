@@ -7,7 +7,6 @@ import './ReviewSection.css';
 const ReviewSection = ({ hotelId }) => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [userReview, setUserReview] = useState({ rating: 5, reviewText: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { user, isAdmin, isSuperAdmin } = useAuth();
@@ -32,7 +31,7 @@ const ReviewSection = ({ hotelId }) => {
                 setAverageRating(0);
             }
         } catch (err) {
-            setError(err.message);
+            console.error('Error fetching reviews:', err);
         } finally {
             setLoading(false);
         }

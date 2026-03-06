@@ -25,7 +25,6 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
 
     // State for availability
     const [availability, setAvailability] = useState([]);
-    const [blockedDates, setBlockedDates] = useState(new Set());
 
     // State for price calculation
     const [priceInfo, setPriceInfo] = useState(null);
@@ -45,9 +44,6 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
         const d = String(date.getDate()).padStart(2, '0');
         return `${y}-${m}-${d}`;
     };
-
-    // Get today's date for min date attribute
-    const today = toLocalDateStr(new Date());
 
     // Fetch room types when component mounts
     useEffect(() => {
@@ -126,15 +122,6 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
             );
 
             setAvailability(data);
-
-            // Build set of blocked dates
-            const blocked = new Set();
-            data.forEach(item => {
-                if (item.isBlocked || item.availableCount === 0) {
-                    blocked.add(item.date.split('T')[0]);
-                }
-            });
-            setBlockedDates(blocked);
         } catch (err) {
             console.error('Error fetching availability:', err);
         }
@@ -198,38 +185,6 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
         } catch (err) {
             setError(err.message || t('checkoutError'));
         }
-    };
-
-    const checkDateRangeAvailability = (checkIn, checkOut, rooms) => {
-        if (!selectedRoomType || !checkIn || !checkOut) return '';
-        const [y1, m1, d1] = checkIn.split('-').map(Number);
-        const [y2, m2, d2] = checkOut.split('-').map(Number);
-        const start = new Date(y1, m1 - 1, d1);
-        const end = new Date(y2, m2 - 1, d2);
-        for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
-            const dateStr = toLocalDateStr(d);
-            const record = availability.find(
-                a => a.roomTypeId === selectedRoomType.id && a.date.split('T')[0] === dateStr
-            );
-            if (record) {
-                if (record.isBlocked) return `Датата ${dateStr} е блокирана.`;
-                if (record.availableCount === 0) return `На ${dateStr} няма налични стаи.`;
-                if (record.availableCount < rooms) return `На ${dateStr} има само ${record.availableCount} стая/и (искате ${rooms}).`;
-            }
-        }
-        return '';
-    };
-
-    const isDateBlocked = (date) => {
-        return blockedDates.has(date);
-    };
-
-    const getAvailableRoomsForDate = (date) => {
-        if (!selectedRoomType) return 0;
-        const record = availability.find(
-            a => a.roomTypeId === selectedRoomType.id && a.date.split('T')[0] === date
-        );
-        return record ? record.availableCount : selectedRoomType.totalRooms;
     };
 
     if (loading) {

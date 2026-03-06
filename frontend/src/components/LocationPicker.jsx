@@ -38,7 +38,8 @@ const MapViewController = ({ center }) => {
 
     useEffect(() => {
         if (center) {
-            map.setView(center, map.getZoom());
+            // Use setView but don't animate to avoid interrupting wheel zooms
+            map.setView(center, map.getZoom(), { animate: false });
         }
     }, [center, map]);
 
@@ -131,12 +132,18 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
         });
     };
 
-    // Update position when initial coordinates change
+    // Update position when initial coordinates change from outside
     useEffect(() => {
         if (initialLat && initialLng) {
-            const newPosition = [initialLat, initialLng];
-            setPosition(newPosition);
-            setMapCenter(newPosition);
+            // Only update if significantly different to prevent feedback loop 
+            // from our own onLocationSelect calls
+            if (!position ||
+                Math.abs(position[0] - initialLat) > 0.0001 ||
+                Math.abs(position[1] - initialLng) > 0.0001) {
+                const newPosition = [initialLat, initialLng];
+                setPosition(newPosition);
+                setMapCenter(newPosition);
+            }
         }
     }, [initialLat, initialLng]);
 
@@ -181,7 +188,7 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
             </div>
 
             <MapContainer
-                center={mapCenter}
+                center={initialLat && initialLng ? [initialLat, initialLng] : defaultCenter}
                 zoom={13}
                 minZoom={2}
                 maxBounds={L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180))}

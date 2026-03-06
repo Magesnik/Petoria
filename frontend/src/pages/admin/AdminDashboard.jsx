@@ -8,7 +8,7 @@ import GlobalPromoCodes from './GlobalPromoCodes';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-    const { user, isSuperAdmin } = useAuth();
+    const { isSuperAdmin } = useAuth();
     const { t, language } = useLanguage();
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);

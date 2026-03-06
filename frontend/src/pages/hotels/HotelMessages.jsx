@@ -9,7 +9,7 @@ import './HotelMessages.css';
 const HotelMessages = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user, isAdmin } = useAuth();
+    const { user } = useAuth();
     const { t } = useLanguage();
 
     const [messages, setMessages] = useState([]);
@@ -83,7 +83,7 @@ const HotelMessages = () => {
 
             setReplyingTo(null);
             setReplyText('');
-        } catch (err) {
+        } catch {
             alert(t('errorSendingReply') || 'Error sending reply');
         } finally {
             setSendingReply(false);

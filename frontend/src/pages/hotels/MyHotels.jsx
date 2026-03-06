@@ -8,7 +8,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import './MyHotels.css';
 
 const MyHotels = () => {
-    const { user, isAdmin } = useAuth();
+    const { isAdmin } = useAuth();
     const { convertAndFormat } = useCurrency();
     const { t } = useLanguage();
     const navigate = useNavigate();

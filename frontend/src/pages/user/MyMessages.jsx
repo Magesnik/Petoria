@@ -15,11 +15,6 @@ const MyMessages = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Reply state
-    const [replyingTo, setReplyingTo] = useState(null);
-    const [replyText, setReplyText] = useState('');
-    const [sendingReply, setSendingReply] = useState(false);
-
     useEffect(() => {
         if (!user) {
             navigate('/login');

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import './RoomTypeManager.css';
 
 const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
-    const { user } = useAuth();
     const { t } = useLanguage();
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -103,7 +101,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
 
             setSuccess(t('roomDeleted'));
             fetchRoomTypes();
-        } catch (err) {
+        } catch {
             setError(t('errorDeleting'));
         }
     };

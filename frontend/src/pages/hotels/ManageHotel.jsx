@@ -104,7 +104,7 @@ const ManageHotel = () => {
             setSuccess(t('savedSuccessfully'));
             setIsEditing(false);
             fetchHotel();
-        } catch (err) {
+        } catch {
             setError(t('errorSaving'));
         }
     };
@@ -151,7 +151,7 @@ const ManageHotel = () => {
             await api.delete(`/hotels/${id}/moderators/${userId}`);
             setSuccess(t('moderatorRemoved') || 'Модераторът е премахнат успешно');
             fetchModerators();
-        } catch (err) {
+        } catch {
             setError(t('errorRemovingModerator') || 'Грешка при премахване на модератор');
         }
     };

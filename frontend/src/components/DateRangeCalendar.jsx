@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import './DateRangeCalendar.css';
 
 const DateRangeCalendar = ({
-    hotelId,
     selectedRoomType,
     checkInDate,
     checkOutDate,

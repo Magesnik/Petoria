@@ -13,7 +13,6 @@ const ModeratorHotelPanel = () => {
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('calendar'); // 'calendar' or 'reservations'
-    const [reservations, setReservations] = useState([]);
 
     // Logic for Booking Modal from Calendar
     const [showBookingModal, setShowBookingModal] = useState(false);

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useCart } from '../../context/CartContext';
-import { useLanguage } from '../../context/LanguageContext';
 import './PaymentSuccess.css';
 
 const PaymentSuccess = () => {
     const navigate = useNavigate();
     const { clearCart } = useCart();
-    const { t } = useLanguage();
     const [status, setStatus] = useState('confirming'); // 'confirming' | 'success' | 'error'
     const [errorMsg, setErrorMsg] = useState('');
 

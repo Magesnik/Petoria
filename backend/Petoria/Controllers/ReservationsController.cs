@@ -40,30 +40,31 @@ public class ReservationsController : ControllerBase
             return Unauthorized();
         }
 
-        var reservations = await _context.Reservations
+        var reservationsData = await _context.Reservations
             .Include(r => r.Hotel)
             .Include(r => r.RoomType)
             .Where(r => r.UserId == userId)
             .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new ReservationResponseDto
-            {
-                Id = r.Id,
-                HotelId = r.HotelId,
-                HotelName = r.Hotel != null ? r.Hotel.Name : "",
-                HotelImageUrl = r.Hotel != null ? r.Hotel.ImageUrl : "",
-                RoomTypeId = r.RoomTypeId ?? 0,
-                RoomTypeName = r.RoomType != null ? r.RoomType.Name : "Standard",
-                CheckInDate = r.CheckInDate,
-                CheckOutDate = r.CheckOutDate,
-                NumberOfRooms = r.NumberOfRooms,
-                NumberOfNights = (int)(r.CheckOutDate - r.CheckInDate).TotalDays,
-                PricePerNight = r.RoomType != null ? r.RoomType.PricePerNight : 0,
-                TotalPrice = r.TotalPrice,
-                Status = r.Status,
-                Notes = r.Notes,
-                CreatedAt = r.CreatedAt
-            })
             .ToListAsync();
+
+        var reservations = reservationsData.Select(r => new ReservationResponseDto
+        {
+            Id = r.Id,
+            HotelId = r.HotelId,
+            HotelName = r.Hotel != null ? r.Hotel.Name : "",
+            HotelImageUrl = r.Hotel != null ? r.Hotel.ImageUrl : "",
+            RoomTypeId = r.RoomTypeId ?? 0,
+            RoomTypeName = r.RoomType != null ? r.RoomType.Name : "Standard",
+            CheckInDate = r.CheckInDate,
+            CheckOutDate = r.CheckOutDate,
+            NumberOfRooms = r.NumberOfRooms,
+            NumberOfNights = (int)(r.CheckOutDate - r.CheckInDate).TotalDays,
+            PricePerNight = r.RoomType != null ? r.RoomType.PricePerNight : 0,
+            TotalPrice = r.TotalPrice,
+            Status = r.Status,
+            Notes = r.Notes,
+            CreatedAt = r.CreatedAt
+        }).ToList();
 
         return Ok(reservations);
     }
