@@ -100,7 +100,10 @@ builder.Services.AddCors(options =>
 
 // Database Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+    ));
 
 // Identity Configuration
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -145,6 +148,13 @@ builder.Services.AddAuthentication(options =>
 });
 
 var app = builder.Build();
+
+// Apply pending migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // Initialize roles and admin user
 using (var scope = app.Services.CreateScope())
