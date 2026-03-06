@@ -100,10 +100,7 @@ builder.Services.AddCors(options =>
 
 // Database Configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
-    ));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity Configuration
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()

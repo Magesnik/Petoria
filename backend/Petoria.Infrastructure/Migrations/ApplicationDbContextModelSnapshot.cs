@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Petoria.Infrastructure.Data;
 
 #nullable disable
@@ -17,66 +17,66 @@ namespace Petoria.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Hotel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Amenities")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("CancellationPolicies")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedById")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Images")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<bool>("IsAvailable")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsSuspendedBySuperAdmin")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<decimal?>("Latitude")
                         .HasColumnType("decimal(10,7)");
@@ -84,7 +84,7 @@ namespace Petoria.Infrastructure.Migrations
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<decimal?>("Longitude")
                         .HasColumnType("decimal(10,7)");
@@ -92,7 +92,7 @@ namespace Petoria.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<decimal>("Rating")
                         .HasColumnType("decimal(2,1)");
@@ -100,13 +100,13 @@ namespace Petoria.Infrastructure.Migrations
                     b.Property<string>("RoomTypes")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("StarRating")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -116,19 +116,19 @@ namespace Petoria.Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -143,19 +143,19 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -168,19 +168,19 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -192,17 +192,17 @@ namespace Petoria.Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -214,10 +214,10 @@ namespace Petoria.Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -229,16 +229,16 @@ namespace Petoria.Infrastructure.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -248,72 +248,72 @@ namespace Petoria.Infrastructure.Migrations
             modelBuilder.Entity("Petoria.Infrastructure.Data.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Currency")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Language")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Theme")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -331,37 +331,37 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CheckInDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CheckOutDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("NumberOfRooms")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("OriginalPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("RoomTypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -378,30 +378,30 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("ParentCommentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -418,22 +418,22 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CommentId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsLike")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -448,19 +448,19 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -475,40 +475,40 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AdminResponse")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("AnsweredAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsAnswered")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsReadByUser")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -523,19 +523,19 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -551,30 +551,30 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ReviewText")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -589,31 +589,31 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("CurrentActivations")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("DiscountPercentage")
                         .HasColumnType("decimal(5,2)");
 
                     b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("MaxActivations")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -627,27 +627,27 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AvailableCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("date");
 
                     b.Property<bool>("IsBlocked")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("RoomTypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -661,27 +661,27 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DiscountPercentage")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RoomTypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -694,40 +694,40 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AdminResponse")
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("AnsweredAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsAnswered")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsReadByAdmin")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsReadByUser")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("text");
 
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -740,28 +740,28 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CheckInDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CheckOutDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("NumberOfRooms")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("RefundAmount")
                         .HasColumnType("decimal(18,2)");
@@ -770,22 +770,22 @@ namespace Petoria.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("RoomTypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("varchar(95)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -802,42 +802,42 @@ namespace Petoria.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Capacity")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("HotelId")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<decimal>("PricePerNight")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TotalRooms")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
