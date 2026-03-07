@@ -68,7 +68,14 @@ const Footer = () => {
                             </li>
                             <li>
                                 <span className="contact-icon">📍</span>
-                                <span>{t('location')}</span>
+                                <a 
+                                    href="https://www.google.com/maps/search/?api=1&query=42.685389,23.319111" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="location-link"
+                                >
+                                    {t('location')}
+                                </a>
                             </li>
                         </ul>
                     </div>

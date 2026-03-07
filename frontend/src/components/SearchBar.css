@@ -21,7 +21,7 @@
 
 .field-icon {
     font-size: 1.1rem;
-    color: #990000;
+    color: var(--primary-color);
     margin-right: 6px;
 }
 
@@ -95,8 +95,8 @@
 
 /* Submit Button */
 .btn-advanced-search {
-    background-color: #990000;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--text-light);
     border: none;
     border-radius: 50px;
     padding: 14px 28px;
@@ -109,7 +109,7 @@
 }
 
 .btn-advanced-search:hover {
-    background-color: #660000;
+    background-color: #112240;
 }
 
 /* Responsive adjustments */

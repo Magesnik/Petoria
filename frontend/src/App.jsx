@@ -42,9 +42,13 @@ import Home from './pages/public/Home';
 import About from './pages/public/About';
 import Deals from './pages/public/Deals';
 import Support from './pages/public/Support';
+import Privacy from './pages/public/Privacy';
+import Terms from './pages/public/Terms';
+import Cookies from './pages/public/Cookies';
 
 import Header from './components/Header';
 import Footer from './components/Footer';
+import CookieBanner from './components/CookieBanner';
 
 function App() {
   return (
@@ -84,8 +88,12 @@ function App() {
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/payment/success" element={<PaymentSuccess />} />
                         <Route path="/payment/cancel" element={<PaymentCancel />} />
+                        <Route path="/privacy" element={<Privacy />} />
+                        <Route path="/terms" element={<Terms />} />
+                        <Route path="/cookies" element={<Cookies />} />
                       </Routes>
                       <Footer />
+                      <CookieBanner />
                     </div>
                   </Router>
                 </CartProvider>

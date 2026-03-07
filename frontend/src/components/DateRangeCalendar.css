@@ -14,12 +14,17 @@
 .date-box {
     flex: 1;
     padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
     border-radius: 12px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .date-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .date-box:hover {
@@ -51,6 +56,10 @@
     display: block;
     font-size: 1rem;
     font-weight: 600;
+    color: #1e293b;
+}
+
+[data-theme='dark'] .date-value {
     color: #fff;
 }
 
@@ -72,15 +81,21 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #1e293b;
     font-size: 1.25rem;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+[data-theme='dark'] .date-range-calendar .nav-btn {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
 }
 
 .date-range-calendar .nav-btn:hover {
@@ -90,10 +105,14 @@
 
 .date-range-calendar .current-month {
     font-size: 1rem;
-    color: #fff;
+    color: #1e293b;
     font-weight: 600;
     min-width: 150px;
     text-align: center;
+}
+
+[data-theme='dark'] .date-range-calendar .current-month {
+    color: #fff;
 }
 
 /* Calendar Grid */
@@ -182,8 +201,12 @@
 
 .date-range-calendar .day-number {
     font-size: 0.85rem;
-    color: #fff;
+    color: #1e293b;
     font-weight: 500;
+}
+
+[data-theme='dark'] .date-range-calendar .day-number {
+    color: #fff;
 }
 
 .date-range-calendar .day-cell.check-in .day-number,
@@ -216,6 +239,10 @@
     justify-content: center;
     gap: 1.25rem;
     padding: 0.75rem 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .date-range-calendar .calendar-legend {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 

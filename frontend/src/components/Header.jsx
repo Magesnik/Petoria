@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useCart } from '../context/CartContext';
+import logoImg from '../assets/logo.png';
 import './Header.css';
 
 const Header = () => {
@@ -111,8 +112,9 @@ const Header = () => {
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
-        <Link to="/" className="logo" onClick={closeMobileMenu}>
-          Petoria<span>.</span>
+        <Link to="/" className="logo-link" onClick={closeMobileMenu}>
+          <img src={logoImg} alt="Petoria Logo" className="logo-img" />
+          <span className="logo-text">Petoria<span>.</span></span>
         </Link>
 
         {/* Desktop Navigation */}
