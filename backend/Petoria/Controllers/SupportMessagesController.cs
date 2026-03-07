@@ -160,5 +160,19 @@ namespace Petoria.Controllers
 
             return NoContent();
         }
+
+        // DELETE: api/support/messages/{id}
+        [HttpDelete("{id}")]
+        [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
+        public async Task<IActionResult> DeleteMessage(int id)
+        {
+            var message = await _context.SupportMessages.FindAsync(id);
+            if (message == null) return NotFound();
+
+            _context.SupportMessages.Remove(message);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
