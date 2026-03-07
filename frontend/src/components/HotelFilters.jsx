@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useCurrency } from '../context/CurrencyContext';
 import './HotelFilters.css';
 
 const HotelFilters = ({
@@ -12,6 +13,7 @@ const HotelFilters = ({
     onClearFilters
 }) => {
     const { t } = useLanguage();
+    const { convertPrice, convertToBase, currencySymbol } = useCurrency();
     const [citySearch, setCitySearch] = useState('');
     const [countrySearch, setCountrySearch] = useState('');
     const [amenitySearch, setAmenitySearch] = useState('');
@@ -80,36 +82,44 @@ const HotelFilters = ({
         setCountrySearch('');
     };
 
-    // Price slider values
-    // Use local state for immediate UI feedback, debounce updates to parent
-    const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice || priceRange.minPrice);
-    const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice || Math.ceil(priceRange.maxPrice));
+    // User currency bounds
+    const rangeMin = Math.floor(convertPrice(priceRange.minPrice));
+    const rangeMax = Math.ceil(convertPrice(priceRange.maxPrice));
 
-    // Update local state when props change (e.g. initial load or clear filters)
+    // UI state for sliders (in user's currency)
+    // We want the local UI state to reflect the selected currency so that the slider renders correctly
+    const effectiveMin = filters.minPrice !== '' ? Math.floor(convertPrice(filters.minPrice)) : rangeMin;
+    const effectiveMax = filters.maxPrice !== '' ? Math.ceil(convertPrice(filters.maxPrice)) : rangeMax;
+
+    const [localMinPrice, setLocalMinPrice] = useState(effectiveMin);
+    const [localMaxPrice, setLocalMaxPrice] = useState(effectiveMax);
+
+    // Update local state when filtering props or currency changes
     useEffect(() => {
-        setLocalMinPrice(filters.minPrice !== '' ? filters.minPrice : priceRange.minPrice);
-        setLocalMaxPrice(filters.maxPrice !== '' ? filters.maxPrice : Math.ceil(priceRange.maxPrice));
-    }, [filters.minPrice, filters.maxPrice, priceRange]);
+        setLocalMinPrice(filters.minPrice !== '' ? Math.floor(convertPrice(filters.minPrice)) : rangeMin);
+        setLocalMaxPrice(filters.maxPrice !== '' ? Math.ceil(convertPrice(filters.maxPrice)) : rangeMax);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.minPrice, filters.maxPrice, rangeMin, rangeMax]);
 
     // Debounce updates to parent
     useEffect(() => {
         const timer = setTimeout(() => {
-            const effectiveMin = filters.minPrice !== '' ? filters.minPrice : priceRange.minPrice;
-            const effectiveMax = filters.maxPrice !== '' ? filters.maxPrice : Math.ceil(priceRange.maxPrice);
-
+            // Compare local currency values against expected effective currency values
+            // If they differ, that means the user dragged the slider, and we need to send
+            // the BGN value back to the parent.
             if (localMinPrice !== effectiveMin) {
-                onFilterChange('minPrice', localMinPrice);
+                const bgnMin = Math.floor(convertToBase(localMinPrice));
+                onFilterChange('minPrice', bgnMin);
             }
 
             if (localMaxPrice !== effectiveMax) {
-                onFilterChange('maxPrice', localMaxPrice);
+                const bgnMax = Math.ceil(convertToBase(localMaxPrice));
+                onFilterChange('maxPrice', bgnMax);
             }
         }, 500); // 500ms debounce
 
         return () => clearTimeout(timer);
-    }, [localMinPrice, localMaxPrice, filters.minPrice, filters.maxPrice, priceRange.minPrice, priceRange.maxPrice]);
-
-    const rangeMax = Math.ceil(priceRange.maxPrice);
+    }, [localMinPrice, localMaxPrice, effectiveMin, effectiveMax, convertToBase, onFilterChange]);
 
     return (
         <div className="hotel-filters">
@@ -166,15 +176,15 @@ const HotelFilters = ({
                     {/* Editable Price Inputs */}
                     <div className="price-inputs-row">
                         <div className="price-input-group">
-                            <span className="currency-symbol">$</span>
+                            <span className="currency-symbol">{currencySymbol}</span>
                             <input
                                 type="number"
                                 className="price-input-field"
                                 value={localMinPrice}
-                                min={priceRange.minPrice}
+                                min={rangeMin}
                                 max={localMaxPrice - 1}
                                 onChange={(e) => {
-                                    const value = parseInt(e.target.value) || priceRange.minPrice;
+                                    const value = parseInt(e.target.value) || rangeMin;
                                     if (value < localMaxPrice) {
                                         setLocalMinPrice(value);
                                     }
@@ -183,7 +193,7 @@ const HotelFilters = ({
                         </div>
                         <span className="price-separator">—</span>
                         <div className="price-input-group">
-                            <span className="currency-symbol">$</span>
+                            <span className="currency-symbol">{currencySymbol}</span>
                             <input
                                 type="number"
                                 className="price-input-field"
@@ -206,14 +216,14 @@ const HotelFilters = ({
                         <div
                             className="slider-track-fill"
                             style={{
-                                left: `${((localMinPrice - priceRange.minPrice) / (rangeMax - priceRange.minPrice)) * 100}%`,
-                                width: `${((localMaxPrice - localMinPrice) / (rangeMax - priceRange.minPrice)) * 100}%`
+                                left: `${((localMinPrice - rangeMin) / (rangeMax - rangeMin)) * 100}%`,
+                                width: `${((localMaxPrice - localMinPrice) / (rangeMax - rangeMin)) * 100}%`
                             }}
                         />
                         <input
                             type="range"
                             className="slider slider-min"
-                            min={priceRange.minPrice}
+                            min={rangeMin}
                             max={rangeMax}
                             value={localMinPrice}
                             onChange={(e) => {
@@ -224,7 +234,7 @@ const HotelFilters = ({
                         <input
                             type="range"
                             className="slider slider-max"
-                            min={priceRange.minPrice}
+                            min={rangeMin}
                             max={rangeMax}
                             value={localMaxPrice}
                             onChange={(e) => {

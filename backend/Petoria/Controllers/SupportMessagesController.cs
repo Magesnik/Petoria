@@ -31,6 +31,15 @@ namespace Petoria.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
+            // Check for unanswered messages limit
+            var unansweredCount = await _context.SupportMessages
+                .CountAsync(m => m.UserId == userId && !m.IsAnswered);
+
+            if (unansweredCount >= 10)
+            {
+                return BadRequest(new { message = "You have reached the maximum limit of 10 unanswered messages." });
+            }
+
             var message = new SupportMessage
             {
                 UserId = userId,

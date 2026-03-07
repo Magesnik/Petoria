@@ -90,7 +90,7 @@ const Terms = () => {
                         <h3>{t('termsContactTitle')}</h3>
                         <p>{t('termsContactText')}</p>
                     </div>
-                    <a href="mailto:legal@petoria.com" className="terms-contact-btn">
+                    <a href="mailto:petooriaa@gmail.com" className="terms-contact-btn">
                         {t('termsContactBtn')}
                     </a>
                 </div>

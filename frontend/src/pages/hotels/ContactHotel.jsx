@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -59,7 +59,11 @@ const ContactHotel = () => {
                 navigate(`/hotel/${id}`);
             }, 3000);
         } catch (err) {
-            setError(err.message);
+            if (err.message?.includes("10 unanswered messages")) {
+                setError(t('messageLimitReachedError') || 'You have reached the maximum limit of 10 unanswered messages.');
+            } else {
+                setError(err.message);
+            }
         } finally {
             setSubmitting(false);
         }
@@ -135,7 +139,10 @@ const ContactHotel = () => {
                                     rows="6"
                                     placeholder={t('messagePlaceholder') || 'Type your message here...'}
                                 />
-                                <small className="char-count">{formData.message.length}/2000</small>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
+                                    <small className="text-muted">{t('messageMinLengthInfo') || 'Message must be at least 10 characters long.'}</small>
+                                    <small className="char-count">{formData.message.length}/2000</small>
+                                </div>
                             </div>
 
                             <button

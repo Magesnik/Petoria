@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -11,6 +11,7 @@ const Support = () => {
         message: '',
     });
     const [submitMessage, setSubmitMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const [openFaq, setOpenFaq] = useState(null);
 
     const handleChange = (e) => {
@@ -18,15 +19,15 @@ const Support = () => {
             ...formData,
             [e.target.name]: e.target.value,
         });
+        setErrorMessage('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMessage('');
 
         try {
             await api.post('/support/messages', formData);
-
-
 
             setSubmitMessage(t('messageSent'));
             setFormData({
@@ -36,7 +37,11 @@ const Support = () => {
             setTimeout(() => setSubmitMessage(''), 5000);
         } catch (error) {
             console.error('Error sending support message:', error);
-            // Optional: set error state
+            if (error.message?.includes("10 unanswered messages")) {
+                setErrorMessage(t('messageLimitReachedError'));
+            } else {
+                setErrorMessage(t('error') || 'Error sending message');
+            }
         }
     };
 
@@ -101,10 +106,13 @@ const Support = () => {
                                     value={formData.message}
                                     onChange={handleChange}
                                     required
+                                    minLength="10"
                                     rows="6"
                                     placeholder={t('yourMessage')}
                                 />
+                                <small className="text-muted" style={{ display: 'block', marginTop: '5px' }}>{t('messageMinLengthInfo')}</small>
                             </div>
+                            {errorMessage && <div className="error-message" style={{ color: 'red', marginBottom: '15px' }}>{errorMessage}</div>}
                             {submitMessage && <div className="success-message">{submitMessage}</div>}
                             <button type="submit" className="btn btn-primary">
                                 {t('sendMessage')}
@@ -137,7 +145,7 @@ const Support = () => {
                         <div className="contact-card">
                             <div className="contact-icon">📧</div>
                             <h3>{t('email')}</h3>
-                            <p>support@petoria.com</p>
+                            <p>petooriaa@gmail.com</p>
                         </div>
                         <div className="contact-card">
                             <div className="contact-icon">📞</div>

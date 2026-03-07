@@ -120,7 +120,7 @@ const Privacy = () => {
                         <h3>{t('privacyContactTitle')}</h3>
                         <p>{t('privacyContactText')}</p>
                     </div>
-                    <a href="mailto:privacy@petoria.com" className="privacy-contact-btn">
+                    <a href="mailto:petooriaa@gmail.com" className="privacy-contact-btn">
                         {t('privacyContactBtn')}
                     </a>
                 </div>

@@ -1,6 +1,7 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { api } from '../../utils/api';
 
 
@@ -9,6 +10,7 @@ import './Home.css';
 
 const Home = () => {
     const { t } = useLanguage();
+    const { convertPrice, currencySymbol } = useCurrency();
     const navigate = useNavigate();
     const [popularDestinations, setPopularDestinations] = useState([]);
     const [loadingDestinations, setLoadingDestinations] = useState(true);
@@ -76,7 +78,7 @@ const Home = () => {
                                 <div className="card-content">
                                     <h3>{dest.city}, {dest.country}</h3>
                                     <p>{t('discoverStaysIn')} {dest.city}.</p>
-                                    <div className="card-price">{t('from')} ${dest.startingPrice}/{t('night')}</div>
+                                    <div className="card-price">{t('from')} {currencySymbol}{convertPrice(dest.startingPrice)}/{t('night')}</div>
                                 </div>
                             </div>
                         ))

@@ -44,6 +44,12 @@ export const CurrencyProvider = ({ children }) => {
         return priceInBGN * EXCHANGE_RATES[currency];
     };
 
+    // Convert price back to BGN from selected currency
+    const convertToBase = (priceInCurrentCurrency) => {
+        if (!priceInCurrentCurrency || isNaN(priceInCurrentCurrency)) return 0;
+        return priceInCurrentCurrency / EXCHANGE_RATES[currency];
+    };
+
     // Format price with currency symbol
     const formatPrice = (price, showCurrency = true) => {
         if (!price || isNaN(price)) return '0';
@@ -86,6 +92,7 @@ export const CurrencyProvider = ({ children }) => {
                 currency,
                 changeCurrency,
                 convertPrice,
+                convertToBase,
                 formatPrice,
                 convertAndFormat,
                 availableCurrencies: Object.keys(EXCHANGE_RATES),
