@@ -123,6 +123,8 @@
     gap: 15px;
     margin-bottom: 30px;
     flex-wrap: wrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .purchase-tab {
@@ -506,12 +508,32 @@
 }
 
 @media (max-width: 600px) {
+    .purchase-history-page {
+        padding-top: 60px;
+    }
+
+    .purchase-hero {
+        padding: 40px 12px;
+    }
+
     .purchase-hero h1 {
         font-size: 1.8rem;
     }
 
     .purchase-hero p {
         font-size: 0.95rem;
+    }
+
+    .purchase-tabs {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        padding-bottom: 5px;
+    }
+
+    .purchase-tab {
+        flex-shrink: 0;
+        padding: 10px 18px;
+        font-size: 0.9rem;
     }
 
     .reservation-dates {
@@ -529,5 +551,14 @@
 
     .total-price .price-value {
         font-size: 1.3rem;
+    }
+
+    .reservation-actions {
+        flex-direction: column;
+    }
+
+    .btn-view,
+    .btn-cancel {
+        text-align: center;
     }
 }

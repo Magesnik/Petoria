@@ -4,8 +4,12 @@
     left: 0;
     width: 100%;
     height: 80px;
+    /* Safe area for iPhone X+ notch / Dynamic Island */
+    padding-top: env(safe-area-inset-top);
+    height: calc(80px + env(safe-area-inset-top));
     background-color: rgba(255, 255, 255, 0.85);
     /* More transparent for glassmorphism */
+    -webkit-backdrop-filter: blur(12px); /* Required for iOS Safari */
     backdrop-filter: blur(12px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     z-index: 1000;
@@ -26,6 +30,8 @@
     background-color: rgba(2, 12, 27, 0.85);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(12px); /* Required for iOS Safari */
+    backdrop-filter: blur(12px);
 }
 
 [data-theme="dark"] .header.scrolled {
@@ -120,80 +126,6 @@
     gap: 15px;
 }
 
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 80px;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    transition: var(--transition);
-}
-
-.header.scrolled {
-    height: 70px;
-    background-color: rgba(255, 255, 255, 0.98);
-}
-
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.logo-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-}
-
-.logo-img {
-    height: 60px;
-    width: auto;
-    object-fit: contain;
-}
-
-.nav-menu {
-    display: flex;
-    gap: 30px;
-    list-style: none;
-}
-
-.nav-link {
-    font-weight: 500;
-    color: var(--text-dark);
-    position: relative;
-}
-
-.nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -4px;
-    left: 0;
-    background-color: var(--accent-color);
-    transition: var(--transition);
-}
-
-.nav-link:hover::after {
-    width: 100%;
-}
-
-.header-actions {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
 
 .global-settings {
     display: flex;
@@ -441,6 +373,8 @@
 /* Dark Mode Adjustments */
 [data-theme='dark'] .header {
     background-color: rgba(2, 12, 27, 0.95);
+    -webkit-backdrop-filter: blur(10px); /* Required for iOS Safari */
+    backdrop-filter: blur(10px);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -562,7 +496,10 @@
     width: 300px;
     max-width: 85vw;
     height: 100vh;
+    /* iPhone safe area for bottom home indicator */
+    padding-bottom: env(safe-area-inset-bottom);
     background-color: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(10px); /* Required for iOS Safari */
     backdrop-filter: blur(10px);
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
     transition: right 0.3s ease;

@@ -96,11 +96,13 @@
     color: var(--text-light);
 }
 
-.social-links a:hover {
-    background: var(--accent-color);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(252, 163, 17, 0.3);
+@media (hover: hover) {
+    .social-links a:hover {
+        background: var(--accent-color);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(252, 163, 17, 0.3);
+    }
 }
 
 /* Footer Title */
@@ -156,10 +158,12 @@
     color: rgba(230, 241, 255, 0.7);
 }
 
-.footer-links li a:hover,
-.footer-contact li a:hover {
-    color: var(--accent-color);
-    transform: translateX(5px);
+@media (hover: hover) {
+    .footer-links li a:hover,
+    .footer-contact li a:hover {
+        color: var(--accent-color);
+        transform: translateX(5px);
+    }
 }
 
 /* Footer Contact */

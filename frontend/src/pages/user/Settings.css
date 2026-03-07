@@ -355,6 +355,22 @@
         margin-bottom: 25px;
     }
 
+    .preference-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .btn-toggle {
+        width: 100%;
+        text-align: center;
+    }
+
+    .currency-select {
+        width: 100%;
+        font-size: 16px; /* Prevent iOS zoom */
+    }
+
     .avatar-preview {
         width: 120px;
         height: 120px;

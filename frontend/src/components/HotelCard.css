@@ -23,14 +23,16 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
 }
 
-.hotel-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
+@media (hover: hover) {
+    .hotel-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
 
-[data-theme="dark"] .hotel-card:hover {
-    border-color: rgba(102, 126, 234, 0.5);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    [data-theme="dark"] .hotel-card:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
 }
 
 .hotel-card-image {
@@ -223,9 +225,11 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.btn-view-details:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+@media (hover: hover) {
+    .btn-view-details:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
 }
 
 .btn-view-details:active {

@@ -9,6 +9,8 @@
     margin: 0 auto;
     font-family: inherit;
     flex-wrap: nowrap;
+    position: relative;
+    z-index: 20;
 }
 
 .search-field {
@@ -41,7 +43,7 @@
 .field-content input[type="date"],
 .field-content select {
     border: none;
-    font-size: 0.9rem;
+    font-size: 16px; /* Minimum 16px to prevent iOS Safari auto-zoom on focus */
     color: #333;
     background: transparent;
     outline: none;
@@ -52,6 +54,7 @@
 }
 
 .field-content select {
+    -webkit-appearance: none; /* Required for iOS Safari */
     appearance: none;
 }
 
@@ -108,8 +111,10 @@
     white-space: nowrap;
 }
 
-.btn-advanced-search:hover {
-    background-color: #112240;
+@media (hover: hover) {
+    .btn-advanced-search:hover {
+        background-color: #112240;
+    }
 }
 
 /* Responsive adjustments */

@@ -5,7 +5,8 @@
 
 /* Hero Section */
 .hero {
-    height: 90vh;
+    min-height: 90vh;
+    min-height: 90svh; /* iPhone Safari fix: svh excludes the address bar */
     background: linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.5)), url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
     background-size: cover;
     background-position: center;
@@ -24,7 +25,8 @@
 
 .hero-content {
     max-width: 1200px;
-    padding: 0 20px;
+    padding: 60px 20px;
+    width: 100%;
     margin: 0 auto;
     text-align: center;
     animation: fadeInUp 1s ease-out;
@@ -176,13 +178,15 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-}
+@media (hover: hover) {
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
 
-[data-theme="dark"] .card:hover {
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    [data-theme="dark"] .card:hover {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
 }
 
 .card-image {
