@@ -5,8 +5,9 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import HotelCard from '../../components/HotelCard';
 import HotelFilters from '../../components/HotelFilters';
-import HotelMap from '../../components/HotelMap';
 import './Hotels.css';
+
+const HotelMap = React.lazy(() => import('../../components/HotelMap'));
 
 const SORT_OPTIONS = [
     { value: 'rating_desc', labelKey: 'sortRatingDesc' },
@@ -65,7 +66,7 @@ const Hotels = () => {
     const [error, setError] = useState(null);
     const location = useLocation();
     const navigate = useNavigate();
-    const queryParams = new useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
     const navState = location.state || {};
 
     const [searchQuery, setSearchQuery] = useState(() => {
@@ -381,7 +382,9 @@ const Hotels = () => {
 
                     {/* Map View */}
                     {!loading && !error && view === 'map' && (
-                        <HotelMap hotels={mapHotels} />
+                        <React.Suspense fallback={<div className="loading-state"><div className="spinner"></div></div>}>
+                            <HotelMap hotels={mapHotels} />
+                        </React.Suspense>
                     )}
 
                     {/* Hotels Grid */}

@@ -8,8 +8,9 @@ import RoomTypeManager from '../../components/RoomTypeManager';
 import DiscountManager from '../../components/DiscountManager';
 import PromoCodeManager from '../../components/PromoCodeManager';
 import AvailabilityCalendar from '../../components/AvailabilityCalendar';
-import LocationPicker from '../../components/LocationPicker';
 import './ManageHotel.css';
+
+const LocationPicker = React.lazy(() => import('../../components/LocationPicker'));
 
 const ManageHotel = () => {
     const { id } = useParams();
@@ -413,20 +414,22 @@ const ManageHotel = () => {
                                         {/* Map Location - New */}
                                         <div className="form-section full-width">
                                             <div className="form-section-title">📍 {t('mapLocation') || 'Локация на картата'}</div>
-                                            <LocationPicker
-                                                onLocationSelect={(locationData) => {
-                                                    setEditData({
-                                                        ...editData,
-                                                        latitude: locationData.lat,
-                                                        longitude: locationData.lng,
-                                                        city: locationData.city || editData.city,
-                                                        country: locationData.country || editData.country,
-                                                        location: locationData.address || editData.location
-                                                    });
-                                                }}
-                                                initialLat={editData.latitude}
-                                                initialLng={editData.longitude}
-                                            />
+                                            <React.Suspense fallback={<div className="loading-state"><div className="spinner"></div></div>}>
+                                                <LocationPicker
+                                                    onLocationSelect={(locationData) => {
+                                                        setEditData({
+                                                            ...editData,
+                                                            latitude: locationData.lat,
+                                                            longitude: locationData.lng,
+                                                            city: locationData.city || editData.city,
+                                                            country: locationData.country || editData.country,
+                                                            location: locationData.address || editData.location
+                                                        });
+                                                    }}
+                                                    initialLat={editData.latitude}
+                                                    initialLng={editData.longitude}
+                                                />
+                                            </React.Suspense>
                                             <div className="form-row">
                                                 <div className="form-group">
                                                     <label>{t('latitude') || 'Географска ширина'}</label>

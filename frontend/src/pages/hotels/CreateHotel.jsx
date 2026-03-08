@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-import LocationPicker from '../../components/LocationPicker';
 import './CreateHotel.css';
+
+const LocationPicker = React.lazy(() => import('../../components/LocationPicker'));
 
 const CreateHotel = () => {
     const { isAdmin } = useAuth();
@@ -244,20 +245,22 @@ const CreateHotel = () => {
                             <h3 className="section-title">📍 {t('mapLocation')}</h3>
                             <p className="section-description">{t('selectLocationDescription')}</p>
 
-                            <LocationPicker
-                                onLocationSelect={(locationData) => {
-                                    setFormData({
-                                        ...formData,
-                                        latitude: locationData.lat,
-                                        longitude: locationData.lng,
-                                        city: locationData.city || formData.city,
-                                        country: locationData.country || formData.country,
-                                        location: locationData.address || formData.location
-                                    });
-                                }}
-                                initialLat={formData.latitude}
-                                initialLng={formData.longitude}
-                            />
+                            <React.Suspense fallback={<div className="loading-state"><div className="spinner"></div></div>}>
+                                <LocationPicker
+                                    onLocationSelect={(locationData) => {
+                                        setFormData({
+                                            ...formData,
+                                            latitude: locationData.lat,
+                                            longitude: locationData.lng,
+                                            city: locationData.city || formData.city,
+                                            country: locationData.country || formData.country,
+                                            location: locationData.address || formData.location
+                                        });
+                                    }}
+                                    initialLat={formData.latitude}
+                                    initialLng={formData.longitude}
+                                />
+                            </React.Suspense>
 
                             <div className="form-row" style={{ marginTop: '15px' }}>
                                 <div className="form-group">

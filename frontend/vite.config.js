@@ -12,14 +12,9 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
-      },
-    },
+    // Rely on Vite default chunking instead of forced single vendor file to fix ESM circular deps
+  },
+  optimizeDeps: {
+    include: ["react-leaflet", "react-leaflet-cluster", "leaflet"],
   },
 })

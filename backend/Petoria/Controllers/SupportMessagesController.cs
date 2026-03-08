@@ -175,6 +175,15 @@ namespace Petoria.Controllers
             return NoContent();
         }
 
+        // GET: api/support/messages/admin/unread-count
+        [HttpGet("admin/unread-count")]
+        [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
+        public async Task<ActionResult<int>> GetAdminUnreadCount()
+        {
+            var count = await _context.SupportMessages.CountAsync(m => !m.IsAnswered);
+            return Ok(new { count = count });
+        }
+
         // GET: api/support/messages/my/unread-count
         [HttpGet("my/unread-count")]
         public async Task<ActionResult<int>> GetMyUnreadCount()
