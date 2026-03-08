@@ -20,8 +20,9 @@ public class SupportMessagesControllerTests : ControllerTestBase
             .ReturnsAsync((string id) => new ApplicationUser { Id = id, FirstName = "Test", LastName = "User", Email = $"{id}@test.com" });
 
         var mockEmailService = new Mock<IEmailService>();
+        var mockScopeFactory = new Mock<Microsoft.Extensions.DependencyInjection.IServiceScopeFactory>();
 
-        var controller = new SupportMessagesController(Context, mockUserManager.Object, mockEmailService.Object);
+        var controller = new SupportMessagesController(Context, mockUserManager.Object, mockEmailService.Object, mockScopeFactory.Object);
         SetControllerUser(controller, userId, roles);
         return controller;
     }

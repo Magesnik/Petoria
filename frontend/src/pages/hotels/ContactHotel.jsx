@@ -28,9 +28,9 @@ const ContactHotel = () => {
             return;
         }
         fetchHotel();
-    }, [id, user, navigate]);
+    }, [user, navigate, fetchHotel]);
 
-    const fetchHotel = async () => {
+    const fetchHotel = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${id}`);
             setHotel(data);
@@ -40,7 +40,7 @@ const ContactHotel = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, t]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

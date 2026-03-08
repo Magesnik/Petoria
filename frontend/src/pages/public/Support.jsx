@@ -139,25 +139,6 @@ const Support = () => {
                             ))}
                         </div>
                     </div>
-
-                    {/* Contact Info */}
-                    <div className="contact-cards">
-                        <div className="contact-card">
-                            <div className="contact-icon">📧</div>
-                            <h3>{t('email')}</h3>
-                            <p>petooriaa@gmail.com</p>
-                        </div>
-                        <div className="contact-card">
-                            <div className="contact-icon">📞</div>
-                            <h3>{t('phone')}</h3>
-                            <p>+1 (555) 123-4567</p>
-                        </div>
-                        <div className="contact-card">
-                            <div className="contact-icon">💬</div>
-                            <h3>{t('liveChat')}</h3>
-                            <p>{t('available24_7')}</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </>

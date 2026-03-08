@@ -17,15 +17,20 @@ const MyHotels = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        if (!isAdmin()) {
-            navigate('/');
-            return;
+    const fetchUnreadCounts = React.useCallback(async () => {
+        try {
+            const data = await api.get('/hotels/my/messages/unread-counts');
+            const counts = {};
+            data.forEach(item => {
+                counts[item.hotelId] = item.unreadCount;
+            });
+            setUnreadCounts(counts);
+        } catch (err) {
+            console.error('Error fetching unread counts:', err);
         }
-        fetchMyHotels();
-    }, [isAdmin, navigate]);
+    }, []);
 
-    const fetchMyHotels = async () => {
+    const fetchMyHotels = React.useCallback(async () => {
         try {
             const data = await api.get('/hotels/my');
             setHotels(data);
@@ -38,20 +43,15 @@ const MyHotels = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [fetchUnreadCounts]);
 
-    const fetchUnreadCounts = async () => {
-        try {
-            const data = await api.get('/hotels/my/messages/unread-counts');
-            const counts = {};
-            data.forEach(item => {
-                counts[item.hotelId] = item.unreadCount;
-            });
-            setUnreadCounts(counts);
-        } catch (err) {
-            console.error('Error fetching unread counts:', err);
+    useEffect(() => {
+        if (!isAdmin()) {
+            navigate('/');
+            return;
         }
-    };
+        fetchMyHotels();
+    }, [isAdmin, navigate, fetchMyHotels]);
 
     if (!isAdmin()) {
         return null;
@@ -63,9 +63,9 @@ const MyHotels = () => {
 
             <div className="my-hotels-container">
                 <div className="page-header">
-                    <h1>🏨 {t('myHotels')}</h1>
+                    <h1>{t('myHotels')}</h1>
                     <Link to="/create-hotel" className="btn-create">
-                        ➕ {t('addNewHotel')}
+                        {t('addNewHotel')}
                     </Link>
                 </div>
 
@@ -81,7 +81,7 @@ const MyHotels = () => {
                         <h2>{t('noHotelsYet')}</h2>
                         <p>{t('createFirstHotel')}</p>
                         <Link to="/create-hotel" className="btn-create-large">
-                            ➕ {t('create')} {t('hotels')}
+                            {t('create')} {t('hotels')}
                         </Link>
                     </div>
                 ) : (

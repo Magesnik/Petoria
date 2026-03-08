@@ -28,9 +28,9 @@ const HotelMessages = () => {
             return;
         }
         fetchData();
-    }, [id, user, navigate]);
+    }, [user, navigate, fetchData]);
 
-    const fetchData = async () => {
+    const fetchData = React.useCallback(async () => {
         try {
             // Fetch hotel details to verify ownership and get name
             const hotelData = await api.get(`/hotels/${id}`);
@@ -55,7 +55,7 @@ const HotelMessages = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, user, navigate, t]);
 
     const handleReplyClick = (messageId) => {
         setReplyingTo(messageId);

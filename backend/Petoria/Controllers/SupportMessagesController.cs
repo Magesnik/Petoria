@@ -8,6 +8,7 @@ using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
 
 using System.Security.Claims;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Petoria.Controllers
 {
@@ -19,12 +20,14 @@ namespace Petoria.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public SupportMessagesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
+        public SupportMessagesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService, IServiceScopeFactory scopeFactory)
         {
             _context = context;
             _userManager = userManager;
             _emailService = emailService;
+            _scopeFactory = scopeFactory;
         }
 
         // POST: api/support/messages
@@ -61,6 +64,9 @@ namespace Petoria.Controllers
             {
                 try
                 {
+                    using var scope = _scopeFactory.CreateScope();
+                    var scopedEmailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+
                     var emailSubject = $"New Support Message: {message.Subject}";
                     var emailBody = $@"
                         <h2>New Support Message Received</h2>
@@ -73,7 +79,7 @@ namespace Petoria.Controllers
                         <br>
                         <p><small>You can reply to this message directly from the <a href='https://petoria.com/admin/support-messages'>Petoria Admin Panel</a>.</small></p>
                     ";
-                    await _emailService.SendEmailAsync("petooriaa@gmail.com", emailSubject, emailBody);
+                    await scopedEmailService.SendEmailAsync("petooriaa@gmail.com", emailSubject, emailBody);
                 }
                 catch (Exception ex)
                 {

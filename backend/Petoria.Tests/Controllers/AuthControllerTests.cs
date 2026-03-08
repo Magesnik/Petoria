@@ -59,7 +59,7 @@ public class AuthControllerTests : ControllerTestBase
     public async Task Login_InvalidCredentials_ReturnsUnauthorized()
     {
         var model = new LoginModel { Email = "a@b.com", Password = "wrong" };
-        _mockAuthService.Setup(s => s.LoginAsync(model)).ReturnsAsync((AuthResponse?)null);
+        _mockAuthService.Setup(s => s.LoginAsync(model)).ReturnsAsync(null as AuthResponse);
 
         var result = await _controller.Login(model);
 
@@ -80,7 +80,7 @@ public class AuthControllerTests : ControllerTestBase
     [Fact]
     public async Task GoogleLogin_Failure_ReturnsUnauthorized()
     {
-        _mockAuthService.Setup(s => s.GoogleLoginAsync("bad_token")).ReturnsAsync((AuthResponse?)null);
+        _mockAuthService.Setup(s => s.GoogleLoginAsync("bad_token")).ReturnsAsync(null as AuthResponse);
 
         var result = await _controller.GoogleLogin(new GoogleLoginModel { GoogleToken = "bad_token" });
 

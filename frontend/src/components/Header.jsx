@@ -50,7 +50,7 @@ const Header = () => {
   const fetchUserData = async () => {
     try {
       const messagesData = await api.get('/hotels/my/messages/unread-responses-count');
-      
+
       let supportUnreadCount = 0;
       try {
         const supportMessagesData = await api.get('/support/messages/my/unread-count');
@@ -135,8 +135,8 @@ const Header = () => {
             <li><Link to="/about" className="nav-link">{t('about')}</Link></li>
             {isAdmin() && (
               <>
-                <li><Link to="/my-hotels" className="nav-link admin-link">🏨 {t('myHotels')}</Link></li>
-                <li><Link to="/create-hotel" className="nav-link admin-link">➕ {t('createHotel')}</Link></li>
+                <li><Link to="/my-hotels" className="nav-link admin-link">{t('myHotels')}</Link></li>
+                <li><Link to="/create-hotel" className="nav-link admin-link">{t('createHotel')}</Link></li>
               </>
             )}
             {isSuperAdmin() && (
@@ -264,8 +264,8 @@ const Header = () => {
             <li><Link to="/about" className="mobile-nav-link" onClick={closeMobileMenu}>{t('about')}</Link></li>
             {isAdmin() && (
               <>
-                <li><Link to="/my-hotels" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>🏨 {t('myHotels')}</Link></li>
-                <li><Link to="/create-hotel" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>➕ {t('createHotel')}</Link></li>
+                <li><Link to="/my-hotels" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>{t('myHotels')}</Link></li>
+                <li><Link to="/create-hotel" className="mobile-nav-link admin-link" onClick={closeMobileMenu}>{t('createHotel')}</Link></li>
               </>
             )}
             {isSuperAdmin() && (

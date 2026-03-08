@@ -15,11 +15,7 @@ const Favorites = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchFavoriteHotels();
-    }, [favorites, user]);
-
-    const fetchFavoriteHotels = async () => {
+    const fetchFavoriteHotels = React.useCallback(async () => {
         if (!user) {
             setFavoriteHotels([]);
             setLoading(false);
@@ -57,7 +53,11 @@ const Favorites = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, favorites.length, favoritesLoading, getFavoritesWithDetails]);
+
+    useEffect(() => {
+        fetchFavoriteHotels();
+    }, [fetchFavoriteHotels]);
 
     return (
         <>

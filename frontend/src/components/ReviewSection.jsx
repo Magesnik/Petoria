@@ -15,9 +15,9 @@ const ReviewSection = ({ hotelId }) => {
 
     useEffect(() => {
         fetchReviews();
-    }, [hotelId]);
+    }, [fetchReviews]);
 
-    const fetchReviews = async () => {
+    const fetchReviews = React.useCallback(async () => {
         setLoading(true);
         try {
             const data = await api.get(`/hotels/${hotelId}/reviews`);
@@ -35,7 +35,7 @@ const ReviewSection = ({ hotelId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [hotelId]);
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();

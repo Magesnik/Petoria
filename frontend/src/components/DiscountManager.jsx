@@ -21,9 +21,9 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
 
     useEffect(() => {
         fetchDiscounts();
-    }, [hotelId]);
+    }, [fetchDiscounts]);
 
-    const fetchDiscounts = async () => {
+    const fetchDiscounts = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${hotelId}/discounts`);
             setDiscounts(data);
@@ -33,7 +33,7 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [hotelId, t]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

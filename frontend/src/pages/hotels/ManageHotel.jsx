@@ -45,9 +45,9 @@ const ManageHotel = () => {
             return;
         }
         fetchHotel();
-    }, [id, isAdmin, navigate]);
+    }, [isAdmin, navigate, fetchHotel]);
 
-    const fetchHotel = async () => {
+    const fetchHotel = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${id}`);
 
@@ -88,22 +88,22 @@ const ManageHotel = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, user, isSuperAdmin, navigate, t]);
 
-    const fetchRoomTypes = async () => {
+    const fetchRoomTypes = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${id}/rooms`);
             setRoomTypes(data);
         } catch (err) {
             console.error('Error fetching room types:', err);
         }
-    };
+    }, [id]);
 
     useEffect(() => {
         if (hotel) {
             fetchRoomTypes();
         }
-    }, [hotel]);
+    }, [hotel, fetchRoomTypes]);
 
     // Image Handlers (from CreateHotel)
     const uploadFile = async (file, isMain = false) => {
@@ -210,14 +210,14 @@ const ManageHotel = () => {
         setRoomTypes(rooms);
     };
 
-    const fetchModerators = async () => {
+    const fetchModerators = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${id}/moderators`);
             setModerators(data);
         } catch (err) {
             console.error('Error fetching moderators:', err);
         }
-    };
+    }, [id]);
 
     const handleAddModerator = async (e) => {
         e.preventDefault();
@@ -257,7 +257,7 @@ const ManageHotel = () => {
         if (activeTab === 'moderators') {
             fetchModerators();
         }
-    }, [activeTab]);
+    }, [activeTab, fetchModerators]);
 
     if (!isAdmin()) return null;
 

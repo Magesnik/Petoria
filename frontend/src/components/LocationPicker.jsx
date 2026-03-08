@@ -145,7 +145,7 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
                 setMapCenter(newPosition);
             }
         }
-    }, [initialLat, initialLng]);
+    }, [initialLat, initialLng, position]);
 
     return (
         <div className="location-picker">

@@ -49,9 +49,7 @@ const Deals = () => {
 
     const tabs = [
         { id: 'discounted', label: t('discounts'), icon: '🏷️' },
-        { id: 'last-minute', label: t('lastMinute'), icon: '⏰' },
-        { id: 'seasonal', label: t('seasonal'), icon: '🎉' },
-        { id: 'packages', label: t('packages'), icon: '💝' }
+        { id: 'last-minute', label: t('lastMinute'), icon: '⏰' }
     ];
 
     return (

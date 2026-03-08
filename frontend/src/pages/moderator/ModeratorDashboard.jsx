@@ -11,11 +11,20 @@ const ModeratorDashboard = () => {
     const [error, setError] = useState(null);
     const { t } = useLanguage();
 
-    useEffect(() => {
-        fetchModeratedHotels();
+    const fetchUnreadCounts = React.useCallback(async () => {
+        try {
+            const data = await api.get('/hotels/my/messages/unread-counts');
+            const counts = {};
+            data.forEach(item => {
+                counts[item.hotelId] = item.unreadCount;
+            });
+            setUnreadCounts(counts);
+        } catch (err) {
+            console.error('Error fetching unread counts:', err);
+        }
     }, []);
 
-    const fetchModeratedHotels = async () => {
+    const fetchModeratedHotels = React.useCallback(async () => {
         try {
             setLoading(true);
             const data = await api.get('/hotels/moderated');
@@ -27,20 +36,11 @@ const ModeratorDashboard = () => {
             setError(t('failedToLoadHotels') || 'Failed to load hotels');
             setLoading(false);
         }
-    };
+    }, [fetchUnreadCounts, t]);
 
-    const fetchUnreadCounts = async () => {
-        try {
-            const data = await api.get('/hotels/my/messages/unread-counts');
-            const counts = {};
-            data.forEach(item => {
-                counts[item.hotelId] = item.unreadCount;
-            });
-            setUnreadCounts(counts);
-        } catch (err) {
-            console.error('Error fetching unread counts:', err);
-        }
-    };
+    useEffect(() => {
+        fetchModeratedHotels();
+    }, [fetchModeratedHotels]);
 
     if (loading) return <div className="moderator-dashboard loading"><div className="spinner"></div></div>;
 

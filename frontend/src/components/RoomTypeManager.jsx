@@ -26,9 +26,9 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         if (hotelId) {
             fetchRoomTypes();
         }
-    }, [hotelId]);
+    }, [hotelId, fetchRoomTypes]);
 
-    const fetchRoomTypes = async () => {
+    const fetchRoomTypes = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${hotelId}/rooms`);
             setRoomTypes(data);
@@ -42,7 +42,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [hotelId, onRoomsChange, t]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

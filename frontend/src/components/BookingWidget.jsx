@@ -7,6 +7,13 @@ import { useCart } from '../context/CartContext';
 import DateRangeCalendar from './DateRangeCalendar';
 import AddToCartDialog from './AddToCartDialog';
 import './BookingWidget.css';
+// Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
+const toLocalDateStr = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
 
 const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) => {
     const { user } = useAuth();
@@ -37,25 +44,69 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
     // Add to cart dialog
     const [cartDialogItem, setCartDialogItem] = useState(null);
 
-    // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
-    const toLocalDateStr = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    };
+    const fetchRoomTypes = React.useCallback(async () => {
+        try {
+            const data = await api.get(`/hotels/${hotelId}/rooms`);
+            setRoomTypes(data);
+
+            // Auto-select first room type if available
+            if (data.length > 0) {
+                setSelectedRoomType(data[0]);
+            }
+        } catch (err) {
+            console.error('Error fetching room types:', err);
+            setError(t('errorLoadingRoomTypes'));
+        } finally {
+            setLoading(false);
+        }
+    }, [hotelId, t]);
+
+    const fetchAvailability = React.useCallback(async () => {
+        try {
+            // Fetch 90 days from today
+            const fromDate = toLocalDateStr(new Date());
+            const toDate = new Date();
+            toDate.setDate(toDate.getDate() + 90);
+            const toDateStr = toLocalDateStr(toDate);
+
+            const data = await api.get(
+                `/hotels/${hotelId}/availability?from=${fromDate}&to=${toDateStr}`
+            );
+
+            setAvailability(data);
+        } catch (err) {
+            console.error('Error fetching availability:', err);
+        }
+    }, [hotelId]);
+
+    const calculatePrice = React.useCallback(async () => {
+        if (!selectedRoomType || !checkInDate || !checkOutDate) return;
+
+        try {
+            const data = await api.post('/reservations/calculate', {
+                roomTypeId: selectedRoomType.id,
+                checkInDate,
+                checkOutDate,
+                numberOfRooms
+            });
+
+            setPriceInfo(data);
+        } catch (err) {
+            console.error('Error calculating price:', err);
+        }
+    }, [selectedRoomType, checkInDate, checkOutDate, numberOfRooms]);
 
     // Fetch room types when component mounts
     useEffect(() => {
         fetchRoomTypes();
-    }, [hotelId]);
+    }, [fetchRoomTypes]);
 
     // Fetch availability when room type changes
     useEffect(() => {
         if (selectedRoomType) {
             fetchAvailability();
         }
-    }, [selectedRoomType]);
+    }, [selectedRoomType, fetchAvailability]);
 
     // Calculate price when dates or room selection changes
     useEffect(() => {
@@ -90,59 +141,7 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
             setPriceInfo(null);
             setUnavailableReason('');
         }
-    }, [selectedRoomType, checkInDate, checkOutDate, numberOfRooms, availability]);
-
-    const fetchRoomTypes = async () => {
-        try {
-            const data = await api.get(`/hotels/${hotelId}/rooms`);
-            setRoomTypes(data);
-
-            // Auto-select first room type if available
-            if (data.length > 0) {
-                setSelectedRoomType(data[0]);
-            }
-        } catch (err) {
-            console.error('Error fetching room types:', err);
-            setError(t('errorLoadingRoomTypes'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchAvailability = async () => {
-        try {
-            // Fetch 90 days from today
-            const fromDate = toLocalDateStr(new Date());
-            const toDate = new Date();
-            toDate.setDate(toDate.getDate() + 90);
-            const toDateStr = toLocalDateStr(toDate);
-
-            const data = await api.get(
-                `/hotels/${hotelId}/availability?from=${fromDate}&to=${toDateStr}`
-            );
-
-            setAvailability(data);
-        } catch (err) {
-            console.error('Error fetching availability:', err);
-        }
-    };
-
-    const calculatePrice = async () => {
-        if (!selectedRoomType || !checkInDate || !checkOutDate) return;
-
-        try {
-            const data = await api.post('/reservations/calculate', {
-                roomTypeId: selectedRoomType.id,
-                checkInDate,
-                checkOutDate,
-                numberOfRooms
-            });
-
-            setPriceInfo(data);
-        } catch (err) {
-            console.error('Error calculating price:', err);
-        }
-    };
+    }, [selectedRoomType, checkInDate, checkOutDate, numberOfRooms, availability, calculatePrice]);
 
     const handleAddToCart = async () => {
         if (!user) {

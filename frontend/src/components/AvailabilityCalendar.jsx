@@ -3,22 +3,22 @@ import { api } from '../utils/api';
 import { useLanguage } from '../context/LanguageContext';
 import './AvailabilityCalendar.css';
 
+// Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
+const toLocalDateStr = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
 const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false, onDateSelect }) => {
     const { t, language } = useLanguage();
-    const safeRoomTypes = Array.isArray(roomTypes) ? roomTypes : [];
+    const safeRoomTypes = React.useMemo(() => Array.isArray(roomTypes) ? roomTypes : [], [roomTypes]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [availability, setAvailability] = useState([]);
     const [selectedRoomType, setSelectedRoomType] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-
-    // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
-    const toLocalDateStr = (date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    };
 
     // Selection state for bulk edit
     const [selectionStart, setSelectionStart] = useState(null);
@@ -37,9 +37,9 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
         if (selectedRoomType) {
             fetchAvailability();
         }
-    }, [selectedRoomType, currentMonth]);
+    }, [selectedRoomType, fetchAvailability]);
 
-    const fetchAvailability = async () => {
+    const fetchAvailability = React.useCallback(async () => {
         try {
             const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
             const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 2, 0);
@@ -55,7 +55,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
         } catch (err) {
             console.error('Error fetching availability:', err);
         }
-    };
+    }, [hotelId, currentMonth]);
 
     const getAvailabilityForDate = (date) => {
         if (!selectedRoomType) return null;

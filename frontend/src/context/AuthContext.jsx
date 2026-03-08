@@ -10,14 +10,16 @@ export const AuthProvider = ({ children }) => {
     const checkUser = async () => {
         try {
             const data = await api.get('/profile');
-            if (data) {
+            // Ensure data is a valid object before setting it as user
+            // This prevents issues where 'null', '""', or HTML strings are treated as valid users
+            if (data && typeof data === 'object') {
                 // Fix avatar URL if it's a relative path
                 if (data.avatarUrl && data.avatarUrl.startsWith('/uploads/')) {
                     data.avatarUrl = getAssetUrl(data.avatarUrl);
                 }
                 setUser(data);
             } else {
-                // 200 OK but null data means not logged in
+                // 200 OK but null or invalid data means not logged in
                 localStorage.removeItem('jwt_token');
                 setUser(null);
             }

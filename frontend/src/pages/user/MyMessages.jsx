@@ -16,15 +16,28 @@ const MyMessages = () => {
     const [error, setError] = useState('');
     const [filter, setFilter] = useState('all'); // 'all', 'answered', 'pending'
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
+    const markSupportMessagesAsRead = React.useCallback(async (messages) => {
+        for (const msg of messages) {
+            try {
+                await api.put(`/support/messages/${msg.id}/read`);
+            } catch (err) {
+                console.error('Error marking support message as read:', err);
+            }
         }
-        fetchMessages();
-    }, [user, navigate]);
+    }, []);
 
-    const fetchMessages = async () => {
+    const markMessagesAsRead = React.useCallback(async (unreadMessages) => {
+        // We mark them as read in the background without blocking UI
+        for (const msg of unreadMessages) {
+            try {
+                await api.put(`/hotels/my/messages/${msg.id}/read`);
+            } catch (err) {
+                console.error('Error marking message as read:', err);
+            }
+        }
+    }, []);
+
+    const fetchMessages = React.useCallback(async () => {
         try {
             let hotelMessages = [];
             let supportMessages = [];
@@ -88,28 +101,15 @@ const MyMessages = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [t, markMessagesAsRead, markSupportMessagesAsRead]);
 
-    const markSupportMessagesAsRead = async (messages) => {
-        for (const msg of messages) {
-            try {
-                await api.put(`/support/messages/${msg.id}/read`);
-            } catch (err) {
-                console.error('Error marking support message as read:', err);
-            }
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
         }
-    };
-
-    const markMessagesAsRead = async (unreadMessages) => {
-        // We mark them as read in the background without blocking UI
-        for (const msg of unreadMessages) {
-            try {
-                await api.put(`/hotels/my/messages/${msg.id}/read`);
-            } catch (err) {
-                console.error('Error marking message as read:', err);
-            }
-        }
-    };
+        fetchMessages();
+    }, [user, navigate, fetchMessages]);
 
     const handleReplyClick = (hotelId) => {
         navigate(`/hotel/${hotelId}/contact`);
@@ -126,7 +126,7 @@ const MyMessages = () => {
             } else if (type === 'support') {
                 await api.delete(`/support/messages/my/${id}`);
             }
-            
+
             // Remove from local state
             setMessages(prev => prev.filter(m => !(m.id === id && m.type === type)));
         } catch (err) {
@@ -173,19 +173,19 @@ const MyMessages = () => {
                 ) : (
                     <>
                         <div className="messages-filters">
-                            <button 
+                            <button
                                 className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
                                 onClick={() => setFilter('all')}
                             >
                                 {t('filterAll') || t('all') || 'All'}
                             </button>
-                            <button 
+                            <button
                                 className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
                                 onClick={() => setFilter('pending')}
                             >
                                 {t('filterPending') || t('pending') || 'Pending'}
                             </button>
-                            <button 
+                            <button
                                 className={`filter-btn ${filter === 'answered' ? 'active' : ''}`}
                                 onClick={() => setFilter('answered')}
                             >
@@ -198,74 +198,74 @@ const MyMessages = () => {
                                 if (filter === 'pending') return !msg.isAnswered;
                                 return true;
                             }).map(msg => (
-                            <div key={`${msg.type}-${msg.id}`} className={`message-card ${msg.isAnswered ? 'answered' : 'pending'}`}>
-                                <div className="message-header-row">
-                                    <div className="hotel-info">
-                                        <span className="hotel-name-label">{t('to')}:</span>
-                                        <Link to={msg.linkTo} className="hotel-link">
-                                            {msg.displayTo}
-                                        </Link>
+                                <div key={`${msg.type}-${msg.id}`} className={`message-card ${msg.isAnswered ? 'answered' : 'pending'}`}>
+                                    <div className="message-header-row">
+                                        <div className="hotel-info">
+                                            <span className="hotel-name-label">{t('to')}:</span>
+                                            <Link to={msg.linkTo} className="hotel-link">
+                                                {msg.displayTo}
+                                            </Link>
+                                        </div>
+                                        <div className="message-date">{formatDate(msg.createdAt)}</div>
                                     </div>
-                                    <div className="message-date">{formatDate(msg.createdAt)}</div>
-                                </div>
 
-                                <h3 className="message-subject">{msg.subject}</h3>
-                                <p className="message-body">{msg.message}</p>
+                                    <h3 className="message-subject">{msg.subject}</h3>
+                                    <p className="message-body">{msg.message}</p>
 
-                                <div className="message-status">
-                                    {msg.isAnswered ? (
-                                        <div className="answer-section">
-                                            <div className="answer-header">
-                                                <span className="status-badge answered">✓ {t('responseReceived') || 'Response Received'}</span>
-                                                <span className="answer-date">{formatDate(msg.answeredAt)}</span>
+                                    <div className="message-status">
+                                        {msg.isAnswered ? (
+                                            <div className="answer-section">
+                                                <div className="answer-header">
+                                                    <span className="status-badge answered">✓ {t('responseReceived') || 'Response Received'}</span>
+                                                    <span className="answer-date">{formatDate(msg.answeredAt)}</span>
+                                                </div>
+                                                <div className="admin-response">
+                                                    <strong>{t('hotelResponse') || 'Hotel Response'}:</strong>
+                                                    <p>{msg.adminResponse}</p>
+                                                </div>
+
+                                                {msg.type === 'hotel' && (
+                                                    <button
+                                                        className="btn-reply-again"
+                                                        onClick={() => handleReplyClick(msg.hotelId)}
+                                                    >
+                                                        📝 {t('sendAnotherMessage')}
+                                                    </button>
+                                                )}
+                                                {msg.type === 'support' && (
+                                                    <button
+                                                        className="btn-reply-again"
+                                                        onClick={() => navigate('/support')}
+                                                    >
+                                                        📝 {t('sendAnotherMessage')}
+                                                    </button>
+                                                )}
                                             </div>
-                                            <div className="admin-response">
-                                                <strong>{t('hotelResponse') || 'Hotel Response'}:</strong>
-                                                <p>{msg.adminResponse}</p>
+                                        ) : (
+                                            <div className="pending-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span className="status-badge pending">⏳ {t('waitingForResponse') || 'Waiting for response'}</span>
+                                                <button
+                                                    className="btn-danger"
+                                                    style={{ padding: '6px 12px', fontSize: '0.9rem', borderRadius: '6px', border: 'none', background: '#dc3545', color: 'white', cursor: 'pointer' }}
+                                                    onClick={() => handleDeleteMessage(msg.id, msg.type)}
+                                                >
+                                                    🗑️ {t('delete') || 'Delete'}
+                                                </button>
                                             </div>
-
-                                            {msg.type === 'hotel' && (
-                                                <button
-                                                    className="btn-reply-again"
-                                                    onClick={() => handleReplyClick(msg.hotelId)}
-                                                >
-                                                    📝 {t('sendAnotherMessage')}
-                                                </button>
-                                            )}
-                                            {msg.type === 'support' && (
-                                                <button
-                                                    className="btn-reply-again"
-                                                    onClick={() => navigate('/support')}
-                                                >
-                                                    📝 {t('sendAnotherMessage')}
-                                                </button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="pending-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span className="status-badge pending">⏳ {t('waitingForResponse') || 'Waiting for response'}</span>
-                                            <button 
-                                                className="btn-danger" 
-                                                style={{ padding: '6px 12px', fontSize: '0.9rem', borderRadius: '6px', border: 'none', background: '#dc3545', color: 'white', cursor: 'pointer' }}
-                                                onClick={() => handleDeleteMessage(msg.id, msg.type)}
-                                            >
-                                                🗑️ {t('delete') || 'Delete'}
-                                            </button>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {messages.filter(msg => {
-                            if (filter === 'answered') return msg.isAnswered;
-                            if (filter === 'pending') return !msg.isAnswered;
-                            return true;
-                        }).length === 0 && (
-                            <div className="empty-state" style={{ padding: '2rem', textAlign: 'center' }}>
-                                <p>{t('noMessagesFilter') || 'No messages match the selected filter.'}</p>
-                            </div>
-                        )}
-                    </div>
+                            ))}
+                            {messages.filter(msg => {
+                                if (filter === 'answered') return msg.isAnswered;
+                                if (filter === 'pending') return !msg.isAnswered;
+                                return true;
+                            }).length === 0 && (
+                                    <div className="empty-state" style={{ padding: '2rem', textAlign: 'center' }}>
+                                        <p>{t('noMessagesFilter') || 'No messages match the selected filter.'}</p>
+                                    </div>
+                                )}
+                        </div>
                     </>
                 )}
             </div>

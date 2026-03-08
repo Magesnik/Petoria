@@ -13,9 +13,9 @@ const CommentsSection = ({ hotelId }) => {
 
     useEffect(() => {
         fetchComments();
-    }, [hotelId]);
+    }, [fetchComments]);
 
-    const fetchComments = async () => {
+    const fetchComments = React.useCallback(async () => {
         setLoading(true);
         try {
             const data = await api.get(`/hotels/${hotelId}/comments`);
@@ -26,7 +26,7 @@ const CommentsSection = ({ hotelId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [hotelId]);
 
     const handleCommentAdded = (newComment) => {
         setComments([newComment, ...comments]);

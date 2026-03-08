@@ -142,13 +142,13 @@ const Hotels = () => {
         } else {
             fetchHotelsForMap();
         }
-    }, [filters, searchQuery, view]);
+    }, [filters, searchQuery, view, fetchHotels, fetchHotelsForMap]);
 
-    const fetchFilterData = async () => {
+    const fetchFilterData = React.useCallback(async () => {
         try {
             // Fetch all filter data in parallel
             const [citiesData, countriesData, amenitiesData, priceRangeData] = await Promise.all([
-                api.get('/hotels/cities'),
+                api.get('/hotels/cities'), // Ensure these API calls trigger correctly 
                 api.get('/hotels/countries'),
                 api.get('/hotels/amenities'),
                 api.get('/hotels/price-range')
@@ -161,9 +161,9 @@ const Hotels = () => {
         } catch (err) {
             console.error('Error fetching filter data:', err);
         }
-    };
+    }, []);
 
-    const fetchHotels = async () => {
+    const fetchHotels = React.useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -191,9 +191,9 @@ const Hotels = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, filters]);
 
-    const fetchHotelsForMap = async () => {
+    const fetchHotelsForMap = React.useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -221,7 +221,7 @@ const Hotels = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchQuery, filters]);
 
     const handleFilterChange = (filterName, value) => {
         setFilters(prev => ({

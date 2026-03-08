@@ -23,9 +23,9 @@ const PromoCodeManager = ({ hotelId }) => {
         if (hotelId) {
             fetchPromoCodes();
         }
-    }, [hotelId]);
+    }, [hotelId, fetchPromoCodes]);
 
-    const fetchPromoCodes = async () => {
+    const fetchPromoCodes = React.useCallback(async () => {
         try {
             setLoading(true);
             const data = await api.get(`/hotels/${hotelId}/promocodes`);
@@ -36,7 +36,7 @@ const PromoCodeManager = ({ hotelId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [hotelId, t]);
 
     const handleInputChange = (e) => {
         let { name, value } = e.target;

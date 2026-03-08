@@ -18,15 +18,7 @@ const PurchaseHistory = () => {
 
     const [activeTab, setActiveTab] = useState('active'); // 'active', 'past', 'cancelled'
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchReservations();
-    }, [user, navigate]);
-
-    const fetchReservations = async () => {
+    const fetchReservations = React.useCallback(async () => {
         try {
             const data = await api.get('/reservations/my');
             setReservations(data);
@@ -36,7 +28,15 @@ const PurchaseHistory = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [t]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchReservations();
+    }, [user, navigate, fetchReservations]);
 
     const handleCancelReservation = async (reservationId) => {
         if (!window.confirm(t('confirmCancelReservation'))) {
