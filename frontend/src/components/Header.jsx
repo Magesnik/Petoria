@@ -50,7 +50,16 @@ const Header = () => {
   const fetchUserData = async () => {
     try {
       const messagesData = await api.get('/hotels/my/messages/unread-responses-count');
-      setUnreadCount(messagesData.count);
+      
+      let supportUnreadCount = 0;
+      try {
+        const supportMessagesData = await api.get('/support/messages/my/unread-count');
+        supportUnreadCount = supportMessagesData.count || 0;
+      } catch (e) {
+        console.warn('Could not fetch support unread count', e);
+      }
+
+      setUnreadCount((messagesData.count || 0) + supportUnreadCount);
 
       // Check if user is a moderator for any hotel
       // We can use the /hotels/moderated endpoint. If it returns any hotels, they are a moderator.
@@ -285,6 +294,12 @@ const Header = () => {
                   <Link to="/cart" className="mobile-nav-link" onClick={closeMobileMenu}>
                     🛒 {t('cart')}
                     {cartCount > 0 && <span className="mobile-cart-badge">{cartCount}</span>}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/my-messages" className="mobile-nav-link" onClick={closeMobileMenu}>
+                    🔔 {t('myMessages') || 'My Messages'}
+                    {unreadCount > 0 && <span className="mobile-cart-badge">{unreadCount}</span>}
                   </Link>
                 </li>
                 <li><Link to="/purchase-history" className="mobile-nav-link" onClick={closeMobileMenu}>🧾 {t('purchaseHistory')}</Link></li>

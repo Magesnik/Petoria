@@ -14,6 +14,7 @@ const MyMessages = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [filter, setFilter] = useState('all'); // 'all', 'answered', 'pending'
 
     useEffect(() => {
         if (!user) {
@@ -170,8 +171,33 @@ const MyMessages = () => {
                         </Link>
                     </div>
                 ) : (
-                    <div className="messages-list">
-                        {messages.map(msg => (
+                    <>
+                        <div className="messages-filters">
+                            <button 
+                                className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+                                onClick={() => setFilter('all')}
+                            >
+                                {t('all') || 'All'}
+                            </button>
+                            <button 
+                                className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
+                                onClick={() => setFilter('pending')}
+                            >
+                                {t('pending') || 'Pending'}
+                            </button>
+                            <button 
+                                className={`filter-btn ${filter === 'answered' ? 'active' : ''}`}
+                                onClick={() => setFilter('answered')}
+                            >
+                                {t('answered') || 'Answered'}
+                            </button>
+                        </div>
+                        <div className="messages-list">
+                            {messages.filter(msg => {
+                                if (filter === 'answered') return msg.isAnswered;
+                                if (filter === 'pending') return !msg.isAnswered;
+                                return true;
+                            }).map(msg => (
                             <div key={`${msg.type}-${msg.id}`} className={`message-card ${msg.isAnswered ? 'answered' : 'pending'}`}>
                                 <div className="message-header-row">
                                     <div className="hotel-info">
@@ -230,7 +256,17 @@ const MyMessages = () => {
                                 </div>
                             </div>
                         ))}
+                        {messages.filter(msg => {
+                            if (filter === 'answered') return msg.isAnswered;
+                            if (filter === 'pending') return !msg.isAnswered;
+                            return true;
+                        }).length === 0 && (
+                            <div className="empty-state" style={{ padding: '2rem', textAlign: 'center' }}>
+                                <p>{t('noMessagesFilter') || 'No messages match the selected filter.'}</p>
+                            </div>
+                        )}
                     </div>
+                    </>
                 )}
             </div>
         </div>

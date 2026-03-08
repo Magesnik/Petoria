@@ -21,14 +21,15 @@ public class DealsController : ControllerBase
     public async Task<ActionResult<IEnumerable<DiscountedHotelResponseDto>>> GetDiscountedHotels()
     {
         var today = DateTime.UtcNow;
+        var thirtyDaysFromNow = today.AddDays(30);
 
-        // Get hotels with active discounts
+        // Get hotels with active discounts within the next 30 days
         var hotelsWithActiveDiscounts = await _context.RoomTypes
             .Include(rt => rt.Hotel)
             .Include(rt => rt.Discounts)
             .Where(rt => rt.Discounts.Any(d => 
-                d.StartDate <= today && 
-                d.EndDate >= today))
+                d.EndDate >= today && 
+                d.StartDate <= thirtyDaysFromNow))
             .Select(rt => new
             {
                 HotelId = rt.Hotel!.Id,
@@ -41,7 +42,7 @@ public class DealsController : ControllerBase
                 HotelDescription = rt.Hotel.Description,
                 RoomPrice = rt.PricePerNight,
                 MaxDiscount = rt.Discounts
-                    .Where(d => d.StartDate <= today && d.EndDate >= today)
+                    .Where(d => d.EndDate >= today && d.StartDate <= thirtyDaysFromNow)
                     .OrderByDescending(d => d.DiscountPercentage)
                     .Select(d => d.DiscountPercentage)
                     .FirstOrDefault()

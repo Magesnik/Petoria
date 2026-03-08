@@ -167,3 +167,49 @@
     background: #667eea;
     color: white;
 }
+
+/* Filters */
+.messages-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #475569;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .filter-btn {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+.filter-btn:hover {
+    background: #f1f5f9;
+}
+
+[data-theme='dark'] .filter-btn:hover {
+    background: #334155;
+}
+
+.filter-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+[data-theme='dark'] .filter-btn.active {
+    background: #818cf8;
+    color: white;
+    border-color: #818cf8;
+}

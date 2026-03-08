@@ -22,18 +22,11 @@
     z-index: 1;
 }
 
-/* Footer Top */
 .footer-top {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1.5fr;
     gap: 40px;
-    margin-bottom: 50px;
     padding-bottom: 40px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='dark'] .footer-top {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-column {
@@ -269,7 +262,6 @@
     .footer-top {
         grid-template-columns: 1fr;
         gap: 30px;
-        margin-bottom: 35px;
         padding-bottom: 30px;
     }
 
@@ -329,7 +321,6 @@
 
     .footer-top {
         gap: 25px;
-        margin-bottom: 30px;
     }
 
     .footer-logo {

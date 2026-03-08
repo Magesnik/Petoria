@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.Core.Contracts;
 using Petoria.Core.DTOs.SupportMessage;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
@@ -17,11 +18,13 @@ namespace Petoria.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _emailService;
 
-        public SupportMessagesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public SupportMessagesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         // POST: api/support/messages
@@ -52,6 +55,29 @@ namespace Petoria.Controllers
             await _context.SaveChangesAsync();
 
             var user = await _userManager.FindByIdAsync(userId);
+
+            // Send Email Notification to Petoria Support
+            try
+            {
+                var emailSubject = $"New Support Message: {message.Subject}";
+                var emailBody = $@"
+                    <h2>New Support Message Received</h2>
+                    <p><strong>From:</strong> {user.FirstName} {user.LastName} ({user.Email})</p>
+                    <p><strong>Subject:</strong> {message.Subject}</p>
+                    <p><strong>Message:</strong></p>
+                    <div style='background-color: #f9f9f9; padding: 15px; border-left: 4px solid #007bff; margin-top: 10px;'>
+                        {message.Message.Replace("\n", "<br>")}
+                    </div>
+                    <br>
+                    <p><small>You can reply to this message directly from the <a href='https://petoria.com/admin/support-messages'>Petoria Admin Panel</a>.</small></p>
+                ";
+                await _emailService.SendEmailAsync("petooriaa@gmail.com", emailSubject, emailBody);
+            }
+            catch (Exception ex)
+            {
+                // We log the exception but don't fail the request if email sending fails.
+                Console.WriteLine($"Failed to send support email: {ex.Message}");
+            }
 
             return CreatedAtAction(nameof(GetMyMessages), new { id = message.Id }, new SupportMessageDto
             {
@@ -140,16 +166,20 @@ namespace Petoria.Controllers
             return NoContent();
         }
 
-        // GET: api/support/messages/admin/unread-count
-        [HttpGet("admin/unread-count")]
-        [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
-        public async Task<ActionResult<int>> GetAdminUnreadCount()
+        // GET: api/support/messages/my/unread-count
+        [HttpGet("my/unread-count")]
+        public async Task<ActionResult<int>> GetMyUnreadCount()
         {
-            // Count messages that are NOT answered yet
-            var count = await _context.SupportMessages
-                .CountAsync(m => !m.IsAnswered);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
 
-            return Ok(count);
+            // Count messages that the user sent, which are answered but the user hasn't read them yet
+            var count = await _context.SupportMessages
+                .CountAsync(m => m.UserId == userId && m.IsAnswered && !m.IsReadByUser);
+
+            // We must return an object with a 'count' field to match frontend expectations
+            // Frontend expects: data.count
+            return Ok(new { count = count });
         }
 
         // PUT: api/support/messages/{id}/read

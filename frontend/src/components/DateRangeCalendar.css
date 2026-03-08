@@ -286,6 +286,11 @@
     border-color: rgba(234, 179, 8, 0.5);
 }
 
+.date-range-calendar .day-cell.discounted .day-number {
+    transform: translateY(4px);
+    transition: transform 0.2s ease;
+}
+
 .date-range-calendar .discount-badge {
     position: absolute;
     top: 1px;
