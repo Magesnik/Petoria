@@ -34,6 +34,7 @@ const Home = () => {
         const newConnection = new signalR.HubConnectionBuilder()
             .withUrl(`${getBaseUrl()}/hubs/liveusers`)
             .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Error)
             .build();
 
         newConnection.on("UpdateUserCount", (count) => {

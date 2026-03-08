@@ -56,28 +56,31 @@ namespace Petoria.Controllers
 
             var user = await _userManager.FindByIdAsync(userId);
 
-            // Send Email Notification to Petoria Support
-            try
+            // Send Email Notification to Petoria Support in the background
+            _ = Task.Run(async () =>
             {
-                var emailSubject = $"New Support Message: {message.Subject}";
-                var emailBody = $@"
-                    <h2>New Support Message Received</h2>
-                    <p><strong>From:</strong> {user.FirstName} {user.LastName} ({user.Email})</p>
-                    <p><strong>Subject:</strong> {message.Subject}</p>
-                    <p><strong>Message:</strong></p>
-                    <div style='background-color: #f9f9f9; padding: 15px; border-left: 4px solid #007bff; margin-top: 10px;'>
-                        {message.Message.Replace("\n", "<br>")}
-                    </div>
-                    <br>
-                    <p><small>You can reply to this message directly from the <a href='https://petoria.com/admin/support-messages'>Petoria Admin Panel</a>.</small></p>
-                ";
-                await _emailService.SendEmailAsync("petooriaa@gmail.com", emailSubject, emailBody);
-            }
-            catch (Exception ex)
-            {
-                // We log the exception but don't fail the request if email sending fails.
-                Console.WriteLine($"Failed to send support email: {ex.Message}");
-            }
+                try
+                {
+                    var emailSubject = $"New Support Message: {message.Subject}";
+                    var emailBody = $@"
+                        <h2>New Support Message Received</h2>
+                        <p><strong>From:</strong> {user.FirstName} {user.LastName} ({user.Email})</p>
+                        <p><strong>Subject:</strong> {message.Subject}</p>
+                        <p><strong>Message:</strong></p>
+                        <div style='background-color: #f9f9f9; padding: 15px; border-left: 4px solid #007bff; margin-top: 10px;'>
+                            {message.Message.Replace("\n", "<br>")}
+                        </div>
+                        <br>
+                        <p><small>You can reply to this message directly from the <a href='https://petoria.com/admin/support-messages'>Petoria Admin Panel</a>.</small></p>
+                    ";
+                    await _emailService.SendEmailAsync("petooriaa@gmail.com", emailSubject, emailBody);
+                }
+                catch (Exception ex)
+                {
+                    // We log the exception but don't fail the request if email sending fails.
+                    Console.WriteLine($"Failed to send support email: {ex.Message}");
+                }
+            });
 
             return Ok(new SupportMessageDto
             {
