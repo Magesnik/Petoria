@@ -115,36 +115,6 @@ const Hotels = () => {
         return defaultFilters;
     });
 
-    // Fetch filter data on mount
-    useEffect(() => {
-        fetchFilterData();
-
-        // Clear history state and url parameters so a page refresh doesn't replay the search
-        // and user doesn't see long URLs
-        if (location.search || location.state) {
-            navigate('/hotels', { replace: true });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Save filters to localStorage whenever they change
-    useEffect(() => {
-        localStorage.setItem('petoria_hotel_filters', JSON.stringify({
-            searchQuery,
-            filters,
-            sortBy
-        }));
-    }, [searchQuery, filters, sortBy]);
-
-    // Fetch hotels when filters or search changes
-    useEffect(() => {
-        if (view === 'grid') {
-            fetchHotels();
-        } else {
-            fetchHotelsForMap();
-        }
-    }, [filters, searchQuery, view, fetchHotels, fetchHotelsForMap]);
-
     const fetchFilterData = React.useCallback(async () => {
         try {
             // Fetch all filter data in parallel
@@ -210,19 +180,46 @@ const Hotels = () => {
             if (filters.amenities.length > 0) params.append('amenities', filters.amenities.join(','));
             if (filters.minRating) params.append('minRating', filters.minRating);
             if (filters.starRating && filters.starRating.length > 0) params.append('starRating', filters.starRating.join(','));
-            if (filters.checkInDate) params.append('checkInDate', filters.checkInDate);
-            if (filters.nights) params.append('nights', filters.nights);
-            if (filters.guests) params.append('guests', filters.guests);
 
-            const data = await api.get(`/hotels/map?${params.toString()}`);
+            const data = await api.get(`/hotels?${params.toString()}`);
             setMapHotels(data);
         } catch (err) {
             setError(err.message);
-            console.error('Error fetching hotels for map:', err);
+            console.error('Error fetching map hotels:', err);
         } finally {
             setLoading(false);
         }
     }, [searchQuery, filters]);
+
+    // Fetch filter data on mount
+    useEffect(() => {
+        fetchFilterData();
+
+        // Clear history state and url parameters so a page refresh doesn't replay the search
+        // and user doesn't see long URLs
+        if (location.search || location.state) {
+            navigate('/hotels', { replace: true });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchFilterData, location.search, location.state, navigate]);
+
+    // Save filters to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('petoria_hotel_filters', JSON.stringify({
+            searchQuery,
+            filters,
+            sortBy
+        }));
+    }, [searchQuery, filters, sortBy]);
+
+    // Fetch hotels when filters or search changes
+    useEffect(() => {
+        if (view === 'grid') {
+            fetchHotels();
+        } else {
+            fetchHotelsForMap();
+        }
+    }, [filters, searchQuery, view, fetchHotels, fetchHotelsForMap]);
 
     const handleFilterChange = (filterName, value) => {
         setFilters(prev => ({

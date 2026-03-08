@@ -5,20 +5,9 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './HotelMap.css';
 
-// Fix для default icons в Leaflet
+// Icon paths
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 // Component to fit bounds when hotels change
 const FitBounds = ({ hotels }) => {
@@ -47,6 +36,17 @@ const FitBounds = ({ hotels }) => {
 
 const HotelMap = ({ hotels, onHotelClick }) => {
     const [mapReady, setMapReady] = useState(false);
+
+    const defaultIcon = React.useMemo(() => {
+        return L.icon({
+            iconUrl: icon,
+            shadowUrl: iconShadow,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+    }, []);
 
     // Filter hotels with valid coordinates
     const validHotels = hotels.filter(
@@ -104,6 +104,7 @@ const HotelMap = ({ hotels, onHotelClick }) => {
                             <Marker
                                 key={hotel.id}
                                 position={[hotel.latitude, hotel.longitude]}
+                                icon={defaultIcon}
                             >
                                 <Popup className="hotel-popup">
                                     <div className="popup-content">

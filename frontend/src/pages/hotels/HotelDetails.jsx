@@ -25,10 +25,6 @@ const HotelDetails = () => {
 
 
 
-    useEffect(() => {
-        fetchHotelDetails();
-    }, [fetchHotelDetails]);
-
     const fetchHotelDetails = React.useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -43,6 +39,10 @@ const HotelDetails = () => {
             setLoading(false);
         }
     }, [id]);
+
+    useEffect(() => {
+        fetchHotelDetails();
+    }, [fetchHotelDetails]);
 
     const handleBackClick = () => {
         navigate('/hotels');

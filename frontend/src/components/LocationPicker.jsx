@@ -6,20 +6,9 @@ import { useLanguage } from '../context/LanguageContext';
 import { api } from '../utils/api';
 import './LocationPicker.css';
 
-// Fix for default marker icon
+// Icon paths
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 // Component to handle map clicks
 const MapClickHandler = ({ onLocationSelect }) => {
@@ -48,6 +37,17 @@ const MapViewController = ({ center }) => {
 
 const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null }) => {
     const { t } = useLanguage();
+
+    const defaultIcon = React.useMemo(() => {
+        return L.icon({
+            iconUrl: icon,
+            shadowUrl: iconShadow,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+    }, []);
     // Default to Sofia, Bulgaria if no initial coordinates
     const defaultCenter = [42.6977, 23.3219];
     const [position, setPosition] = useState(
@@ -209,6 +209,7 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
                     <Marker
                         position={position}
                         draggable={true}
+                        icon={defaultIcon}
                         eventHandlers={{
                             dragend: handleMarkerDrag
                         }}

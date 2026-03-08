@@ -40,14 +40,6 @@ const ManageHotel = () => {
     const [uploadingImage, setUploadingImage] = useState(false);
     const [hoveredStar, setHoveredStar] = useState(null);
 
-    useEffect(() => {
-        if (!isAdmin()) {
-            navigate('/');
-            return;
-        }
-        fetchHotel();
-    }, [isAdmin, navigate, fetchHotel]);
-
     const fetchHotel = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${id}`);
@@ -99,6 +91,14 @@ const ManageHotel = () => {
             console.error('Error fetching room types:', err);
         }
     }, [id]);
+
+    useEffect(() => {
+        if (!isAdmin()) {
+            navigate('/');
+            return;
+        }
+        fetchHotel();
+    }, [isAdmin, navigate, fetchHotel]);
 
     useEffect(() => {
         if (hotel) {
