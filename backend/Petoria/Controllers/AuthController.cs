@@ -100,36 +100,40 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("jwt", new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true, 
-            SameSite = SameSiteMode.None // Changed to None for ensuring cross-site if needed, or Strict if same domain
-        });
+        var isLocalhost = Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
         
-        // Also try setting it to expired to be sure
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(-1),
-            Secure = true,
-            SameSite = SameSiteMode.None
+            Secure = !isLocalhost, 
+            SameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.None
         };
-        Response.Cookies.Append("jwt", "", cookieOptions);
+        
+        Response.Cookies.Delete("jwt", cookieOptions);
+        
+        // Also try setting it to expired to be sure
+        var expiredOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Expires = DateTime.UtcNow.AddDays(-1),
+            Secure = !isLocalhost,
+            SameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.None
+        };
+        Response.Cookies.Append("jwt", "", expiredOptions);
 
         return Ok(new { message = "Logged out successfully" });
     }
 
     private void SetTokenCookie(string token)
     {
+        var isLocalhost = Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+        
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
             Expires = DateTime.UtcNow.AddDays(7),
-            Secure = true, // Set to true in production, but also needed for SameSite=None
-            SameSite = SameSiteMode.None // 'None' is often needed if frontend/backend form different origins (localhost:5174 vs 5150)
-            // If they were on same domain, Strict or Lax would be better.
-            // Since we use CORS with specific origin, SameSite=None + Secure is usually required for cross-origin cookies.
+            Secure = !isLocalhost,
+            SameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.None
         };
         Response.Cookies.Append("jwt", token, cookieOptions);
     }
