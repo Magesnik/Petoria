@@ -8,6 +8,7 @@ export const LiveUsersProvider = ({ children }) => {
     const [liveUsers, setLiveUsers] = useState(0);
 
     useEffect(() => {
+        let isMounted = true;
         // Setup global SignalR connection
         const newConnection = new signalR.HubConnectionBuilder()
             .withUrl(`${getBaseUrl()}/hubs/liveusers`)
@@ -16,15 +17,30 @@ export const LiveUsersProvider = ({ children }) => {
             .build();
 
         newConnection.on("UpdateUserCount", (count) => {
-            setLiveUsers(count);
+            if (isMounted) {
+                setLiveUsers(count);
+            }
         });
 
-        newConnection.start()
-            .catch(err => console.error('SignalR Connection Error: ', err));
+        const startConnection = async () => {
+            try {
+                if (newConnection.state === signalR.HubConnectionState.Disconnected && isMounted) {
+                    await newConnection.start();
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('SignalR Connection Error: ', err);
+                }
+            }
+        };
+
+        startConnection();
 
         return () => {
-            if (newConnection) {
-                newConnection.stop();
+            isMounted = false;
+            if (newConnection && newConnection.state !== signalR.HubConnectionState.Disconnected) {
+                // Background stop without await to prevent blocking unmount
+                newConnection.stop().catch(e => console.error("SignalR stop error", e));
             }
         };
     }, []);

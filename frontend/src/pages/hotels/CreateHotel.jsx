@@ -419,6 +419,7 @@ const CreateHotel = () => {
                                             src={formData.imageUrl}
                                             alt="Preview"
                                             onError={(e) => e.target.style.display = 'none'}
+                                            onLoad={(e) => e.target.style.display = 'block'}
                                         />
                                     </div>
                                 )}
@@ -449,9 +450,14 @@ const CreateHotel = () => {
                                                     className="url-input"
                                                 />
                                             </div>
-                                            {imagePreviews[index] && (
+                                            {(imagePreviews[index] || images[index]) && (
                                                 <div className="image-preview-small">
-                                                    <img src={imagePreviews[index]} alt={`Preview ${index}`} />
+                                                    <img
+                                                        src={imagePreviews[index] || images[index]}
+                                                        alt={`Preview ${index}`}
+                                                        onError={(e) => e.target.style.display = 'none'}
+                                                        onLoad={(e) => e.target.style.display = 'block'}
+                                                    />
                                                 </div>
                                             )}
                                             <button

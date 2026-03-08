@@ -72,9 +72,9 @@ const Settings = () => {
                 return;
             }
 
-            // Validate file size (max 2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                setAvatarMessage('File size must be less than 2MB');
+            // Validate file size (max 25MB)
+            if (file.size > 25 * 1024 * 1024) {
+                setAvatarMessage('File size must be less than 25MB');
                 setTimeout(() => setAvatarMessage(''), 3000);
                 return;
             }

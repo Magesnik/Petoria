@@ -10,7 +10,7 @@ import './Home.css';
 
 const Home = () => {
     const { t } = useLanguage();
-    const { convertPrice, currencySymbol } = useCurrency();
+    const { convertAndFormat } = useCurrency();
     const { liveUsers } = useLiveUsers();
     const navigate = useNavigate();
     const [popularDestinations, setPopularDestinations] = useState([]);
@@ -84,7 +84,7 @@ const Home = () => {
                                 <div className="card-content">
                                     <h3>{dest.city}, {dest.country}</h3>
                                     <p>{t('discoverStaysIn')} {dest.city}.</p>
-                                    <div className="card-price">{t('from')} {currencySymbol}{convertPrice(dest.startingPrice)}/{t('night')}</div>
+                                    <div className="card-price">{t('from')} {convertAndFormat(dest.startingPrice)}/{t('night')}</div>
                                 </div>
                             </div>
                         ))

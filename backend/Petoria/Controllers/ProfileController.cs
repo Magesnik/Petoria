@@ -147,10 +147,10 @@ public class ProfileController : ControllerBase
             return BadRequest("Only JPG, JPEG, and PNG files are allowed");
         }
 
-        // Validate file size (max 2MB)
-        if (file.Length > 2 * 1024 * 1024)
+        // Validate file size (max 25MB)
+        if (file.Length > 25 * 1024 * 1024)
         {
-            return BadRequest("File size must be less than 2MB");
+            return BadRequest("File size must be less than 25MB");
         }
 
         try

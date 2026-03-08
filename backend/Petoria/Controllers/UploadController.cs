@@ -36,10 +36,10 @@ public class UploadController : ControllerBase
                 return BadRequest(new { message = $"Invalid file type: '{extension}'. Allowed types: jpg, jpeg, png, gif, webp" });
             }
 
-            // Validate file size (max 5MB)
-            if (file.Length > 5 * 1024 * 1024)
+            // Validate file size (max 25MB)
+            if (file.Length > 25 * 1024 * 1024)
             {
-                return BadRequest(new { message = "File size exceeds 5MB limit" });
+                return BadRequest(new { message = "File size exceeds 25MB limit" });
             }
 
             var result = await _photoService.AddPhotoAsync(file);
