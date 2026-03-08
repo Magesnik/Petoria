@@ -330,14 +330,14 @@
     align-items: flex-end;
 }
 
-.price-label {
+.hotel-price-box .price-label {
     font-size: 0.9rem;
     color: #ffffff !important;
     opacity: 1 !important;
     font-weight: 500;
 }
 
-.price-amount {
+.hotel-price-box .price-amount {
     font-size: 2.5rem;
     font-weight: 700;
     line-height: 1;
@@ -345,7 +345,7 @@
     color: #ffffff !important;
 }
 
-.price-period {
+.hotel-price-box .price-period {
     font-size: 1rem;
     color: #ffffff !important;
     opacity: 1 !important;

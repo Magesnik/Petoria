@@ -110,18 +110,27 @@ public static class ValidationConstants
 
     public static class User
     {
+        public const int FirstNameMinLength = 2;
         public const int FirstNameMaxLength = 100;
+        public const int LastNameMinLength = 4;
         public const int LastNameMaxLength = 100;
         public const int PasswordMinLength = 6;
+        public const string NameRegex = @"^[a-zA-Zа-яА-Я]+$";
+        public const string PasswordRegex = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$";
 
         public const string EmailRequired = "Имейлът е задължителен";
         public const string EmailInvalid = "Невалиден имейл адрес";
         public const string PasswordRequired = "Паролата е задължителна";
         public const string PasswordMinLengthError = "Паролата трябва да бъде поне {1} символа";
+        public const string PasswordRegexError = "Паролата трябва да съдържа поне една главна буква, една малка буква, една цифра и един специален символ";
         public const string FirstNameRequired = "Името е задължително";
+        public const string FirstNameMinLengthError = "Името трябва да бъде поне {1} символа";
         public const string FirstNameMaxLengthError = "Името не може да надвишава {1} символа";
+        public const string FirstNameRegexError = "Името може да съдържа само букви (без интервали, тирета или специални символи)";
         public const string LastNameRequired = "Фамилията е задължителна";
+        public const string LastNameMinLengthError = "Фамилията трябва да бъде поне {1} символа";
         public const string LastNameMaxLengthError = "Фамилията не може да надвишава {1} символа";
+        public const string LastNameRegexError = "Фамилията може да съдържа само букви (без интервали, тирета или специални символи)";
     }
 
     public static class Availability

@@ -10,6 +10,7 @@ import { CartProvider } from './context/CartContext';
 // Auth
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ConfirmEmail from './pages/auth/ConfirmEmail';
 
 // Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -49,6 +50,7 @@ import Cookies from './pages/public/Cookies';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
+import { LiveUsersProvider } from './context/LiveUsersContext';
 
 function App() {
   return (
@@ -59,43 +61,46 @@ function App() {
             <CurrencyProvider>
               <FavoritesProvider>
                 <CartProvider>
-                  <Router>
-                    <div className="App">
-                      <Header /> {/* Added Global Header */}
-                      <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/hotels" element={<Hotels />} />
-                        <Route path="/hotels/:id" element={<HotelDetails />} />
-                        <Route path="/deals" element={<Deals />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/create-hotel" element={<CreateHotel />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/favorites" element={<Favorites />} />
-                        <Route path="/purchase-history" element={<PurchaseHistory />} />
-                        <Route path="/support" element={<Support />} />
-                        <Route path="/admin" element={<AdminDashboard />} />
-                        <Route path="/moderator" element={<ModeratorDashboard />} />
-                        <Route path="/moderator/hotel/:id" element={<ModeratorHotelPanel />} />
-                        <Route path="/my-hotels" element={<MyHotels />} />
-                        <Route path="/manage-hotel/:id" element={<ManageHotel />} />
-                        <Route path="/hotel/:id" element={<HotelDetails />} />
-                        <Route path="/hotel/:id/contact" element={<ContactHotel />} />
-                        <Route path="/hotel/:id/messages" element={<HotelMessages />} />
-                        <Route path="/my-messages" element={<MyMessages />} />
-                        <Route path="/admin/support-messages" element={<AdminSupportMessages />} />
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/payment/success" element={<PaymentSuccess />} />
-                        <Route path="/payment/cancel" element={<PaymentCancel />} />
-                        <Route path="/privacy" element={<Privacy />} />
-                        <Route path="/terms" element={<Terms />} />
-                        <Route path="/cookies" element={<Cookies />} />
-                      </Routes>
-                      <Footer />
-                      <CookieBanner />
-                    </div>
-                  </Router>
+                  <LiveUsersProvider>
+                    <Router>
+                      <div className="App">
+                        <Header /> {/* Added Global Header */}
+                        <Routes>
+                          <Route path="/" element={<Home />} />
+                          <Route path="/hotels" element={<Hotels />} />
+                          <Route path="/hotels/:id" element={<HotelDetails />} />
+                          <Route path="/deals" element={<Deals />} />
+                          <Route path="/about" element={<About />} />
+                          <Route path="/login" element={<Login />} />
+                          <Route path="/register" element={<Register />} />
+                          <Route path="/confirm-email" element={<ConfirmEmail />} />
+                          <Route path="/create-hotel" element={<CreateHotel />} />
+                          <Route path="/settings" element={<Settings />} />
+                          <Route path="/favorites" element={<Favorites />} />
+                          <Route path="/purchase-history" element={<PurchaseHistory />} />
+                          <Route path="/support" element={<Support />} />
+                          <Route path="/admin" element={<AdminDashboard />} />
+                          <Route path="/moderator" element={<ModeratorDashboard />} />
+                          <Route path="/moderator/hotel/:id" element={<ModeratorHotelPanel />} />
+                          <Route path="/my-hotels" element={<MyHotels />} />
+                          <Route path="/manage-hotel/:id" element={<ManageHotel />} />
+                          <Route path="/hotel/:id" element={<HotelDetails />} />
+                          <Route path="/hotel/:id/contact" element={<ContactHotel />} />
+                          <Route path="/hotel/:id/messages" element={<HotelMessages />} />
+                          <Route path="/my-messages" element={<MyMessages />} />
+                          <Route path="/admin/support-messages" element={<AdminSupportMessages />} />
+                          <Route path="/cart" element={<Cart />} />
+                          <Route path="/payment/success" element={<PaymentSuccess />} />
+                          <Route path="/payment/cancel" element={<PaymentCancel />} />
+                          <Route path="/privacy" element={<Privacy />} />
+                          <Route path="/terms" element={<Terms />} />
+                          <Route path="/cookies" element={<Cookies />} />
+                        </Routes>
+                        <Footer />
+                        <CookieBanner />
+                      </div>
+                    </Router>
+                  </LiveUsersProvider>
                 </CartProvider>
               </FavoritesProvider>
             </CurrencyProvider>

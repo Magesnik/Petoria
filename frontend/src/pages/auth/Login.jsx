@@ -42,7 +42,11 @@ const Login = () => {
 
             navigate('/');
         } catch (err) {
-            setError(err.message || 'Invalid email or password');
+            if (err.message === 'EmailNotConfirmed' || err.response?.data?.message === 'EmailNotConfirmed') {
+                setError(t('emailNotConfirmedError'));
+            } else {
+                setError(err.message || 'Invalid email or password');
+            }
             console.error(err);
         }
     };

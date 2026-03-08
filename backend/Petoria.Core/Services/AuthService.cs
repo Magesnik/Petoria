@@ -17,17 +17,20 @@ public class AuthService : IAuthService
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         RoleManager<IdentityRole> roleManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IEmailService emailService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
         _configuration = configuration;
+        _emailService = emailService;
     }
 
     public async Task<AuthResponse> LoginAsync(LoginModel model)
@@ -36,6 +39,11 @@ public class AuthService : IAuthService
         if (user == null)
         {
             return null;
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            throw new Exception("EmailNotConfirmed");
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
@@ -136,7 +144,55 @@ public class AuthService : IAuthService
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-        return await GenerateJwtToken(user, roles.ToList());
+
+        // Generate email confirmation token
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        
+        // Construct the confirmation link
+        // Hardcoding the frontend URL for now, could be moved to configuration
+        var frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:5174";
+        var encodedToken = Uri.EscapeDataString(token);
+        var confirmationLink = $"{frontendUrl}/confirm-email?uid={user.Id}&token={encodedToken}";
+
+        // Send confirmation email
+        var emailBody = $@"
+            <h2>Добре дошли в Petoria!</h2>
+            <p>Здравейте {user.FirstName},</p>
+            <p>Моля, потвърдете вашия имейл адрес, като кликнете на следния линк:</p>
+            <p><a href='{confirmationLink}'>Потвърди имейл адрес</a></p>
+            <p>Ако не сте създали този акаунт, можете спокойно да игнорирате този имейл.</p>
+            <p>Поздрави,<br>Екипът на Petoria</p>
+        ";
+        await _emailService.SendEmailAsync(user.Email, "Потвърждение на акаунт - Petoria", emailBody);
+
+        // Return AuthResponse without a token since they need to confirm their email first
+        return new AuthResponse
+        {
+            Id = user.Id,
+            Token = string.Empty,
+            Email = user.Email!,
+            FirstName = user.FirstName ?? "",
+            LastName = user.LastName ?? "",
+            Roles = roles.ToList(),
+            AvatarUrl = user.AvatarUrl
+        };
+    }
+
+    public async Task<bool> ConfirmEmailAsync(string userId, string token)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            return false;
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        return result.Succeeded;
     }
 
     public async Task InitializeRolesAndAdminAsync()

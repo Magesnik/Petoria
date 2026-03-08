@@ -25,8 +25,8 @@ const CreateHotel = () => {
     });
 
     const [images, setImages] = useState([]);
-    const [imageFiles, setImageFiles] = useState([null]);
-    const [imagePreviews, setImagePreviews] = useState([null]);
+    const [imageFiles, setImageFiles] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
     const [amenities, setAmenities] = useState([]);
     const [customAmenity, setCustomAmenity] = useState('');
     const [error, setError] = useState('');
@@ -206,8 +206,8 @@ const CreateHotel = () => {
                 imageUrl: ''
             });
             setImages([]);
-            setImageFiles([null]);
-            setImagePreviews([null]);
+            setImageFiles([]);
+            setImagePreviews([]);
             setAmenities([]);
 
             // Redirect to hotels page after 2 seconds
@@ -429,7 +429,7 @@ const CreateHotel = () => {
                                 <div className="dynamic-list">
                                     {imageFiles.map((file, index) => (
                                         <div key={index} className="dynamic-item">
-                                            <div className="file-input-wrapper compact">
+                                            <div className="file-input-wrapper">
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -437,14 +437,15 @@ const CreateHotel = () => {
                                                     className="file-input"
                                                     id={`image-${index}`}
                                                 />
-                                                <label htmlFor={`image-${index}`} className="file-label compact">
-                                                    📁
+                                                <label htmlFor={`image-${index}`} className="file-label">
+                                                    📁 {t('chooseFile')}
                                                 </label>
+                                                <span className="file-hint">{t('orText')} </span>
                                                 <input
                                                     type="url"
                                                     value={images[index] || ''}
                                                     onChange={(e) => updateImage(index, e.target.value)}
-                                                    placeholder={`${t('photoURL')} ${index + 1}`}
+                                                    placeholder={`${t('enterURL')} ${index + 1}`}
                                                     className="url-input"
                                                 />
                                             </div>
@@ -453,15 +454,13 @@ const CreateHotel = () => {
                                                     <img src={imagePreviews[index]} alt={`Preview ${index}`} />
                                                 </div>
                                             )}
-                                            {imageFiles.length > 1 && (
-                                                <button
-                                                    type="button"
-                                                    className="btn-remove"
-                                                    onClick={() => removeImageField(index)}
-                                                >
-                                                    ✕
-                                                </button>
-                                            )}
+                                            <button
+                                                type="button"
+                                                className="btn-remove"
+                                                onClick={() => removeImageField(index)}
+                                            >
+                                                ✕
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -488,6 +487,21 @@ const CreateHotel = () => {
                                         {amenity}
                                     </button>
                                 ))}
+
+                                {/* Render custom amenities as standard tags */}
+                                {amenities
+                                    .filter(amenity => !popularAmenities.includes(amenity))
+                                    .map((customAmenity, index) => (
+                                        <button
+                                            key={`custom-${index}`}
+                                            type="button"
+                                            className="amenity-tag selected"
+                                            onClick={() => removeAmenity(customAmenity)}
+                                            title={t('clickToRemove')}
+                                        >
+                                            ✓ {customAmenity}
+                                        </button>
+                                    ))}
                             </div>
 
                             {/* Custom amenity input */}
@@ -505,22 +519,7 @@ const CreateHotel = () => {
                             </div>
 
                             {amenities.length > 0 && (
-                                <div className="selected-amenities">
-                                    <h4>{t('selectedAmenities')}</h4>
-                                    <div className="selected-tags">
-                                        {amenities.map((amenity, index) => (
-                                            <span key={index} className="selected-tag">
-                                                {amenity}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeAmenity(amenity)}
-                                                    className="remove-tag"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
+                                <div className="selected-amenities" style={{ marginTop: '1rem' }}>
                                     <div className="selected-count">
                                         {t('totalAmenities').replace('{count}', amenities.length)}
                                     </div>

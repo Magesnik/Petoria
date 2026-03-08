@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useCurrency } from '../../context/CurrencyContext';
-import { api, getBaseUrl } from '../../utils/api';
-import * as signalR from '@microsoft/signalr';
+import { useLiveUsers } from '../../context/LiveUsersContext';
+import { api } from '../../utils/api';
 
 import SearchBar from '../../components/SearchBar';
 import './Home.css';
@@ -11,10 +11,10 @@ import './Home.css';
 const Home = () => {
     const { t } = useLanguage();
     const { convertPrice, currencySymbol } = useCurrency();
+    const { liveUsers } = useLiveUsers();
     const navigate = useNavigate();
     const [popularDestinations, setPopularDestinations] = useState([]);
     const [loadingDestinations, setLoadingDestinations] = useState(true);
-    const [liveUsers, setLiveUsers] = useState(0);
 
     useEffect(() => {
         const fetchPopularDestinations = async () => {
@@ -29,26 +29,6 @@ const Home = () => {
         };
 
         fetchPopularDestinations();
-        
-        // Setup SignalR connection
-        const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl(`${getBaseUrl()}/hubs/liveusers`)
-            .withAutomaticReconnect()
-            .configureLogging(signalR.LogLevel.Error)
-            .build();
-
-        newConnection.on("UpdateUserCount", (count) => {
-            setLiveUsers(count);
-        });
-
-        newConnection.start()
-            .catch(err => console.error('SignalR Connection Error: ', err));
-
-        return () => {
-            if (newConnection) {
-                newConnection.stop();
-            }
-        };
     }, []);
 
     const handleDestinationClick = (hotelId) => {
@@ -72,7 +52,7 @@ const Home = () => {
 
             {/* Featured Section */}
             <section className="featured container">
-                 {liveUsers > 0 && (
+                {liveUsers > 0 && (
                     <div className="live-users-counter" style={{ textAlign: 'center', marginBottom: '1rem', color: '#64748b', fontSize: '1.1rem', fontWeight: '500' }}>
                         {t('liveUsersCount').replace('{count}', liveUsers)}
                     </div>

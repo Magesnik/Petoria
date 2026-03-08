@@ -22,26 +22,66 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.RegisterAsync(model);
-            SetTokenCookie(result.Token);
+            if (!string.IsNullOrEmpty(result.Token))
+            {
+                SetTokenCookie(result.Token);
+            }
             return Ok(result);
         }
         catch (Exception ex)
         {
+            if (ex.Message == "EmailNotConfirmed")
+            {
+                return BadRequest(new { message = "EmailNotConfirmed" });
+            }
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    public class ConfirmEmailRequest
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    {
+        if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.Token))
+        {
+            return BadRequest("Invalid confirmation request");
+        }
+
+        var result = await _authService.ConfirmEmailAsync(request.UserId, request.Token);
+        if (result)
+        {
+            return Ok(new { message = "Email confirmed successfully" });
+        }
+        return BadRequest("Email confirmation failed");
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        var result = await _authService.LoginAsync(model);
-        if (result == null)
+        try 
         {
-            return Unauthorized("Invalid credentials");
-        }
+            var result = await _authService.LoginAsync(model);
+            if (result == null)
+            {
+                return Unauthorized("Invalid credentials");
+            }
 
-        SetTokenCookie(result.Token);
-        return Ok(result);
+            SetTokenCookie(result.Token);
+            return Ok(result);
+        } 
+        catch (Exception ex)
+        {
+            if (ex.Message == "EmailNotConfirmed")
+            {
+                return BadRequest("EmailNotConfirmed");
+            }
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost("google-login")]
