@@ -126,7 +126,7 @@ public class ProfileControllerTests : ControllerTestBase
     {
         await SeedUser("user1");
         var controller = CreateController("user1");
-        var file = CreateMockFile("big.jpg", "image/jpeg", 6 * 1024 * 1024); // 6MB
+        var file = CreateMockFile("big.jpg", "image/jpeg", 26 * 1024 * 1024); // 26MB
 
         var result = await controller.UploadAvatar(file);
 

@@ -51,7 +51,7 @@ public class UploadControllerTests : ControllerTestBase
     public async Task UploadImage_TooLarge_ReturnsBadRequest()
     {
         var controller = CreateController("admin1", Petoria.Constants.Roles.Admin);
-        var file = CreateMockFile("test.jpg", "image/jpeg", 6 * 1024 * 1024); // 6MB
+        var file = CreateMockFile("test.jpg", "image/jpeg", 26 * 1024 * 1024); // 26MB
 
         var result = await controller.UploadImage(file);
 
