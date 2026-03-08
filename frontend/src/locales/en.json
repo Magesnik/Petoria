@@ -312,6 +312,8 @@
     "roomAdded": "Room added successfully!",
     "confirmDelete": "Are you sure you want to delete this room?",
     "roomDeleted": "Room deleted successfully!",
+    "all": "All",
+    "noMessagesFilter": "No messages match the selected filter.",
     "bookNowHeader": "Book Now",
     "roomTypeLabel": "Room Type",
     "guests": "guests",

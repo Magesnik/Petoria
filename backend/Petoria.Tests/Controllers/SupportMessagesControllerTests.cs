@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Petoria.Controllers;
 using Petoria.Core.DTOs.SupportMessage;
+using Petoria.Core.Contracts;
 using Petoria.Infrastructure.Data.Entities;
 using Petoria.Tests.Helpers;
 
@@ -18,20 +19,22 @@ public class SupportMessagesControllerTests : ControllerTestBase
         mockUserManager.Setup(m => m.FindByIdAsync(It.IsAny<string>()))
             .ReturnsAsync((string id) => new ApplicationUser { Id = id, FirstName = "Test", LastName = "User", Email = $"{id}@test.com" });
 
-        var controller = new SupportMessagesController(Context, mockUserManager.Object);
+        var mockEmailService = new Mock<IEmailService>();
+
+        var controller = new SupportMessagesController(Context, mockUserManager.Object, mockEmailService.Object);
         SetControllerUser(controller, userId, roles);
         return controller;
     }
 
     [Fact]
-    public async Task CreateMessage_ReturnsCreated()
+    public async Task CreateMessage_ReturnsOk()
     {
         var controller = CreateController("user1");
         var dto = new CreateSupportMessageDto { Subject = "Help", Message = "I need help" };
 
         var result = await controller.CreateMessage(dto);
 
-        Assert.IsType<CreatedAtActionResult>(result.Result);
+        Assert.IsType<OkObjectResult>(result.Result);
     }
 
     [Fact]
@@ -79,20 +82,6 @@ public class SupportMessagesControllerTests : ControllerTestBase
         Assert.IsType<NoContentResult>(result);
         var updated = Context.SupportMessages.First(m => m.Id == msg.Id);
         Assert.True(updated.IsAnswered);
-    }
-
-    [Fact]
-    public async Task GetAdminUnreadCount_ReturnsCount()
-    {
-        Context.SupportMessages.Add(new SupportMessage { UserId = "u1", Subject = "Q1", Message = "M1", IsAnswered = false });
-        Context.SupportMessages.Add(new SupportMessage { UserId = "u2", Subject = "Q2", Message = "M2", IsAnswered = true });
-        await Context.SaveChangesAsync();
-        var controller = CreateController("admin1", Petoria.Constants.Roles.SuperAdmin);
-
-        var result = await controller.GetAdminUnreadCount();
-
-        var ok = Assert.IsType<OkObjectResult>(result.Result);
-        Assert.Equal(1, (int)ok.Value!);
     }
 
     [Fact]

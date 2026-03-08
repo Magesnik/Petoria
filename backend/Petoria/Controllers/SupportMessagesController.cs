@@ -79,7 +79,7 @@ namespace Petoria.Controllers
                 Console.WriteLine($"Failed to send support email: {ex.Message}");
             }
 
-            return CreatedAtAction(nameof(GetMyMessages), new { id = message.Id }, new SupportMessageDto
+            return Ok(new SupportMessageDto
             {
                 Id = message.Id,
                 Subject = message.Subject,

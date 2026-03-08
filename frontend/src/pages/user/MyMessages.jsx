@@ -177,19 +177,19 @@ const MyMessages = () => {
                                 className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
                                 onClick={() => setFilter('all')}
                             >
-                                {t('all') || 'All'}
+                                {t('filterAll') || t('all') || 'All'}
                             </button>
                             <button 
                                 className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
                                 onClick={() => setFilter('pending')}
                             >
-                                {t('pending') || 'Pending'}
+                                {t('filterPending') || t('pending') || 'Pending'}
                             </button>
                             <button 
                                 className={`filter-btn ${filter === 'answered' ? 'active' : ''}`}
                                 onClick={() => setFilter('answered')}
                             >
-                                {t('answered') || 'Answered'}
+                                {t('filterAnswered') || t('answered') || 'Answered'}
                             </button>
                         </div>
                         <div className="messages-list">
