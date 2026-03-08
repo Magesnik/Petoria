@@ -85,6 +85,7 @@ const HotelMap = ({ hotels, onHotelClick }) => {
                     maxBounds={[[-90, -180], [90, 180]]}
                     className="leaflet-map"
                     whenReady={() => setMapReady(true)}
+                    tap={false}
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

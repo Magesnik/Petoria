@@ -83,6 +83,7 @@
 .stat-label {
     font-size: 0.875rem;
     color: #64748b;
+    word-break: break-word;
 }
 
 /* Panels - Light */
@@ -447,6 +448,8 @@
 .stat-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
 .dashboard-content {

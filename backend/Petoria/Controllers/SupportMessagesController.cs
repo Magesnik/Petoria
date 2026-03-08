@@ -183,5 +183,28 @@ namespace Petoria.Controllers
 
             return NoContent();
         }
+
+        // DELETE: api/support/messages/my/{id}
+        [HttpDelete("my/{id}")]
+        public async Task<IActionResult> DeleteMyMessage(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var message = await _context.SupportMessages.FindAsync(id);
+            if (message == null) return NotFound();
+
+            if (message.UserId != userId) return Forbid();
+
+            if (message.IsAnswered)
+            {
+                return BadRequest(new { message = "You cannot delete a message that has already been answered." });
+            }
+
+            _context.SupportMessages.Remove(message);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

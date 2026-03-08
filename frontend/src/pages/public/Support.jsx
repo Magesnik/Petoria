@@ -112,7 +112,7 @@ const Support = () => {
                                 />
                                 <small className="text-muted" style={{ display: 'block', marginTop: '5px' }}>{t('messageMinLengthInfo')}</small>
                             </div>
-                            {errorMessage && <div className="error-message" style={{ color: 'red', marginBottom: '15px' }}>{errorMessage}</div>}
+                            {errorMessage && <div className="error-message">{errorMessage}</div>}
                             {submitMessage && <div className="success-message">{submitMessage}</div>}
                             <button type="submit" className="btn btn-primary">
                                 {t('sendMessage')}

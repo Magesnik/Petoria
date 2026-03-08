@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useCurrency } from '../../context/CurrencyContext';
-import { api } from '../../utils/api';
-
+import { api, getBaseUrl } from '../../utils/api';
+import * as signalR from '@microsoft/signalr';
 
 import SearchBar from '../../components/SearchBar';
 import './Home.css';
@@ -14,6 +14,7 @@ const Home = () => {
     const navigate = useNavigate();
     const [popularDestinations, setPopularDestinations] = useState([]);
     const [loadingDestinations, setLoadingDestinations] = useState(true);
+    const [liveUsers, setLiveUsers] = useState(0);
 
     useEffect(() => {
         const fetchPopularDestinations = async () => {
@@ -28,6 +29,25 @@ const Home = () => {
         };
 
         fetchPopularDestinations();
+        
+        // Setup SignalR connection
+        const newConnection = new signalR.HubConnectionBuilder()
+            .withUrl(`${getBaseUrl()}/hubs/liveusers`)
+            .withAutomaticReconnect()
+            .build();
+
+        newConnection.on("UpdateUserCount", (count) => {
+            setLiveUsers(count);
+        });
+
+        newConnection.start()
+            .catch(err => console.error('SignalR Connection Error: ', err));
+
+        return () => {
+            if (newConnection) {
+                newConnection.stop();
+            }
+        };
     }, []);
 
     const handleDestinationClick = (hotelId) => {
@@ -51,6 +71,11 @@ const Home = () => {
 
             {/* Featured Section */}
             <section className="featured container">
+                 {liveUsers > 0 && (
+                    <div className="live-users-counter" style={{ textAlign: 'center', marginBottom: '1rem', color: '#64748b', fontSize: '1.1rem', fontWeight: '500' }}>
+                        {t('liveUsersCount').replace('{count}', liveUsers)}
+                    </div>
+                )}
                 <h2 className="section-title">{t('popularDestinations')}</h2>
                 <div className="featured-grid">
                     {loadingDestinations ? (

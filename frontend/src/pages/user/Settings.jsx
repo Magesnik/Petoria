@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { api, getAssetUrl } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -10,7 +10,7 @@ import './Settings.css';
 const Settings = () => {
     const { t, language, toggleLanguage } = useLanguage();
     const { theme, toggleTheme } = useTheme();
-    const { currency, changeCurrency, availableCurrencies } = useCurrency();
+    const { currency, changeCurrency, availableCurrencies, convertAndFormat } = useCurrency();
     const { user, login } = useAuth();
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
@@ -185,7 +185,7 @@ const Settings = () => {
                                 {avatarPreview && (
                                     <button
                                         type="button"
-                                        className="btn btn-secondary"
+                                        className="btn btn-danger"
                                         onClick={handleAvatarRemove}
                                     >
                                         {t('removePicture') || 'Remove Picture'}
@@ -308,7 +308,7 @@ const Settings = () => {
                             <div className="form-group total-spent-display">
                                 <label>{t('totalSpent') || 'Total Spent'}</label>
                                 <div className="total-spent-value">
-                                    {(user?.totalSpent || 0).toFixed(2)} {currency || 'BGN'}
+                                    {convertAndFormat(user?.totalSpent || 0)}
                                 </div>
                             </div>
                             {message && <div className="success-message">{message}</div>}

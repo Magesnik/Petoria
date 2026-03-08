@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
@@ -24,8 +24,7 @@ const SORT_OPTIONS = [
     { value: 'discount_desc', labelKey: 'sortDiscountDesc' },
     { value: 'reviews_desc', labelKey: 'sortReviewsDesc' },
     { value: 'reviews_asc', labelKey: 'sortReviewsAsc' },
-    { value: 'recent_reviews_desc', labelKey: 'sortRecentReviewsDesc' },
-    { value: 'best_value', labelKey: 'sortBestValue' },
+    { value: 'recent_reviews_desc', labelKey: 'sortRecentReviewsDesc' }
 ];
 
 function sortHotels(hotels, sortBy) {
@@ -50,11 +49,6 @@ function sortHotels(hotels, sortBy) {
         case 'reviews_desc': return arr.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
         case 'reviews_asc': return arr.sort((a, b) => (a.reviewCount || 0) - (b.reviewCount || 0));
         case 'recent_reviews_desc': return arr.sort((a, b) => (b.recentReviewCount || 0) - (a.recentReviewCount || 0));
-        case 'best_value': return arr.sort((a, b) => {
-            const scoreA = (a.rating || 0) * 20 - (a.displayPrice || 0) / 10;
-            const scoreB = (b.rating || 0) * 20 - (b.displayPrice || 0) / 10;
-            return scoreB - scoreA;
-        });
         default: return arr;
     }
 }
@@ -341,16 +335,16 @@ const Hotels = () => {
                                 <button
                                     className={`view-btn ${view === 'grid' ? 'active' : ''}`}
                                     onClick={() => setView('grid')}
-                                    title="Grid View"
+                                    title={t('gridView')}
                                 >
-                                    ⊞ Grid
+                                    ⊞ {t('grid')}
                                 </button>
                                 <button
                                     className={`view-btn ${view === 'map' ? 'active' : ''}`}
                                     onClick={() => setView('map')}
-                                    title="Map View"
+                                    title={t('mapView')}
                                 >
-                                    🗺️ Map
+                                    🗺️ {t('map')}
                                 </button>
                             </div>
                         </div>
@@ -369,7 +363,7 @@ const Hotels = () => {
                         <div className="error-state">
                             <p>❌ {error}</p>
                             <button onClick={view === 'grid' ? fetchHotels : fetchHotelsForMap} className="btn-retry">
-                                Try Again
+                                {t('tryAgain')}
                             </button>
                         </div>
                     )}

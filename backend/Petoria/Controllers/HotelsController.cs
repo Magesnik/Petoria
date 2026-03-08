@@ -623,8 +623,8 @@ public class HotelsController : ControllerBase
             ));
         }
 
-        // Only show available hotels
-        query = query.Where(h => h.IsAvailable);
+        // Only show available hotels that are not suspended by SuperAdmin
+        query = query.Where(h => h.IsAvailable && !h.IsSuspendedBySuperAdmin);
 
         // Fetch hotels with their min room price
         var hotelsData = await query

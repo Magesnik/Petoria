@@ -273,9 +273,10 @@
         padding-bottom: 30px;
     }
 
-    .footer-column:first-child {
+    .footer-column {
         grid-column: auto;
         text-align: center;
+        align-items: center;
     }
 
     .footer-logo {
@@ -293,11 +294,18 @@
     .footer-title {
         font-size: 1rem;
         margin-bottom: 15px;
+        text-align: center;
     }
 
     .footer-links,
     .footer-contact {
-        gap: 8px;
+        gap: 12px;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-contact li {
+        justify-content: center;
     }
 
     .footer-bottom {

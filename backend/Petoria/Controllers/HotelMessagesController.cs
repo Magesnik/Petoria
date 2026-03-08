@@ -292,4 +292,40 @@ public class HotelMessagesController : ControllerBase
 
         return Ok(new UnreadUserResponseCountDto { Count = count });
     }
+
+    /// <summary>
+    /// Потребител изтрива свое неотговорено съобщение
+    /// DELETE /api/hotels/my/messages/{id}
+    /// </summary>
+    [HttpDelete("my/messages/{id}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteMyMessage(int id)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var message = await _context.HotelMessages.FindAsync(id);
+        if (message == null)
+        {
+            return NotFound(new { message = "Съобщението не е намерено" });
+        }
+
+        if (message.UserId != userId)
+        {
+            return Forbid();
+        }
+
+        if (message.IsAnswered)
+        {
+            return BadRequest(new { message = "You cannot delete a message that has already been answered." });
+        }
+
+        _context.HotelMessages.Remove(message);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Съобщението е изтрито успешно." });
+    }
 }

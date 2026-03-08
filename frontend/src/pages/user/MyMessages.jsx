@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -114,6 +114,26 @@ const MyMessages = () => {
         navigate(`/hotel/${hotelId}/contact`);
     };
 
+    const handleDeleteMessage = async (id, type) => {
+        if (!window.confirm(t('confirmDeleteMessage') || 'Are you sure you want to delete this message?')) {
+            return;
+        }
+
+        try {
+            if (type === 'hotel') {
+                await api.delete(`/hotels/my/messages/${id}`);
+            } else if (type === 'support') {
+                await api.delete(`/support/messages/my/${id}`);
+            }
+            
+            // Remove from local state
+            setMessages(prev => prev.filter(m => !(m.id === id && m.type === type)));
+        } catch (err) {
+            console.error('Error deleting message:', err);
+            alert(err.message || 'Failed to delete message');
+        }
+    };
+
     const formatDate = (dateString) => {
         const locale = language === 'bg' ? 'bg-BG' : 'en-US';
         return new Date(dateString).toLocaleString(locale);
@@ -196,8 +216,15 @@ const MyMessages = () => {
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="pending-section">
+                                        <div className="pending-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span className="status-badge pending">⏳ {t('waitingForResponse') || 'Waiting for response'}</span>
+                                            <button 
+                                                className="btn-danger" 
+                                                style={{ padding: '6px 12px', fontSize: '0.9rem', borderRadius: '6px', border: 'none', background: '#dc3545', color: 'white', cursor: 'pointer' }}
+                                                onClick={() => handleDeleteMessage(msg.id, msg.type)}
+                                            >
+                                                🗑️ {t('delete') || 'Delete'}
+                                            </button>
                                         </div>
                                     )}
                                 </div>

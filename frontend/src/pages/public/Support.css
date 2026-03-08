@@ -184,7 +184,7 @@
     opacity: 0.8;
 }
 
-/* Success Message */
+/* Success and Error Messages */
 .success-message {
     background-color: #d4edda;
     color: #155724;
@@ -192,6 +192,16 @@
     border-radius: 8px;
     border: 1px solid #c3e6cb;
     font-weight: 500;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+    font-weight: 500;
+    margin-bottom: 15px;
 }
 
 /* Dark Mode */
@@ -237,6 +247,18 @@
 
 [data-theme='dark'] .faq-icon {
     color: var(--text-light);
+}
+
+[data-theme='dark'] .success-message {
+    background-color: rgba(21, 87, 36, 0.2);
+    color: #d4edda;
+    border-color: rgba(195, 230, 203, 0.2);
+}
+
+[data-theme='dark'] .error-message {
+    background-color: rgba(114, 28, 36, 0.2);
+    color: #f8d7da;
+    border-color: rgba(245, 198, 203, 0.2);
 }
 
 /* Responsive */

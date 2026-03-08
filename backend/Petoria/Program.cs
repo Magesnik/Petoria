@@ -45,6 +45,9 @@ builder.Services.AddScoped<Petoria.Core.Contracts.IAuthService, Petoria.Core.Ser
 builder.Services.AddScoped<Petoria.Core.Contracts.IPhotoService, Petoria.Core.Services.CloudinaryService>();
 builder.Services.AddScoped<Petoria.Core.Contracts.IEmailService, Petoria.Core.Services.EmailService>();
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Configure strong-typed settings objects
 builder.Services.Configure<Petoria.Core.Models.Email.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 
@@ -206,5 +209,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<Petoria.Hubs.LiveUsersHub>("/hubs/liveusers");
 
 app.Run();

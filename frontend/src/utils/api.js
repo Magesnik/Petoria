@@ -1,4 +1,5 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5150') + '/api';
+export const getBaseUrl = () => import.meta.env.VITE_API_URL || 'http://localhost:5150';
+const API_BASE_URL = getBaseUrl() + '/api';
 
 /**
  * Returns a full URL for a static asset (e.g. uploaded avatar image).

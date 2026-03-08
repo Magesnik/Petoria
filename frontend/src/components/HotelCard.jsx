@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../context/FavoritesContext';
 import { useCurrency } from '../context/CurrencyContext';
@@ -11,8 +11,9 @@ const HotelCard = ({ hotel }) => {
     const { isFavorite, toggleFavorite } = useFavorites();
     const { convertAndFormat } = useCurrency();
     const { t } = useLanguage();
+    const [showAllAmenities, setShowAllAmenities] = useState(false);
     const amenities = hotel.amenities ? JSON.parse(hotel.amenities) : [];
-    const displayAmenities = amenities.slice(0, 4);
+    const displayAmenities = showAllAmenities ? amenities : amenities.slice(0, 4);
 
     const handleViewDetails = () => {
         navigate(`/hotels/${hotel.id}`);
@@ -62,8 +63,23 @@ const HotelCard = ({ hotel }) => {
                         {displayAmenities.map((amenity, index) => (
                             <span key={index} className="amenity-tag">{amenity}</span>
                         ))}
-                        {amenities.length > 4 && (
-                            <span className="amenity-tag">+{amenities.length - 4}</span>
+                        {!showAllAmenities && amenities.length > 4 && (
+                            <span 
+                                className="amenity-tag more-amenities-btn"
+                                onClick={(e) => { e.stopPropagation(); setShowAllAmenities(true); }}
+                                title={t('showMore') || "Show more"}
+                            >
+                                +{amenities.length - 4}
+                            </span>
+                        )}
+                        {showAllAmenities && amenities.length > 4 && (
+                            <span 
+                                className="amenity-tag more-amenities-btn"
+                                onClick={(e) => { e.stopPropagation(); setShowAllAmenities(false); }}
+                                title={t('showLess') || "Show less"}
+                            >
+                                -
+                            </span>
                         )}
                     </div>
                 )}
