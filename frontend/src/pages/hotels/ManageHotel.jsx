@@ -8,6 +8,7 @@ import RoomTypeManager from '../../components/RoomTypeManager';
 import DiscountManager from '../../components/DiscountManager';
 import PromoCodeManager from '../../components/PromoCodeManager';
 import AvailabilityCalendar from '../../components/AvailabilityCalendar';
+import LocationPicker from '../../components/LocationPicker';
 import './ManageHotel.css';
 
 const ManageHotel = () => {
@@ -31,6 +32,12 @@ const ManageHotel = () => {
     // Edit mode
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({});
+    const [images, setImages] = useState([]);
+    const [imageFiles, setImageFiles] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [hoveredStar, setHoveredStar] = useState(null);
 
     useEffect(() => {
         if (!isAdmin()) {
@@ -63,10 +70,18 @@ const ManageHotel = () => {
                 location: data.location,
                 city: data.city,
                 country: data.country,
+                latitude: data.latitude,
+                longitude: data.longitude,
+                imageUrl: data.imageUrl,
                 isAvailable: data.isAvailable,
                 starRating: data.starRating || 3,
                 cancellationPolicies: data.cancellationPolicies ? JSON.parse(data.cancellationPolicies) : []
             });
+
+            const additionalImages = data.images ? JSON.parse(data.images) : [];
+            setImages(additionalImages);
+            setImageFiles(new Array(additionalImages.length).fill(null));
+            setImagePreviews(new Array(additionalImages.length).fill(null));
         } catch (err) {
             setError(t('errorLoadingHotel'));
             console.error(err);
@@ -90,22 +105,104 @@ const ManageHotel = () => {
         }
     }, [hotel]);
 
+    // Image Handlers (from CreateHotel)
+    const uploadFile = async (file, isMain = false) => {
+        setUploadingImage(true);
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('file', file);
+            const data = await api.post('/upload/image', formDataUpload);
+            if (isMain) {
+                setEditData(prev => ({ ...prev, imageUrl: data.url }));
+            }
+            return data.url;
+        } catch (err) {
+            console.error('Upload error:', err);
+            setError('Грешка при качване на снимка: ' + err.message);
+            return null;
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const handleMainImageFile = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setEditData(prev => ({ ...prev, imageUrl: reader.result }));
+            };
+            reader.readAsDataURL(file);
+            await uploadFile(file, true);
+        }
+    };
+
+    const handleImageFile = async (index, e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const newImageFiles = [...imageFiles];
+            newImageFiles[index] = file;
+            setImageFiles(newImageFiles);
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const newPreviews = [...imagePreviews];
+                newPreviews[index] = reader.result;
+                setImagePreviews(newPreviews);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const addImageField = () => {
+        setImages([...images, '']);
+        setImageFiles([...imageFiles, null]);
+        setImagePreviews([...imagePreviews, null]);
+    };
+
+    const removeImageField = (index) => {
+        setImages(images.filter((_, i) => i !== index));
+        setImageFiles(imageFiles.filter((_, i) => i !== index));
+        setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+    };
+
+    const updateImage = (index, value) => {
+        const newImages = [...images];
+        newImages[index] = value;
+        setImages(newImages);
+    };
+
     const handleSaveEdit = async () => {
         setError('');
         setSuccess('');
+        setUploading(true);
 
         try {
+            // Upload additional images that are files
+            const uploadedImageUrls = [];
+            for (let i = 0; i < imageFiles.length; i++) {
+                if (imageFiles[i]) {
+                    const url = await uploadFile(imageFiles[i]);
+                    if (url) uploadedImageUrls.push(url);
+                } else if (images[i] && images[i].trim()) {
+                    uploadedImageUrls.push(images[i]);
+                }
+            }
+
             await api.put(`/hotels/${id}`, {
                 ...hotel,
                 ...editData,
+                images: JSON.stringify(uploadedImageUrls),
                 cancellationPolicies: JSON.stringify(editData.cancellationPolicies)
             });
 
             setSuccess(t('savedSuccessfully'));
             setIsEditing(false);
             fetchHotel();
-        } catch {
-            setError(t('errorSaving'));
+        } catch (err) {
+            setError(err.message || t('errorSaving'));
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -313,6 +410,45 @@ const ManageHotel = () => {
                             ) : (
                                 <div className="info-edit">
                                     <div className="edit-grid">
+                                        {/* Map Location - New */}
+                                        <div className="form-section full-width">
+                                            <div className="form-section-title">📍 {t('mapLocation') || 'Локация на картата'}</div>
+                                            <LocationPicker
+                                                onLocationSelect={(locationData) => {
+                                                    setEditData({
+                                                        ...editData,
+                                                        latitude: locationData.lat,
+                                                        longitude: locationData.lng,
+                                                        city: locationData.city || editData.city,
+                                                        country: locationData.country || editData.country,
+                                                        location: locationData.address || editData.location
+                                                    });
+                                                }}
+                                                initialLat={editData.latitude}
+                                                initialLng={editData.longitude}
+                                            />
+                                            <div className="form-row">
+                                                <div className="form-group">
+                                                    <label>{t('latitude') || 'Географска ширина'}</label>
+                                                    <input
+                                                        type="number"
+                                                        value={editData.latitude || ''}
+                                                        onChange={(e) => setEditData({ ...editData, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                                                        step="0.000001"
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>{t('longitude') || 'Географска дължина'}</label>
+                                                    <input
+                                                        type="number"
+                                                        value={editData.longitude || ''}
+                                                        onChange={(e) => setEditData({ ...editData, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                                                        step="0.000001"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="form-group">
                                             <label>{t('hotelName')}</label>
                                             <input
@@ -346,8 +482,9 @@ const ManageHotel = () => {
                                             />
                                         </div>
 
+                                        {/* Status and Rating Row */}
                                         <div className="form-group">
-                                            <label>{t('status')}</label>
+                                            <label>{t('status') || 'Статус'}</label>
                                             <select
                                                 value={editData.isAvailable}
                                                 onChange={(e) => setEditData({ ...editData, isAvailable: e.target.value === 'true' })}
@@ -359,16 +496,21 @@ const ManageHotel = () => {
 
                                         <div className="form-group">
                                             <label>{t('starRating') || 'Звезди'}</label>
-                                            <select
-                                                value={editData.starRating}
-                                                onChange={(e) => setEditData({ ...editData, starRating: parseInt(e.target.value) })}
-                                            >
-                                                <option value="1">1 ⭐</option>
-                                                <option value="2">2 ⭐⭐</option>
-                                                <option value="3">3 ⭐⭐⭐</option>
-                                                <option value="4">4 ⭐⭐⭐⭐</option>
-                                                <option value="5">5 ⭐⭐⭐⭐⭐</option>
-                                            </select>
+                                            <div className="star-rating-select">
+                                                {[0, 1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        className={`star-select-btn ${star <= (hoveredStar !== null ? hoveredStar : editData.starRating) ? 'selected' : ''
+                                                            } ${star === 0 ? 'zero-star' : ''}`}
+                                                        onClick={() => setEditData({ ...editData, starRating: star })}
+                                                        onMouseEnter={() => setHoveredStar(star)}
+                                                        onMouseLeave={() => setHoveredStar(null)}
+                                                    >
+                                                        {star === 0 ? '—' : '★'}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
 
                                         <div className="form-group full-width">
@@ -380,11 +522,99 @@ const ManageHotel = () => {
                                             />
                                         </div>
 
+                                        {/* Photos Section - New */}
+                                        <div className="form-section full-width">
+                                            <div className="form-section-title">🖼️ {t('photos') || 'Снимки'}</div>
+
+                                            {/* Main Photo */}
+                                            <div className="form-group main-photo-upload">
+                                                <label>{t('mainPhoto') || 'Основна снимка'} *</label>
+                                                <div className="photo-input-group">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleMainImageFile}
+                                                        style={{ display: 'none' }}
+                                                        id="edit-main-image"
+                                                    />
+                                                    <label htmlFor="edit-main-image" className="btn-upload">
+                                                        📁 {t('changePhoto') || 'Смени снимката'}
+                                                    </label>
+                                                    <input
+                                                        type="url"
+                                                        value={editData.imageUrl?.startsWith('data:') ? '' : editData.imageUrl}
+                                                        onChange={(e) => setEditData({ ...editData, imageUrl: e.target.value })}
+                                                        placeholder={t('enterURL') || 'Или въведи URL адрес'}
+                                                    />
+                                                </div>
+                                                {editData.imageUrl && (
+                                                    <div className="image-preview-large">
+                                                        <img
+                                                            src={editData.imageUrl}
+                                                            alt="Main Preview"
+                                                            onError={(e) => e.target.parentElement.style.display = 'none'}
+                                                            onLoad={(e) => e.target.parentElement.style.display = 'block'}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Additional Photos */}
+                                            <div className="form-group">
+                                                <label>{t('additionalPhotos') || 'Допълнителни снимки'}</label>
+                                                <div className="additional-photos-grid">
+                                                    {images.map((img, index) => (
+                                                        <div key={index} className="photo-card">
+                                                            {(imagePreviews[index] || img) ? (
+                                                                <img
+                                                                    src={imagePreviews[index] || img}
+                                                                    alt={`Preview ${index}`}
+                                                                    className="preview-thumb"
+                                                                    onError={(e) => e.target.style.display = 'none'}
+                                                                    onLoad={(e) => e.target.style.display = 'block'}
+                                                                />
+                                                            ) : (
+                                                                <div className="preview-thumb" style={{ background: '#eee', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>🖼️</div>
+                                                            )}
+                                                            <input
+                                                                type="url"
+                                                                className="url-input"
+                                                                value={img || ''}
+                                                                onChange={(e) => updateImage(index, e.target.value)}
+                                                                placeholder="URL"
+                                                            />
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(e) => handleImageFile(index, e)}
+                                                                style={{ display: 'none' }}
+                                                                id={`edit-image-${index}`}
+                                                            />
+                                                            <div style={{ display: 'flex', gap: '5px', marginTop: '5px' }}>
+                                                                <label htmlFor={`edit-image-${index}`} className="btn-upload" style={{ padding: '2px 5px', fontSize: '0.8rem', flex: 1 }}>📁</label>
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn-remove-photo"
+                                                                    onClick={() => removeImageField(index)}
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <button type="button" className="btn-add-photo" onClick={addImageField}>
+                                                        <span>➕</span>
+                                                        <span style={{ fontSize: '0.8rem' }}>{t('addPhoto') || 'Добави'}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="form-group full-width">
                                             <label>{t('cancellationPolicies') || 'Политики за отмяна'}</label>
                                             <div className="dynamic-list">
                                                 {editData.cancellationPolicies.map((policy, index) => (
-                                                    <div key={index} className="dynamic-item policy-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                                                    <div key={index} className="policy-card">
                                                         <span>До</span>
                                                         <input
                                                             type="number"
@@ -396,7 +626,7 @@ const ManageHotel = () => {
                                                                 newPolicies[index].daysBefore = isNaN(val) ? 0 : val;
                                                                 setEditData({ ...editData, cancellationPolicies: newPolicies });
                                                             }}
-                                                            style={{ width: '70px', padding: '5px' }}
+                                                            style={{ width: '80px' }}
                                                         />
                                                         <span>дни:</span>
                                                         <input
@@ -412,7 +642,7 @@ const ManageHotel = () => {
                                                                 newPolicies[index].refundPercentage = val;
                                                                 setEditData({ ...editData, cancellationPolicies: newPolicies });
                                                             }}
-                                                            style={{ width: '70px', padding: '5px' }}
+                                                            style={{ width: '80px' }}
                                                         />
                                                         <span>% възстановяване</span>
                                                         <button
@@ -422,7 +652,7 @@ const ManageHotel = () => {
                                                                 const newPolicies = editData.cancellationPolicies.filter((_, i) => i !== index);
                                                                 setEditData({ ...editData, cancellationPolicies: newPolicies });
                                                             }}
-                                                            style={{ marginLeft: 'auto' }}
+                                                            style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ff4444', fontSize: '1.2rem' }}
                                                         >
                                                             ✕
                                                         </button>
@@ -438,21 +668,20 @@ const ManageHotel = () => {
                                                         cancellationPolicies: [...editData.cancellationPolicies, { daysBefore: 7, refundPercentage: 100 }]
                                                     });
                                                 }}
-                                                style={{ marginTop: '10px' }}
                                             >
                                                 ➕ {t('addCancellationPolicy') || 'Добави правило'}
                                             </button>
-                                            <p className="hint-text" style={{ fontSize: '0.85em', color: '#666', marginTop: '5px' }}>
+                                            <p className="hint-text">
                                                 Пример: 60 дни преди настаняване -&gt; 100% възстановяване на сумата. За липсващи дни до самата дата на настаняване (0 дни) се приема 0% (без възстановяване). Ако нямате въведени правила, приемаме, че отмяната е винаги 100% безплатна.
                                             </p>
                                         </div>
                                     </div>
                                     <div className="edit-actions">
-                                        <button className="btn-cancel" onClick={() => setIsEditing(false)}>
+                                        <button className="btn-cancel" onClick={() => setIsEditing(false)} disabled={uploading}>
                                             ❌ {t('cancel')}
                                         </button>
-                                        <button className="btn-save" onClick={handleSaveEdit}>
-                                            ✅ {t('save')}
+                                        <button className="btn-save" onClick={handleSaveEdit} disabled={uploading || uploadingImage}>
+                                            {uploading ? '⏳...' : `✅ ${t('save')}`}
                                         </button>
                                     </div>
                                 </div>
