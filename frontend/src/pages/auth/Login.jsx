@@ -28,6 +28,8 @@ const Login = () => {
         try {
             const data = await api.post('/auth/login', formData);
 
+            if (data.token) localStorage.setItem('jwt_token', data.token);
+
             // Store token with avatar URL
             const avatarUrl = getAssetUrl(data.avatarUrl);
 
@@ -54,6 +56,8 @@ const Login = () => {
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             const data = await api.post('/auth/google-login', { googleToken: credentialResponse.credential });
+
+            if (data.token) localStorage.setItem('jwt_token', data.token);
 
             // Store token with avatar URL
             const avatarUrl = getAssetUrl(data.avatarUrl);
