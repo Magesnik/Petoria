@@ -1,8 +1,7 @@
-using MailKit.Net.Smtp;
-using MailKit.Security;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MimeKit;
 using Petoria.Core.Contracts;
 using Petoria.Core.Models.Email;
 
@@ -21,55 +20,39 @@ namespace Petoria.Core.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
-            var email = new MimeMessage();
-            email.From.Add(new MailboxAddress(_smtpSettings.FromName, _smtpSettings.FromEmail));
-            email.To.Add(MailboxAddress.Parse(toEmail));
-            email.Subject = subject;
-
-            var builder = new BodyBuilder { HtmlBody = htmlBody };
-            email.Body = builder.ToMessageBody();
-
-            using var smtp = new SmtpClient();
-            
             try
             {
-                // Diagnostic: Ignore certificate validation errors (common in cloud environments)
-                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                var apiKey = _smtpSettings.ApiKey;
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    // Fallback to Password if ApiKey is not set explicitly (user might put it in Password field)
+                    apiKey = _smtpSettings.Password;
+                }
 
-                _logger.LogInformation("SMTP Step 1: Connecting to {Host}:{Port} with {Options}", 
-                    _smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl ? "SSL/TLS" : "No SSL");
+                var client = new SendGridClient(apiKey);
+                var from = new EmailAddress(_smtpSettings.FromEmail, _smtpSettings.FromName);
+                var to = new EmailAddress(toEmail);
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, null, htmlBody);
 
-                var socketOptions = _smtpSettings.Port == 465 
-                    ? SecureSocketOptions.SslOnConnect 
-                    : SecureSocketOptions.StartTls;
-
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                _logger.LogInformation("Attempting to send email via SendGrid API to {ToEmail}", toEmail);
                 
-                await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, socketOptions, cts.Token);
-                _logger.LogInformation("SMTP Step 2: Connected successfully.");
+                var response = await client.SendEmailAsync(msg);
 
-                await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password, cts.Token);
-                _logger.LogInformation("SMTP Step 3: Authenticated successfully.");
-
-                await smtp.SendAsync(email, cts.Token);
-                _logger.LogInformation("SMTP Step 4: Email sent successfully to {ToEmail}", toEmail);
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogError("SMTP Error: Operation timed out during email sending to {ToEmail}", toEmail);
-                throw;
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Email sent successfully to {ToEmail} via SendGrid.", toEmail);
+                }
+                else
+                {
+                    var errorContent = await response.Body.ReadAsStringAsync();
+                    _logger.LogError("Failed to send email via SendGrid. Status: {Status}, Error: {Error}", response.StatusCode, errorContent);
+                    throw new Exception($"SendGrid Error: {response.StatusCode}");
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "SMTP Error: Failed at some step. Message: {Message}", ex.Message);
+                _logger.LogError(ex, "Failed to send email to {ToEmail} using SendGrid API.", toEmail);
                 throw;
-            }
-            finally
-            {
-                if (smtp.IsConnected)
-                {
-                    await smtp.DisconnectAsync(true);
-                }
             }
         }
     }
