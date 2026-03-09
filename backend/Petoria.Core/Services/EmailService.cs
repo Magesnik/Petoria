@@ -33,35 +33,35 @@ namespace Petoria.Core.Services
             
             try
             {
-                _logger.LogInformation("Attempting to send email to {ToEmail} via {Host}:{Port} (SSL: {EnableSsl})", 
-                    toEmail, _smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl);
+                // Diagnostic: Ignore certificate validation errors (common in cloud environments)
+                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                // For Gmail: Port 465 uses SslOnConnect, Port 587 uses StartTls
-                var socketOptions = SecureSocketOptions.None;
-                if (_smtpSettings.EnableSsl)
-                {
-                    socketOptions = _smtpSettings.Port == 465 
-                        ? SecureSocketOptions.SslOnConnect 
-                        : SecureSocketOptions.StartTls;
-                }
+                _logger.LogInformation("SMTP Step 1: Connecting to {Host}:{Port} with {Options}", 
+                    _smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl ? "SSL/TLS" : "No SSL");
 
-                // Add a shorter timeout for the connection phase specifically
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var socketOptions = _smtpSettings.Port == 465 
+                    ? SecureSocketOptions.SslOnConnect 
+                    : SecureSocketOptions.StartTls;
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
                 
                 await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, socketOptions, cts.Token);
+                _logger.LogInformation("SMTP Step 2: Connected successfully.");
+
                 await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password, cts.Token);
+                _logger.LogInformation("SMTP Step 3: Authenticated successfully.");
+
                 await smtp.SendAsync(email, cts.Token);
-                
-                _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
+                _logger.LogInformation("SMTP Step 4: Email sent successfully to {ToEmail}", toEmail);
             }
             catch (OperationCanceledException)
             {
-                _logger.LogError("Email sending timed out after 10 seconds for {ToEmail}", toEmail);
+                _logger.LogError("SMTP Error: Operation timed out during email sending to {ToEmail}", toEmail);
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {ToEmail}. Error: {Message}", toEmail, ex.Message);
+                _logger.LogError(ex, "SMTP Error: Failed at some step. Message: {Message}", ex.Message);
                 throw;
             }
             finally
