@@ -30,21 +30,34 @@ namespace Petoria.Core.Services
             email.Body = builder.ToMessageBody();
 
             using var smtp = new SmtpClient();
+            // Increase timeout for cloud environments
+            smtp.Timeout = 15000; 
+
             try
             {
-                await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
+                _logger.LogInformation("Attempting to send email to {ToEmail} via {Host}:{Port} (SSL: {EnableSsl})", 
+                    toEmail, _smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl);
+
+                // Use SecureSocketOptions.Auto for better compatibility with different providers/ports
+                var socketOptions = _smtpSettings.EnableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None;
+                
+                await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, socketOptions);
                 await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
                 await smtp.SendAsync(email);
+                
                 _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {ToEmail}", toEmail);
-                throw; // Rethrow to let the caller handle it if needed
+                _logger.LogError(ex, "Failed to send email to {ToEmail}. Error: {Message}", toEmail, ex.Message);
+                throw;
             }
             finally
             {
-                await smtp.DisconnectAsync(true);
+                if (smtp.IsConnected)
+                {
+                    await smtp.DisconnectAsync(true);
+                }
             }
         }
     }
