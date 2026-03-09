@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFavorites } from '../context/FavoritesContext';
-import { useCurrency } from '../context/CurrencyContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useFavorites } from '../../context/FavoritesContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './HotelCard.css';
 
 
@@ -64,7 +64,7 @@ const HotelCard = ({ hotel }) => {
                             <span key={index} className="amenity-tag">{amenity}</span>
                         ))}
                         {!showAllAmenities && amenities.length > 4 && (
-                            <span 
+                            <span
                                 className="amenity-tag more-amenities-btn"
                                 onClick={(e) => { e.stopPropagation(); setShowAllAmenities(true); }}
                                 title={t('showMore') || "Show more"}
@@ -73,7 +73,7 @@ const HotelCard = ({ hotel }) => {
                             </span>
                         )}
                         {showAllAmenities && amenities.length > 4 && (
-                            <span 
+                            <span
                                 className="amenity-tag more-amenities-btn"
                                 onClick={(e) => { e.stopPropagation(); setShowAllAmenities(false); }}
                                 title={t('showLess') || "Show less"}

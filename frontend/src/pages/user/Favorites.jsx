@@ -4,7 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
 
-import HotelCard from '../../components/HotelCard';
+import HotelCard from '../../components/hotel/HotelCard';
 import './Favorites.css';
 
 const Favorites = () => {

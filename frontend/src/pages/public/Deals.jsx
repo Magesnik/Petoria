@@ -16,10 +16,6 @@ const Deals = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchDeals(activeTab);
-    }, [activeTab]);
-
     const fetchDeals = async (type) => {
         setLoading(true);
         setError(null);
@@ -34,6 +30,10 @@ const Deals = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchDeals(activeTab);
+    }, [activeTab]);
 
     const formatCountdown = (hours) => {
         if (hours <= 0) return t('expired');

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLanguage } from '../context/LanguageContext';
-import { useCurrency } from '../context/CurrencyContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import './HotelFilters.css';
 
 const HotelFilters = ({

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 import './DiscountManager.css';
 
 const DiscountManager = ({ hotelId, roomTypes }) => {
@@ -19,10 +19,6 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
         discountPercentage: ''
     });
 
-    useEffect(() => {
-        fetchDiscounts();
-    }, [fetchDiscounts]);
-
     const fetchDiscounts = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${hotelId}/discounts`);
@@ -34,6 +30,10 @@ const DiscountManager = ({ hotelId, roomTypes }) => {
             setLoading(false);
         }
     }, [hotelId, t]);
+
+    useEffect(() => {
+        fetchDiscounts();
+    }, [fetchDiscounts]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

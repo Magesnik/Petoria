@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './CreateHotel.css';
 
-const LocationPicker = React.lazy(() => import('../../components/LocationPicker'));
+const LocationPicker = React.lazy(() => import('../../components/common/LocationPicker'));
 
 const CreateHotel = () => {
     const { isAdmin } = useAuth();

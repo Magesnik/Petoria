@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { api, getAssetUrl } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
+import { api, getAssetUrl } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './ReviewSection.css';
 
 const ReviewSection = ({ hotelId }) => {
@@ -12,10 +12,6 @@ const ReviewSection = ({ hotelId }) => {
     const { user, isAdmin, isSuperAdmin } = useAuth();
     const { t, language } = useLanguage();
     const [averageRating, setAverageRating] = useState(0);
-
-    useEffect(() => {
-        fetchReviews();
-    }, [fetchReviews]);
 
     const fetchReviews = React.useCallback(async () => {
         setLoading(true);
@@ -36,6 +32,10 @@ const ReviewSection = ({ hotelId }) => {
             setLoading(false);
         }
     }, [hotelId]);
+
+    useEffect(() => {
+        fetchReviews();
+    }, [fetchReviews]);
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();

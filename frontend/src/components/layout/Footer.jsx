@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './Footer.css';
 
 const Footer = () => {
@@ -68,9 +68,9 @@ const Footer = () => {
                             </li>
                             <li>
                                 <span className="contact-icon">📍</span>
-                                <a 
-                                    href="https://www.google.com/maps/search/?api=1&query=42.685389,23.319111" 
-                                    target="_blank" 
+                                <a
+                                    href="https://www.google.com/maps/search/?api=1&query=42.685389,23.319111"
+                                    target="_blank"
                                     rel="noopener noreferrer"
                                     className="location-link"
                                 >

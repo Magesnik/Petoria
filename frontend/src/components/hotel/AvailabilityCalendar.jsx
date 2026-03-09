@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 import './AvailabilityCalendar.css';
 
 // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
@@ -33,12 +33,6 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
         }
     }, [safeRoomTypes, selectedRoomType]);
 
-    useEffect(() => {
-        if (selectedRoomType) {
-            fetchAvailability();
-        }
-    }, [selectedRoomType, fetchAvailability]);
-
     const fetchAvailability = React.useCallback(async () => {
         try {
             const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
@@ -56,6 +50,12 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
             console.error('Error fetching availability:', err);
         }
     }, [hotelId, currentMonth]);
+
+    useEffect(() => {
+        if (selectedRoomType) {
+            fetchAvailability();
+        }
+    }, [selectedRoomType, fetchAvailability]);
 
     const getAvailabilityForDate = (date) => {
         if (!selectedRoomType) return null;

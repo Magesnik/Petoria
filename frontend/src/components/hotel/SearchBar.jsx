@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 import './SearchBar.css';
 
 const SearchBar = ({ initialValues = {} }) => {

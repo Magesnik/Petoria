@@ -1,0 +1,64 @@
+﻿
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mтЬУ[39m 100 modules transformed.
+node.exe : [31mx[39m Bui
+ld failed in 507ms
+At C:\Program Files\nodejs
+\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_J
+S $args
++   ~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (  
+  [31mx[39m Build fail   
+ ed in 507ms:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+[31merror during build:
+[31mCould not resolve "..
+/../components/Availabilit
+yCalendar" from "src/pages
+/moderator/ModeratorHotelP
+anel.jsx"[31m
+file: [36mC:/Users/magesn
+ik/My Drive/╨Ф╨╕╨┐╨╗╨╛╨╝╨╜
+╨░/Petoria/frontend/src/pa
+ges/moderator/ModeratorHot
+elPanel.jsx[31m
+    at getRollupError (fil
+e:///C:/Users/magesnik/My%
+20Drive/%D0%94%D0%B8%D0%BF
+%D0%BB%D0%BE%D0%BC%D0%BD%D
+0%B0/Petoria/frontend/node
+_modules/rollup/dist/es/sh
+ared/parseAst.js:401:41)
+    at error (file:///C:/U
+sers/magesnik/My%20Drive/%
+D0%94%D0%B8%D0%BF%D0%BB%D0
+%BE%D0%BC%D0%BD%D0%B0/Peto
+ria/frontend/node_modules/
+rollup/dist/es/shared/pars
+eAst.js:397:42)
+    at ModuleLoader.handle
+InvalidResolvedId (file://
+/C:/Users/magesnik/My%20Dr
+ive/%D0%94%D0%B8%D0%BF%D0%
+BB%D0%BE%D0%BC%D0%BD%D0%B0
+/Petoria/frontend/node_mod
+ules/rollup/dist/es/shared
+/node-entry.js:21590:24)
+    at file:///C:/Users/ma
+gesnik/My%20Drive/%D0%94%D
+0%B8%D0%BF%D0%BB%D0%BE%D0%
+BC%D0%BD%D0%B0/Petoria/fro
+ntend/node_modules/rollup/
+dist/es/shared/node-entry.
+js:21550:26[39m

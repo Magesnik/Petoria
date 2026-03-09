@@ -6,9 +6,9 @@ import { useFavorites } from '../../context/FavoritesContext';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 
-import ReviewSection from '../../components/ReviewSection';
-import BookingWidget from '../../components/BookingWidget';
-import RoomTypeManager from '../../components/RoomTypeManager';
+import ReviewSection from '../../components/hotel/ReviewSection';
+import BookingWidget from '../../components/booking/BookingWidget';
+import RoomTypeManager from '../../components/booking/RoomTypeManager';
 import './HotelDetails.css';
 
 const HotelDetails = () => {

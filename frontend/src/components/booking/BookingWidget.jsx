@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
-import { useCurrency } from '../context/CurrencyContext';
-import { useCart } from '../context/CartContext';
+import { api } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { useCart } from '../../context/CartContext';
 import DateRangeCalendar from './DateRangeCalendar';
 import AddToCartDialog from './AddToCartDialog';
 import './BookingWidget.css';

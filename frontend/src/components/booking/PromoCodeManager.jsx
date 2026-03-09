@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 import './PromoCodeManager.css';
 
 const PromoCodeManager = ({ hotelId }) => {
@@ -19,12 +19,6 @@ const PromoCodeManager = ({ hotelId }) => {
         validDays: '30'
     });
 
-    useEffect(() => {
-        if (hotelId) {
-            fetchPromoCodes();
-        }
-    }, [hotelId, fetchPromoCodes]);
-
     const fetchPromoCodes = React.useCallback(async () => {
         try {
             setLoading(true);
@@ -37,6 +31,12 @@ const PromoCodeManager = ({ hotelId }) => {
             setLoading(false);
         }
     }, [hotelId, t]);
+
+    useEffect(() => {
+        if (hotelId) {
+            fetchPromoCodes();
+        }
+    }, [hotelId, fetchPromoCodes]);
 
     const handleInputChange = (e) => {
         let { name, value } = e.target;

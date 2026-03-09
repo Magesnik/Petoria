@@ -26,14 +26,6 @@ const AdminSupportMessages = () => {
         return true;
     });
 
-    useEffect(() => {
-        if (!isSuperAdmin()) {
-            navigate('/');
-            return;
-        }
-        fetchMessages();
-    }, [isSuperAdmin, navigate, fetchMessages]);
-
     const fetchMessages = React.useCallback(async () => {
         try {
             const data = await api.get('/support/messages/admin');
@@ -45,6 +37,14 @@ const AdminSupportMessages = () => {
             setLoading(false);
         }
     }, [t]);
+
+    useEffect(() => {
+        if (!isSuperAdmin()) {
+            navigate('/');
+            return;
+        }
+        fetchMessages();
+    }, [isSuperAdmin, navigate, fetchMessages]);
 
     const handleReplySubmit = async (messageId) => {
         if (!replyText.trim()) return;

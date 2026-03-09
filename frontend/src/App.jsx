@@ -47,13 +47,13 @@ import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
 import Cookies from './pages/public/Cookies';
 
-import Header from './components/Header';
-import Footer from './components/Footer';
-import CookieBanner from './components/CookieBanner';
-import ProtectedRoute from './components/ProtectedRoute';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import CookieBanner from './components/common/CookieBanner';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import { LiveUsersProvider } from './context/LiveUsersContext';
 
-import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from './components/common/ScrollToTop';
 
 function App() {
   return (

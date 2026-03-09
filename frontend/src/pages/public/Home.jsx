@@ -5,7 +5,7 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { useLiveUsers } from '../../context/LiveUsersContext';
 import { api } from '../../utils/api';
 
-import SearchBar from '../../components/SearchBar';
+import SearchBar from '../../components/hotel/SearchBar';
 import './Home.css';
 
 const Home = () => {

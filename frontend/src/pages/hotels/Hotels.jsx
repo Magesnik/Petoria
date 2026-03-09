@@ -3,11 +3,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 
-import HotelCard from '../../components/HotelCard';
-import HotelFilters from '../../components/HotelFilters';
+import HotelCard from '../../components/hotel/HotelCard';
+import HotelFilters from '../../components/hotel/HotelFilters';
 import './Hotels.css';
 
-const HotelMap = React.lazy(() => import('../../components/HotelMap'));
+const HotelMap = React.lazy(() => import('../../components/hotel/HotelMap'));
 
 const SORT_OPTIONS = [
     { value: 'rating_desc', labelKey: 'sortRatingDesc' },

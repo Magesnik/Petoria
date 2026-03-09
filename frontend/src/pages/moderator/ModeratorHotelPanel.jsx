@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
-import AvailabilityCalendar from '../../components/AvailabilityCalendar';
+import AvailabilityCalendar from '../../components/hotel/AvailabilityCalendar';
 import './ModeratorHotelPanel.css'; // We'll create this
 
 const ModeratorHotelPanel = () => {

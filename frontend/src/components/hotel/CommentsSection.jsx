@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { api } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import Comment from './Comment';
 import CommentForm from './CommentForm';
 import './CommentsSection.css';
@@ -10,10 +10,6 @@ const CommentsSection = ({ hotelId }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { user } = useAuth();
-
-    useEffect(() => {
-        fetchComments();
-    }, [fetchComments]);
 
     const fetchComments = React.useCallback(async () => {
         setLoading(true);
@@ -27,6 +23,10 @@ const CommentsSection = ({ hotelId }) => {
             setLoading(false);
         }
     }, [hotelId]);
+
+    useEffect(() => {
+        fetchComments();
+    }, [fetchComments]);
 
     const handleCommentAdded = (newComment) => {
         setComments([newComment, ...comments]);

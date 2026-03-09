@@ -36,14 +36,6 @@ const AdminDashboard = () => {
         }
     };
 
-    useEffect(() => {
-        if (!isSuperAdmin()) {
-            navigate('/');
-            return;
-        }
-        fetchData();
-    }, [isSuperAdmin, navigate]);
-
     const fetchData = async () => {
         try {
             let usersData = [];
@@ -81,6 +73,14 @@ const AdminDashboard = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!isSuperAdmin()) {
+            navigate('/');
+            return;
+        }
+        fetchData();
+    }, [isSuperAdmin, navigate]);
 
     const fetchUserDetails = async (userId) => {
         try {

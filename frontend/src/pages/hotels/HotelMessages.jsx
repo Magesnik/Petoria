@@ -22,14 +22,6 @@ const HotelMessages = () => {
     const [replyText, setReplyText] = useState('');
     const [sendingReply, setSendingReply] = useState(false);
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchData();
-    }, [user, navigate, fetchData]);
-
     const fetchData = React.useCallback(async () => {
         try {
             // Fetch hotel details to verify ownership and get name
@@ -56,6 +48,14 @@ const HotelMessages = () => {
             setLoading(false);
         }
     }, [id, user, navigate, t]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchData();
+    }, [user, navigate, fetchData]);
 
     const handleReplyClick = (messageId) => {
         setReplyingTo(messageId);

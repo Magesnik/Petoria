@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api } from '../utils/api';
+import { api } from '../../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
-import { useCurrency } from '../context/CurrencyContext';
-import { useCart } from '../context/CartContext';
-import logoImg from '../assets/logo.png';
+import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { useCart } from '../../context/CartContext';
+import logoImg from '../../assets/logo.png';
 import './Header.css';
 
 const Header = () => {
@@ -38,15 +38,6 @@ const Header = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isModerator, setIsModerator] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-      // Poll every minute
-      const interval = setInterval(fetchUserData, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [user]);
-
   const fetchUserData = async () => {
     try {
       const messagesData = await api.get('/hotels/my/messages/unread-responses-count');
@@ -69,6 +60,15 @@ const Header = () => {
       console.error('Error fetching user data:', err);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+      // Poll every minute
+      const interval = setInterval(fetchUserData, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   // Click outside to close dropdown
   useEffect(() => {

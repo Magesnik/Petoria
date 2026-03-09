@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
-import { useLanguage } from '../context/LanguageContext';
+import { api } from '../../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
 import './RoomTypeManager.css';
 
 const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
@@ -22,12 +22,6 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
         imageUrl: ''
     });
 
-    useEffect(() => {
-        if (hotelId) {
-            fetchRoomTypes();
-        }
-    }, [hotelId, fetchRoomTypes]);
-
     const fetchRoomTypes = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${hotelId}/rooms`);
@@ -43,6 +37,12 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
             setLoading(false);
         }
     }, [hotelId, onRoomsChange, t]);
+
+    useEffect(() => {
+        if (hotelId) {
+            fetchRoomTypes();
+        }
+    }, [hotelId, fetchRoomTypes]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

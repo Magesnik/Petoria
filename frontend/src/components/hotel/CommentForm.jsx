@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { api } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { api } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import './Comment.css';
 
 const CommentForm = ({ hotelId, parentCommentId = null, onCommentSubmitted, onCancel }) => {

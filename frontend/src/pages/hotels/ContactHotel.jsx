@@ -22,14 +22,6 @@ const ContactHotel = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        fetchHotel();
-    }, [user, navigate, fetchHotel]);
-
     const fetchHotel = React.useCallback(async () => {
         try {
             const data = await api.get(`/hotels/${id}`);
@@ -41,6 +33,14 @@ const ContactHotel = () => {
             setLoading(false);
         }
     }, [id, t]);
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        fetchHotel();
+    }, [user, navigate, fetchHotel]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

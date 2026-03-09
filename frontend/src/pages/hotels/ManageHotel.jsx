@@ -4,13 +4,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-import RoomTypeManager from '../../components/RoomTypeManager';
-import DiscountManager from '../../components/DiscountManager';
-import PromoCodeManager from '../../components/PromoCodeManager';
-import AvailabilityCalendar from '../../components/AvailabilityCalendar';
+import RoomTypeManager from '../../components/booking/RoomTypeManager';
+import DiscountManager from '../../components/booking/DiscountManager';
+import PromoCodeManager from '../../components/booking/PromoCodeManager';
+import AvailabilityCalendar from '../../components/hotel/AvailabilityCalendar';
 import './ManageHotel.css';
 
-const LocationPicker = React.lazy(() => import('../../components/LocationPicker'));
+const LocationPicker = React.lazy(() => import('../../components/common/LocationPicker'));
 
 const ManageHotel = () => {
     const { id } = useParams();

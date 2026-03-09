@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useLanguage } from '../context/LanguageContext';
-import { api } from '../utils/api';
+import { useLanguage } from '../../context/LanguageContext';
+import { api } from '../../utils/api';
 import './LocationPicker.css';
 
 // Icon paths

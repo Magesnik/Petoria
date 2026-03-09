@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { api, getAssetUrl } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { api, getAssetUrl } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import CommentForm from './CommentForm';
 import './Comment.css';
 
