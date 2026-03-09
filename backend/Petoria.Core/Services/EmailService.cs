@@ -30,22 +30,34 @@ namespace Petoria.Core.Services
             email.Body = builder.ToMessageBody();
 
             using var smtp = new SmtpClient();
-            // Increase timeout for cloud environments
-            smtp.Timeout = 15000; 
-
+            
             try
             {
                 _logger.LogInformation("Attempting to send email to {ToEmail} via {Host}:{Port} (SSL: {EnableSsl})", 
                     toEmail, _smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl);
 
-                // Use SecureSocketOptions.Auto for better compatibility with different providers/ports
-                var socketOptions = _smtpSettings.EnableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None;
+                // For Gmail: Port 465 uses SslOnConnect, Port 587 uses StartTls
+                var socketOptions = SecureSocketOptions.None;
+                if (_smtpSettings.EnableSsl)
+                {
+                    socketOptions = _smtpSettings.Port == 465 
+                        ? SecureSocketOptions.SslOnConnect 
+                        : SecureSocketOptions.StartTls;
+                }
+
+                // Add a shorter timeout for the connection phase specifically
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 
-                await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, socketOptions);
-                await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
-                await smtp.SendAsync(email);
+                await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, socketOptions, cts.Token);
+                await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password, cts.Token);
+                await smtp.SendAsync(email, cts.Token);
                 
                 _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogError("Email sending timed out after 10 seconds for {ToEmail}", toEmail);
+                throw;
             }
             catch (Exception ex)
             {
