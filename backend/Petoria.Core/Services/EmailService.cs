@@ -1,5 +1,6 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Petoria.Core.Contracts;
@@ -10,10 +11,12 @@ namespace Petoria.Core.Services
     public class EmailService : IEmailService
     {
         private readonly SmtpSettings _smtpSettings;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IOptions<SmtpSettings> smtpSettings)
+        public EmailService(IOptions<SmtpSettings> smtpSettings, ILogger<EmailService> logger)
         {
             _smtpSettings = smtpSettings.Value;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
@@ -32,6 +35,12 @@ namespace Petoria.Core.Services
                 await smtp.ConnectAsync(_smtpSettings.Host, _smtpSettings.Port, _smtpSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
                 await smtp.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
                 await smtp.SendAsync(email);
+                _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email to {ToEmail}", toEmail);
+                throw; // Rethrow to let the caller handle it if needed
             }
             finally
             {
