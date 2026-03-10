@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +50,7 @@ public class AdminController : ControllerBase
                 LastName = user.LastName,
                 AvatarUrl = user.AvatarUrl,
                 Roles = roles.ToList(),
+                IsBlocked = user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow,
                 FavoritesCount = favoritesCount,
                 ReservationsCount = reservationsCount,
                 TotalSpent = totalSpent,
@@ -173,6 +175,7 @@ public class AdminController : ControllerBase
             LastName = user.LastName,
             AvatarUrl = user.AvatarUrl,
             Roles = roles.ToList(),
+            IsBlocked = user.LockoutEnabled && user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow,
             TotalSpent = totalSpent,
             Favorites = favorites,
             Reservations = reservations,
@@ -236,6 +239,80 @@ public class AdminController : ControllerBase
         }
 
         return Ok(new { message = $"User {user.Email} has been demoted from Admin" });
+    }
+
+    // PUT: api/admin/users/{id}/promote-super
+    [HttpPut("users/{id}/promote-super")]
+    public async Task<ActionResult> PromoteToSuperAdmin(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found");
+
+        if (await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
+            return BadRequest("User is already a SuperAdmin");
+
+        if (!await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.Admin))
+            await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.Admin);
+
+        var result = await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.SuperAdmin);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { message = $"User {user.Email} has been promoted to SuperAdmin" });
+    }
+
+    // DELETE: api/admin/users/{id}/demote-super
+    [HttpDelete("users/{id}/demote-super")]
+    public async Task<ActionResult> DemoteFromSuperAdmin(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found");
+
+        if (!await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
+            return BadRequest("User is not a SuperAdmin");
+
+        var result = await _userManager.RemoveFromRoleAsync(user, Petoria.Constants.Roles.SuperAdmin);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { message = $"User {user.Email} has been demoted from SuperAdmin" });
+    }
+
+
+    // PUT: api/admin/users/{id}/block
+    [HttpPut("users/{id}/block")]
+    public async Task<ActionResult> BlockUser(string id)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id == currentUserId)
+            return BadRequest("Cannot block yourself");
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found");
+
+        if (await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
+            return BadRequest("Cannot block a SuperAdmin");
+
+        await _userManager.SetLockoutEnabledAsync(user, true);
+        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+
+        return Ok(new { message = $"User {user.Email} has been blocked" });
+    }
+
+    // PUT: api/admin/users/{id}/unblock
+    [HttpPut("users/{id}/unblock")]
+    public async Task<ActionResult> UnblockUser(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found");
+
+        await _userManager.SetLockoutEndDateAsync(user, null);
+
+        return Ok(new { message = $"User {user.Email} has been unblocked" });
     }
 
     // GET: api/admin/stats

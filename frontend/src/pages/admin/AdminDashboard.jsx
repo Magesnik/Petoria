@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api, getAssetUrl } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -133,6 +133,47 @@ const AdminDashboard = () => {
             if (selectedUser === userId) {
                 fetchUserDetails(userId);
             }
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const promoteSuperAdmin = async (userId) => {
+        try {
+            await api.put(`/admin/users/${userId}/promote-super`);
+            fetchData();
+            if (selectedUser === userId) fetchUserDetails(userId);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const demoteSuperAdmin = async (userId) => {
+        try {
+            await api.delete(`/admin/users/${userId}/demote-super`);
+            fetchData();
+            if (selectedUser === userId) fetchUserDetails(userId);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const blockUser = async (userId) => {
+        if (!window.confirm(t('confirmBlockUser'))) return;
+        try {
+            await api.put(`/admin/users/${userId}/block`);
+            fetchData();
+            if (selectedUser === userId) fetchUserDetails(userId);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const unblockUser = async (userId) => {
+        try {
+            await api.put(`/admin/users/${userId}/unblock`);
+            fetchData();
+            if (selectedUser === userId) fetchUserDetails(userId);
         } catch (err) {
             setError(err.message);
         }
@@ -485,29 +526,48 @@ const AdminDashboard = () => {
                                     )}
                                 </div>
                                 <div className="profile-info">
-                                    <h3>{userDetails.firstName} {userDetails.lastName}</h3>
+                                    <div className="profile-name-row">
+                                        <h3>{userDetails.firstName} {userDetails.lastName}</h3>
+                                        <div className="profile-actions">
+                                            {userDetails.roles?.includes('SuperAdmin') ? (
+                                                <button className="btn-demote-super" onClick={() => demoteSuperAdmin(userDetails.id)}>
+                                                    {t('removeSuperAdmin')}
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    {userDetails.roles?.includes('Admin') ? (
+                                                        <button className="btn-demote" onClick={() => demoteUser(userDetails.id)}>
+                                                            {t('removeAdmin')}
+                                                        </button>
+                                                    ) : (
+                                                        <button className="btn-promote" onClick={() => promoteUser(userDetails.id)}>
+                                                            {t('promoteToAdmin')}
+                                                        </button>
+                                                    )}
+                                                    <button className="btn-promote-super" onClick={() => promoteSuperAdmin(userDetails.id)}>
+                                                        {t('promoteToSuperAdmin')}
+                                                    </button>
+                                                </>
+                                            )}
+                                            {userDetails.isBlocked ? (
+                                                <button className="btn-unblock" onClick={() => unblockUser(userDetails.id)}>
+                                                    {t('unblockUser')}
+                                                </button>
+                                            ) : (
+                                                !userDetails.roles?.includes('SuperAdmin') && (
+                                                    <button className="btn-admin-block" onClick={() => blockUser(userDetails.id)}>
+                                                        {t('blockUser')}
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
                                     <p>{userDetails.email}</p>
                                     <div className="profile-badges">
                                         {userDetails.roles?.map(role => (
                                             <span key={role} className={`badge ${role.toLowerCase()}`}>{role}</span>
                                         ))}
                                     </div>
-                                </div>
-
-                                <div className="profile-actions">
-                                    {!userDetails.roles?.includes('SuperAdmin') && (
-                                        <>
-                                            {userDetails.roles?.includes('Admin') ? (
-                                                <button className="btn-demote" onClick={() => demoteUser(userDetails.id)}>
-                                                    {t('removeAdmin')}
-                                                </button>
-                                            ) : (
-                                                <button className="btn-promote" onClick={() => promoteUser(userDetails.id)}>
-                                                    {t('promoteToAdmin')}
-                                                </button>
-                                            )}
-                                        </>
-                                    )}
                                 </div>
                             </div>
 

@@ -570,16 +570,38 @@
 .profile-actions {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+}
+
+.profile-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.profile-name-row h3 {
+    margin: 0 !important;
 }
 
 .btn-promote,
-.btn-demote {
-    padding: 0.6rem 1.25rem;
+.btn-demote,
+.btn-promote-super,
+.btn-demote-super,
+.btn-admin-block,
+.btn-unblock {
+    padding: 0.25rem 0.6rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 600;
+    font-size: 0.7rem;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+    width: fit-content;
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
 .btn-promote {
@@ -593,8 +615,34 @@
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.btn-promote-super {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+}
+
+.btn-demote-super {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+    border: 1px solid rgba(124, 58, 237, 0.25);
+}
+
+.btn-admin-block {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+}
+
+.btn-unblock {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
 .btn-promote:hover,
 .btn-demote:hover,
+.btn-promote-super:hover,
+.btn-demote-super:hover,
+.btn-admin-block:hover,
+.btn-unblock:hover,
 .btn-delete-review:hover,
 .btn-delete-comment:hover {
     transform: translateY(-2px);
@@ -781,9 +829,11 @@
     }
 
     .btn-promote,
-    .btn-demote {
-        flex: 1;
-        text-align: center;
+    .btn-demote,
+    .btn-promote-super,
+    .btn-block,
+    .btn-unblock {
+        flex: none;
     }
 
     .user-profile {

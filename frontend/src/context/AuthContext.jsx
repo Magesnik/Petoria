@@ -44,16 +44,29 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
+        // Clear state immediately to prevent infinite loops if logout call also returns 401
+        localStorage.removeItem('jwt_token');
+        setUser(null);
+
         try {
             await api.post('/auth/logout');
         } catch (error) {
             console.error("Logout failed", error);
         }
-        localStorage.removeItem('jwt_token');
-        setUser(null);
+        
         // Refresh to ensure clean state if needed, or just clear user
         window.location.href = '/';
     };
+
+    useEffect(() => {
+        const handleUnauthorized = () => {
+            console.warn("Unauthorized request detected, logging out...");
+            logout();
+        };
+
+        window.addEventListener('auth-unauthorized', handleUnauthorized);
+        return () => window.removeEventListener('auth-unauthorized', handleUnauthorized);
+    }, []);
 
     const isAdmin = () => {
         // Roles might be returned from profile endpoint? 

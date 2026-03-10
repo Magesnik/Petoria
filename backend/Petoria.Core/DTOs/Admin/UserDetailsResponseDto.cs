@@ -12,6 +12,7 @@ public class UserDetailsResponseDto
     public string? LastName { get; set; }
     public string? AvatarUrl { get; set; }
     public IList<string> Roles { get; set; } = new List<string>();
+    public bool IsBlocked { get; set; }
     public decimal TotalSpent { get; set; }
     public List<UserFavoriteDto> Favorites { get; set; } = new();
     public List<UserReservationDto> Reservations { get; set; } = new();

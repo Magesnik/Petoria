@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { api, getAssetUrl } from '../../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -46,6 +46,8 @@ const Login = () => {
         } catch (err) {
             if (err.message === 'EmailNotConfirmed' || err.response?.data?.message === 'EmailNotConfirmed') {
                 setError(t('emailNotConfirmedError'));
+            } else if (err.message === 'UserIsBlocked' || err.response?.data?.message === 'UserIsBlocked') {
+                setError(t('userIsBlockedError'));
             } else {
                 setError(err.message || 'Invalid email or password');
             }
@@ -73,7 +75,11 @@ const Login = () => {
 
             navigate('/');
         } catch (err) {
-            setError(err.message || 'Google authentication failed. Please try again.');
+            if (err.message === 'UserIsBlocked' || err.response?.data?.message === 'UserIsBlocked') {
+                setError(t('userIsBlockedError'));
+            } else {
+                setError(err.message || 'Google authentication failed. Please try again.');
+            }
             console.error(err);
         }
     };

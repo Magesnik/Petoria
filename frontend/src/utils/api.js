@@ -79,6 +79,11 @@ async function request(endpoint, options = {}) {
         }
 
         if (!response.ok) {
+            // Handle 401 Unauthorized globally by dispatching a custom event
+            if (response.status === 401) {
+                window.dispatchEvent(new CustomEvent('auth-unauthorized'));
+            }
+
             // Create error object with status
             const error = new Error(data.message || data || response.statusText || 'API request failed');
             error.status = response.status;

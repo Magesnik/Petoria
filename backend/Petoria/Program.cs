@@ -160,6 +160,23 @@ builder.Services.AddAuthentication(options =>
                 context.Token = token;
             }
             return Task.CompletedTask;
+        },
+        OnTokenValidated = async context =>
+        {
+            var userManager = context.HttpContext.RequestServices
+                .GetRequiredService<UserManager<ApplicationUser>>();
+            var userId = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                context.Fail("Invalid token");
+                return;
+            }
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null || await userManager.IsLockedOutAsync(user))
+            {
+                context.Fail("User is blocked");
+                context.HttpContext.Response.StatusCode = 401;
+            }
         }
     };
 });

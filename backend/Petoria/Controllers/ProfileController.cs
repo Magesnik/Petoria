@@ -39,6 +39,11 @@ public class ProfileController : ControllerBase
             return Ok(null);
         }
 
+        if (await _userManager.IsLockedOutAsync(user))
+        {
+            return Unauthorized(new { message = "UserIsBlocked" });
+        }
+
         // Map Entity → Response DTO
         var roles = await _userManager.GetRolesAsync(user);
 

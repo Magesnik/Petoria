@@ -80,6 +80,10 @@ public class AuthController : ControllerBase
             {
                 return BadRequest("EmailNotConfirmed");
             }
+            if (ex.Message == "UserIsBlocked")
+            {
+                return BadRequest("UserIsBlocked");
+            }
             return BadRequest(ex.Message);
         }
     }
@@ -87,14 +91,25 @@ public class AuthController : ControllerBase
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginModel model)
     {
-        var result = await _authService.GoogleLoginAsync(model.GoogleToken);
-        if (result == null)
+        try
         {
-            return Unauthorized("Google authentication failed");
-        }
+            var result = await _authService.GoogleLoginAsync(model.GoogleToken);
+            if (result == null)
+            {
+                return Unauthorized("Google authentication failed");
+            }
 
-        SetTokenCookie(result.Token);
-        return Ok(result);
+            SetTokenCookie(result.Token);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message == "UserIsBlocked")
+            {
+                return BadRequest("UserIsBlocked");
+            }
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost("logout")]

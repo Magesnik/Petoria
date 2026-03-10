@@ -46,6 +46,11 @@ public class AuthService : IAuthService
             throw new Exception("EmailNotConfirmed");
         }
 
+        if (await _userManager.IsLockedOutAsync(user))
+        {
+            throw new Exception("UserIsBlocked");
+        }
+
         var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
         if (!result.Succeeded)
         {
@@ -111,6 +116,11 @@ public class AuthService : IAuthService
                         await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.Admin);
                     }
                 }
+            }
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                throw new Exception("UserIsBlocked");
             }
 
             var roles = await _userManager.GetRolesAsync(user);
