@@ -1,15 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Petoria.Controllers;
+using Petoria.Core.Contracts;
 using Petoria.Core.DTOs.Cart;
+using Petoria.Core.DTOs.Reservation;
 using Petoria.Tests.Helpers;
 
 namespace Petoria.Tests.Controllers;
 
 public class CartControllerTests : ControllerTestBase
 {
+    private readonly Mock<IPricingService> _mockPricingService;
+
+    public CartControllerTests()
+    {
+        _mockPricingService = new Mock<IPricingService>();
+        _mockPricingService
+            .Setup(p => p.CalculatePriceAsync(
+                It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(),
+                It.IsAny<int>(), It.IsAny<string?>()))
+            .ReturnsAsync(new PriceCalculationResponseDto
+            {
+                NumberOfNights = 2, PricePerNight = 100, NumberOfRooms = 1,
+                TotalPrice = 200, OriginalPrice = 200, TotalDiscount = 0,
+                Breakdown = new List<DayPriceBreakdownDto>()
+            });
+    }
+
     private CartController CreateController(string userId)
     {
-        var controller = new CartController(Context);
+        var controller = new CartController(Context, _mockPricingService.Object);
         SetControllerUser(controller, userId);
         return controller;
     }
@@ -39,7 +59,7 @@ public class CartControllerTests : ControllerTestBase
     [Fact]
     public async Task GetCart_NoUser_ReturnsUnauthorized()
     {
-        var controller = new CartController(Context);
+        var controller = new CartController(Context, _mockPricingService.Object);
         SetControllerUser(controller, ""); // empty = no user
         // Override the user with empty claim
         controller.ControllerContext.HttpContext.User = new System.Security.Claims.ClaimsPrincipal();
@@ -60,7 +80,7 @@ public class CartControllerTests : ControllerTestBase
         {
             HotelId = hotel.Id, RoomTypeId = room.Id,
             CheckInDate = DateTime.Today.AddDays(1), CheckOutDate = DateTime.Today.AddDays(3),
-            NumberOfRooms = 1, TotalPrice = 200, OriginalPrice = 200
+            NumberOfRooms = 1
         };
 
         var result = await controller.AddToCart(dto);
@@ -79,7 +99,7 @@ public class CartControllerTests : ControllerTestBase
         {
             HotelId = hotel.Id, RoomTypeId = room.Id,
             CheckInDate = DateTime.Today.AddDays(3), CheckOutDate = DateTime.Today.AddDays(1), // invalid
-            NumberOfRooms = 1, TotalPrice = 200, OriginalPrice = 200
+            NumberOfRooms = 1
         };
 
         var result = await controller.AddToCart(dto);
@@ -95,7 +115,7 @@ public class CartControllerTests : ControllerTestBase
         {
             HotelId = 9999, RoomTypeId = 1,
             CheckInDate = DateTime.Today.AddDays(1), CheckOutDate = DateTime.Today.AddDays(3),
-            NumberOfRooms = 1, TotalPrice = 100, OriginalPrice = 100
+            NumberOfRooms = 1
         };
 
         var result = await controller.AddToCart(dto);

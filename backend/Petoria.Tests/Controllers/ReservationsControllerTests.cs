@@ -13,12 +13,25 @@ namespace Petoria.Tests.Controllers;
 public class ReservationsControllerTests : ControllerTestBase
 {
     private readonly Mock<IEmailService> _mockEmailService;
+    private readonly Mock<IPricingService> _mockPricingService;
 
     public ReservationsControllerTests()
     {
         _mockEmailService = new Mock<IEmailService>();
         _mockEmailService.Setup(e => e.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
+
+        _mockPricingService = new Mock<IPricingService>();
+        _mockPricingService
+            .Setup(p => p.CalculatePriceAsync(
+                It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(),
+                It.IsAny<int>(), It.IsAny<string?>()))
+            .ReturnsAsync(new PriceCalculationResponseDto
+            {
+                NumberOfNights = 3, PricePerNight = 100, NumberOfRooms = 1,
+                TotalPrice = 300, OriginalPrice = 300, TotalDiscount = 0,
+                Breakdown = new List<DayPriceBreakdownDto>()
+            });
     }
 
     private ReservationsController CreateController(string userId, params string[] roles)
@@ -33,7 +46,7 @@ public class ReservationsControllerTests : ControllerTestBase
         mockUserManager.Setup(m => m.GetRolesAsync(It.IsAny<ApplicationUser>()))
             .ReturnsAsync(new List<string>(roles));
 
-        var controller = new ReservationsController(Context, _mockEmailService.Object, mockUserManager.Object);
+        var controller = new ReservationsController(Context, _mockEmailService.Object, mockUserManager.Object, _mockPricingService.Object);
         SetControllerUser(controller, userId, roles);
         return controller;
     }

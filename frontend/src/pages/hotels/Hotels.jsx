@@ -200,7 +200,6 @@ const Hotels = () => {
         if (location.search || location.state) {
             navigate('/hotels', { replace: true });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchFilterData, location.search, location.state, navigate]);
 
     // Save filters to localStorage whenever they change
