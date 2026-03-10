@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLanguage } from '../../context/LanguageContext';
-import { api } from '../../utils/api';
 import './LocationPicker.css';
 
 // Icon paths
@@ -60,35 +59,20 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
     const [loading, setLoading] = useState(false);
     const geocodeTimer = useRef(null);
 
-    // Reverse geocoding using Nominatim API (via backend proxy)
+    // Reverse geocoding using BigDataCloud free API (no auth, no rate limit issues)
     const reverseGeocode = useCallback(async (lat, lng) => {
         setLoading(true);
         try {
-            const data = await api.get(`/hotels/geocode?lat=${lat}&lon=${lng}`);
+            const response = await fetch(
+                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+            );
+            if (!response.ok) throw new Error('Geocoding request failed');
+            const data = await response.json();
 
-            const address = data.address || {};
+            const city = data.city || data.locality || data.principalSubdivision || '';
+            const country = data.countryName || '';
 
-            const city = address.city || address.town || address.village || address.municipality || '';
-            const country = address.country || '';
-            const street = address.road || address.street || '';
-            const houseNumber = address.house_number || '';
-            const suburb = address.suburb || address.neighbourhood || '';
-
-            let fullAddress = '';
-            if (street) {
-                fullAddress = street;
-                if (houseNumber) fullAddress += ' ' + houseNumber;
-            }
-            if (suburb && !fullAddress.includes(suburb)) {
-                fullAddress = fullAddress ? `${fullAddress}, ${suburb}` : suburb;
-            }
-
-            const info = {
-                city,
-                country,
-                address: fullAddress || data.display_name?.split(',')[0] || ''
-            };
-
+            const info = { city, country, address: '' };
             setAddressInfo(info);
             return info;
         } catch (error) {

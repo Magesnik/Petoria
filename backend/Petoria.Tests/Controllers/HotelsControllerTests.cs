@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using Petoria.Controllers;
 using Petoria.Core.DTOs.Hotel;
@@ -36,7 +37,8 @@ public class HotelsControllerTests : ControllerTestBase
             .ReturnsAsync(IdentityResult.Success);
 
         var httpClient = new HttpClient();
-        var controller = new HotelsController(Context, httpClient, mockUserManager.Object);
+        var cache = new MemoryCache(new MemoryCacheOptions());
+        var controller = new HotelsController(Context, httpClient, mockUserManager.Object, cache);
         SetControllerUser(controller, userId, roles);
         return controller;
     }
