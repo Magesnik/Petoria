@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Petoria.Core.DTOs.Hotel;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
@@ -15,12 +16,14 @@ public class HotelsController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly HttpClient _httpClient;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMemoryCache _cache;
 
-    public HotelsController(ApplicationDbContext context, HttpClient httpClient, UserManager<ApplicationUser> userManager)
+    public HotelsController(ApplicationDbContext context, HttpClient httpClient, UserManager<ApplicationUser> userManager, IMemoryCache cache)
     {
         _context = context;
         _httpClient = httpClient;
         _userManager = userManager;
+        _cache = cache;
     }
 
     // GET: api/hotels
@@ -674,22 +677,34 @@ public class HotelsController : ControllerBase
     [HttpGet("geocode")]
     public async Task<IActionResult> GetAddress([FromQuery] double lat, [FromQuery] double lon)
     {
+        // Round to 4 decimal places (~11m precision) to maximise cache hits
+        var cacheKey = $"geocode_{lat:F4}_{lon:F4}";
+
+        if (_cache.TryGetValue(cacheKey, out string? cached))
+            return Content(cached!, "application/json");
+
         try
         {
             var latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
             var lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            var request = new HttpRequestMessage(HttpMethod.Get, 
+            var request = new HttpRequestMessage(HttpMethod.Get,
                 $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=18&addressdetails=1");
             request.Headers.Add("User-Agent", "PetoriaApp/1.0 (contact@petoria.com)");
 
             var response = await _httpClient.SendAsync(request);
 
-            if (!response.IsSuccessStatusCode)
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                return StatusCode((int)response.StatusCode, "Error from geocoding service");
+                // Cache a negative result briefly to avoid retry storms
+                _cache.Set(cacheKey, "{}", TimeSpan.FromSeconds(30));
+                return StatusCode(429, "Error from geocoding service");
             }
 
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, "Error from geocoding service");
+
             var content = await response.Content.ReadAsStringAsync();
+            _cache.Set(cacheKey, content, TimeSpan.FromHours(24));
             return Content(content, "application/json");
         }
         catch (Exception ex)

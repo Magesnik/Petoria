@@ -52,6 +52,7 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 // Services
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<Petoria.Core.Contracts.IAuthService, Petoria.Core.Services.AuthService>();
 builder.Services.AddScoped<Petoria.Core.Contracts.IPhotoService, Petoria.Core.Services.CloudinaryService>();
