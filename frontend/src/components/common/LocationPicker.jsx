@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -58,29 +58,26 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
     );
     const [addressInfo, setAddressInfo] = useState(null);
     const [loading, setLoading] = useState(false);
+    const geocodeTimer = useRef(null);
 
     // Reverse geocoding using Nominatim API (via backend proxy)
-    const reverseGeocode = async (lat, lng) => {
+    const reverseGeocode = useCallback(async (lat, lng) => {
         setLoading(true);
         try {
             const data = await api.get(`/hotels/geocode?lat=${lat}&lon=${lng}`);
 
             const address = data.address || {};
 
-            // Extract relevant address components
             const city = address.city || address.town || address.village || address.municipality || '';
             const country = address.country || '';
             const street = address.road || address.street || '';
             const houseNumber = address.house_number || '';
             const suburb = address.suburb || address.neighbourhood || '';
 
-            // Build full address
             let fullAddress = '';
             if (street) {
                 fullAddress = street;
-                if (houseNumber) {
-                    fullAddress += ' ' + houseNumber;
-                }
+                if (houseNumber) fullAddress += ' ' + houseNumber;
             }
             if (suburb && !fullAddress.includes(suburb)) {
                 fullAddress = fullAddress ? `${fullAddress}, ${suburb}` : suburb;
@@ -100,36 +97,32 @@ const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null
         } finally {
             setLoading(false);
         }
+    }, []);
+
+    // Debounced geocode + location select — max 1 request per second (Nominatim limit)
+    const debouncedGeocode = useCallback((lat, lng) => {
+        if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+        geocodeTimer.current = setTimeout(async () => {
+            const info = await reverseGeocode(lat, lng);
+            onLocationSelect({
+                lat,
+                lng,
+                city: info?.city || '',
+                country: info?.country || '',
+                address: info?.address || ''
+            });
+        }, 1000);
+    }, [reverseGeocode, onLocationSelect]);
+
+    const handleMapClick = (lat, lng) => {
+        setPosition([lat, lng]);
+        debouncedGeocode(lat, lng);
     };
 
-    const handleMapClick = async (lat, lng) => {
-        const newPosition = [lat, lng];
-        setPosition(newPosition);
-
-        // Fetch address info and pass everything to parent
-        const info = await reverseGeocode(lat, lng);
-        onLocationSelect({
-            lat,
-            lng,
-            city: info?.city || '',
-            country: info?.country || '',
-            address: info?.address || ''
-        });
-    };
-
-    const handleMarkerDrag = async (e) => {
+    const handleMarkerDrag = (e) => {
         const { lat, lng } = e.target.getLatLng();
         setPosition([lat, lng]);
-
-        // Fetch address info and pass everything to parent
-        const info = await reverseGeocode(lat, lng);
-        onLocationSelect({
-            lat,
-            lng,
-            city: info?.city || '',
-            country: info?.country || '',
-            address: info?.address || ''
-        });
+        debouncedGeocode(lat, lng);
     };
 
     // Update position when initial coordinates change from outside
