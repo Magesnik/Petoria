@@ -57,6 +57,8 @@ public class AvailabilityController : ControllerBase
             .ToListAsync();
 
         var result = new List<AvailabilityResponseDto>();
+        var todayDate = DateTime.UtcNow.Date;
+        var tomorrowDate = todayDate.AddDays(1);
 
         // Generate availability data for each date and room type
         for (var date = from.Date; date <= to.Date; date = date.AddDays(1))
@@ -66,11 +68,34 @@ public class AvailabilityController : ControllerBase
                 var existingRecord = availabilityRecords
                     .FirstOrDefault(ra => ra.RoomTypeId == roomType.Id && ra.Date == date);
 
+                var availableCount = existingRecord?.AvailableCount ?? roomType.TotalRooms;
+                var isBlocked = existingRecord?.IsBlocked ?? false;
+
                 // Find active discount for this date and room type
-                var activeDiscount = discounts.FirstOrDefault(d => 
-                    d.RoomTypeId == roomType.Id && 
-                    date >= d.StartDate.Date && 
+                var activeDiscount = discounts.FirstOrDefault(d =>
+                    d.RoomTypeId == roomType.Id &&
+                    date >= d.StartDate.Date &&
                     date <= d.EndDate.Date);
+
+                // Apply virtual 5% last-minute discount for today and tomorrow when no other discount exists
+                int? discountPct;
+                decimal? discountedPrice;
+                var isLastMinuteDate = (date == todayDate || date == tomorrowDate) && !isBlocked && availableCount > 0;
+                if (activeDiscount != null)
+                {
+                    discountPct = activeDiscount.DiscountPercentage;
+                    discountedPrice = roomType.PricePerNight * (1 - activeDiscount.DiscountPercentage / 100m);
+                }
+                else if (isLastMinuteDate)
+                {
+                    discountPct = 5;
+                    discountedPrice = roomType.PricePerNight * 0.95m;
+                }
+                else
+                {
+                    discountPct = null;
+                    discountedPrice = null;
+                }
 
                 result.Add(new AvailabilityResponseDto
                 {
@@ -79,13 +104,10 @@ public class AvailabilityController : ControllerBase
                     PricePerNight = roomType.PricePerNight,
                     Capacity = roomType.Capacity,
                     Date = date,
-                    // If no record exists, use TotalRooms as available count
-                    AvailableCount = existingRecord?.AvailableCount ?? roomType.TotalRooms,
-                    IsBlocked = existingRecord?.IsBlocked ?? false,
-                    DiscountPercentage = activeDiscount?.DiscountPercentage,
-                    DiscountedPrice = activeDiscount != null 
-                        ? roomType.PricePerNight * (1 - activeDiscount.DiscountPercentage / 100m) 
-                        : null
+                    AvailableCount = availableCount,
+                    IsBlocked = isBlocked,
+                    DiscountPercentage = discountPct,
+                    DiscountedPrice = discountedPrice
                 });
             }
         }

@@ -721,7 +721,7 @@
     }
 
     .user-name {
-        display: none;
+        display: block;
     }
 }
 

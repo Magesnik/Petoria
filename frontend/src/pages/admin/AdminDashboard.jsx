@@ -92,6 +92,28 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteReview = async (hotelId, reviewId) => {
+        if (!window.confirm(t('confirmDeleteReview') || 'Наистина ли искате да изтриете този отзив?')) return;
+        try {
+            await api.delete(`/hotels/${hotelId}/reviews/${reviewId}`);
+            if (selectedUser) fetchUserDetails(selectedUser);
+            fetchData();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm(t('confirmDeleteComment') || 'Наистина ли искате да изтриете този коментар?')) return;
+        try {
+            await api.delete(`/comments/${commentId}`);
+            if (selectedUser) fetchUserDetails(selectedUser);
+            fetchData();
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
     const promoteUser = async (userId) => {
         try {
             await api.put(`/admin/users/${userId}/promote`);
@@ -279,7 +301,7 @@ const AdminDashboard = () => {
                         <div className="stat-card">
                             <div className="stat-icon">💬</div>
                             <div className="stat-info">
-                                <span className="stat-value">{stats.totalComments}</span>
+                                <span className="stat-value">{stats.totalReviews || 0}</span>
                                 <span className="stat-label">{t('comments')}</span>
                             </div>
                         </div>
@@ -352,7 +374,7 @@ const AdminDashboard = () => {
                                             <div className="user-stats">
                                                 <span title="Favorites">❤️ {u.favoritesCount}</span>
                                                 <span title="Reservations">📅 {u.reservationsCount}</span>
-                                                <span title="Comments">💬 {u.commentsCount}</span>
+                                                <span title="Comments">💬 {u.reviewsCount || 0}</span>
                                                 <span title="Hotels Created">🏨 {u.hotelsCreated}</span>
                                             </div>
                                         </div>
@@ -471,6 +493,7 @@ const AdminDashboard = () => {
                                         ))}
                                     </div>
                                 </div>
+
                                 <div className="profile-actions">
                                     {!userDetails.roles?.includes('SuperAdmin') && (
                                         <>
@@ -554,22 +577,31 @@ const AdminDashboard = () => {
                             </div>
 
                             <div className="details-section">
-                                <h4>💬 {t('comments')} ({userDetails.comments?.length || 0})</h4>
+                                <h4>💬 {t('comments')} ({userDetails.reviews?.length || 0})</h4>
                                 <div className="items-list">
-                                    {userDetails.comments?.length > 0 ? (
-                                        userDetails.comments.map(c => (
-                                            <div key={c.id} className="item-card comment">
-                                                <div className="comment-content">
-                                                    <span className="comment-text">{c.text}</span>
-                                                    <span className="comment-hotel">{t('onHotel')}: {c.hotelName}</span>
-                                                    <span className="comment-date">
-                                                        {new Date(c.createdAt).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
-                                                    </span>
-                                                </div>
-                                                <div className="comment-stats">
-                                                    <span>👍 {c.likesCount}</span>
-                                                    <span>👎 {c.dislikesCount}</span>
-                                                    <span>💬 {c.repliesCount}</span>
+                                    {userDetails.reviews?.length > 0 ? (
+                                        userDetails.reviews.map(r => (
+                                            <div key={r.id} className="item-card review">
+                                                <div className="review-content" style={{ width: '100%' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                                <span className="review-rating" style={{ color: '#f59e0b' }}>{'★'.repeat(r.rating)}</span>
+                                                                <span className="review-hotel" style={{ fontWeight: '600' }}>{r.hotelName}</span>
+                                                            </div>
+                                                            <span className="review-text">{r.reviewText}</span>
+                                                            <span className="review-date" style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                                                {new Date(r.createdAt).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            className="btn-delete-review"
+                                                            onClick={() => handleDeleteReview(r.hotelId, r.id)}
+                                                            style={{ padding: '4px 8px', backgroundColor: '#ef4444', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                        >
+                                                            {t('delete') || 'Изтрий'}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))
@@ -578,6 +610,40 @@ const AdminDashboard = () => {
                                     )}
                                 </div>
                             </div>
+
+                            {/* Actual technical comments / activity if needed */}
+                            {userDetails.comments?.length > 0 && (
+                                <div className="details-section">
+                                    <h4>💬 {t('activity') || 'Активност (Дискусии)'} ({userDetails.comments.length})</h4>
+                                    <div className="items-list">
+                                        {userDetails.comments.map(c => (
+                                            <div key={c.id} className="item-card comment">
+                                                <div className="comment-content" style={{ width: '100%' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <span className="comment-text">
+                                                                {c.parentCommentId && <span className="badge reply" style={{ marginRight: '8px', verticalAlign: 'middle', backgroundColor: '#64748b', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>{t('reply') || 'Отговор'}</span>}
+                                                                {c.text}
+                                                            </span>
+                                                            <span className="comment-hotel" style={{ display: 'block', fontSize: '0.85rem', color: '#64748b' }}>{t('onHotel')}: {c.hotelName}</span>
+                                                        </div>
+                                                        <button
+                                                            className="btn-delete-review"
+                                                            onClick={() => handleDeleteComment(c.id)}
+                                                            style={{ marginLeft: '8px', padding: '4px 8px', backgroundColor: '#ef4444', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                        >
+                                                            {t('delete') || 'Изтрий'}
+                                                        </button>
+                                                    </div>
+                                                    <div className="comment-date" style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
+                                                        {new Date(c.createdAt).toLocaleDateString(language === 'bg' ? 'bg-BG' : 'en-US')}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : null}
                 </div>

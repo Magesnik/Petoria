@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.Core.Contracts;
 using Petoria.Core.DTOs.Reservation;
 using Petoria.Core.Models.Email;
 using Petoria.Infrastructure.Data;
@@ -15,17 +16,20 @@ namespace Petoria.Controllers;
 public class ReservationsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
-    private readonly Petoria.Core.Contracts.IEmailService _emailService;
+    private readonly IEmailService _emailService;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IPricingService _pricingService;
 
     public ReservationsController(
-        ApplicationDbContext context, 
-        Petoria.Core.Contracts.IEmailService emailService,
-        UserManager<ApplicationUser> userManager)
+        ApplicationDbContext context,
+        IEmailService emailService,
+        UserManager<ApplicationUser> userManager,
+        IPricingService pricingService)
     {
         _context = context;
         _emailService = emailService;
         _userManager = userManager;
+        _pricingService = pricingService;
     }
 
     // GET: api/reservations/my - Get current user's reservations
@@ -75,81 +79,28 @@ public class ReservationsController : ControllerBase
     {
         var roomType = await _context.RoomTypes.FindAsync(request.RoomTypeId);
         if (roomType == null)
-        {
             return NotFound(new { message = "Room type not found" });
-        }
 
         if (request.CheckOutDate <= request.CheckInDate)
-        {
             return BadRequest(new { message = "Check-out date must be after check-in date" });
-        }
 
-        var numberOfNights = (int)(request.CheckOutDate.Date - request.CheckInDate.Date).TotalDays;
-        
-        // Get discounts for the date range
-        var discounts = await _context.RoomDiscounts
-            .Where(d => d.RoomTypeId == request.RoomTypeId &&
-                        d.EndDate >= request.CheckInDate.Date &&
-                        d.StartDate <= request.CheckOutDate.Date)
-            .ToListAsync();
-
-        // Calculate price per day with discounts
-        var breakdown = new List<DayPriceBreakdownDto>();
-        decimal totalPrice = 0;
-        decimal originalTotal = 0;
-
-        for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
-        {
-            var discount = discounts
-                .Where(d => d.StartDate.Date <= date && d.EndDate.Date >= date)
-                .OrderByDescending(d => d.DiscountPercentage)
-                .FirstOrDefault();
-
-            var dayOriginal = roomType.PricePerNight;
-            var dayFinal = discount != null 
-                ? dayOriginal * (1 - discount.DiscountPercentage / 100m)
-                : dayOriginal;
-
-            breakdown.Add(new DayPriceBreakdownDto
-            {
-                Date = date,
-                OriginalPrice = dayOriginal,
-                DiscountPercentage = discount?.DiscountPercentage,
-                FinalPrice = dayFinal
-            });
-
-            originalTotal += dayOriginal;
-            totalPrice += dayFinal;
-        }
-
-        totalPrice *= request.NumberOfRooms;
-        originalTotal *= request.NumberOfRooms;
-
-        // Check for moderator/owner if user is logged in
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (!string.IsNullOrEmpty(userId))
-        {
-            var isModerator = await _context.HotelModerators
-                .AnyAsync(hm => hm.HotelId == roomType.HotelId && hm.UserId == userId);
-            
-            var isOwner = await _context.Hotels
-                .AnyAsync(h => h.Id == roomType.HotelId && h.CreatedById == userId);
-
-            if (isModerator || isOwner)
-            {
-                totalPrice = 0;
-            }
-        }
+        var result = await _pricingService.CalculatePriceAsync(
+            request.RoomTypeId,
+            request.CheckInDate,
+            request.CheckOutDate,
+            request.NumberOfRooms,
+            userId);
 
         return Ok(new PriceCalculationResponseDto
         {
-            NumberOfNights = numberOfNights,
-            PricePerNight = roomType.PricePerNight,
-            NumberOfRooms = request.NumberOfRooms,
-            TotalPrice = totalPrice,
-            OriginalPrice = originalTotal,
-            TotalDiscount = originalTotal - totalPrice,
-            Breakdown = breakdown
+            NumberOfNights = result.NumberOfNights,
+            PricePerNight = result.PricePerNight,
+            NumberOfRooms = result.NumberOfRooms,
+            TotalPrice = result.TotalPrice,
+            OriginalPrice = result.OriginalPrice,
+            TotalDiscount = result.TotalDiscount,
+            Breakdown = result.Breakdown
         });
     }
 
@@ -213,44 +164,15 @@ public class ReservationsController : ControllerBase
             }
         }
 
-        // Calculate total price with discounts
-        var numberOfNights = (int)(request.CheckOutDate.Date - request.CheckInDate.Date).TotalDays;
-        
-        // Get discounts for the date range
-        var discounts = await _context.RoomDiscounts
-            .Where(d => d.RoomTypeId == request.RoomTypeId &&
-                        d.EndDate >= request.CheckInDate.Date &&
-                        d.StartDate <= request.CheckOutDate.Date)
-            .ToListAsync();
-
-        decimal totalPrice = 0;
-        for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
-        {
-            var discount = discounts
-                .Where(d => d.StartDate.Date <= date && d.EndDate.Date >= date)
-                .OrderByDescending(d => d.DiscountPercentage)
-                .FirstOrDefault();
-
-            var dayPrice = discount != null 
-                ? roomType.PricePerNight * (1 - discount.DiscountPercentage / 100m)
-                : roomType.PricePerNight;
-
-            totalPrice += dayPrice;
-        }
-        totalPrice *= request.NumberOfRooms;
-
-        // Check if user is moderator for this hotel
-        var isModerator = await _context.HotelModerators
-            .AnyAsync(hm => hm.HotelId == request.HotelId && hm.UserId == userId);
-        
-        // Also check if owner (though owners usually don't book their own rooms via API, logic applies)
-        var isOwner = await _context.Hotels
-            .AnyAsync(h => h.Id == request.HotelId && h.CreatedById == userId);
-
-        if (isModerator || isOwner)
-        {
-            totalPrice = 0; // Free for moderators and owners
-        }
+        // Calculate total price using PricingService (includes last-minute 5% discount)
+        var priceResult = await _pricingService.CalculatePriceAsync(
+            request.RoomTypeId,
+            request.CheckInDate,
+            request.CheckOutDate,
+            request.NumberOfRooms,
+            userId);
+        var totalPrice = priceResult.TotalPrice;
+        var numberOfNights = priceResult.NumberOfNights;
 
         // Create reservation — Map DTO → Entity
         var reservation = new Reservation

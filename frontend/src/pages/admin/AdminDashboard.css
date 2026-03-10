@@ -594,9 +594,29 @@
 }
 
 .btn-promote:hover,
-.btn-demote:hover {
+.btn-demote:hover,
+.btn-delete-review:hover,
+.btn-delete-comment:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-delete-review,
+.btn-delete-comment {
+    padding: 0.4rem 0.8rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-delete-review:hover,
+.btn-delete-comment:hover {
+    background: #dc2626;
 }
 
 .items-list {
@@ -824,7 +844,8 @@
 
     .search-input {
         width: 100%;
-        font-size: 16px; /* Prevent iOS zoom */
+        font-size: 16px;
+        /* Prevent iOS zoom */
     }
 }
 

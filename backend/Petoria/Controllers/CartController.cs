@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Petoria.Core.Contracts;
 using Petoria.Core.DTOs.Cart;
 using Petoria.Infrastructure.Data;
 using Petoria.Infrastructure.Data.Entities;
@@ -13,10 +14,12 @@ namespace Petoria.Controllers;
 public class CartController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly IPricingService _pricingService;
 
-    public CartController(ApplicationDbContext context)
+    public CartController(ApplicationDbContext context, IPricingService pricingService)
     {
         _context = context;
+        _pricingService = pricingService;
     }
 
     // GET: api/cart - Get current user's cart items
@@ -71,6 +74,13 @@ public class CartController : ControllerBase
         if (request.CheckOutDate <= request.CheckInDate)
             return BadRequest(new { message = "Check-out date must be after check-in date" });
 
+        var priceResult = await _pricingService.CalculatePriceAsync(
+            request.RoomTypeId,
+            request.CheckInDate,
+            request.CheckOutDate,
+            request.NumberOfRooms,
+            userId);
+
         var cartItem = new CartItem
         {
             UserId = userId,
@@ -79,8 +89,8 @@ public class CartController : ControllerBase
             CheckInDate = request.CheckInDate.Date,
             CheckOutDate = request.CheckOutDate.Date,
             NumberOfRooms = request.NumberOfRooms,
-            TotalPrice = request.TotalPrice,
-            OriginalPrice = request.OriginalPrice,
+            TotalPrice = priceResult.TotalPrice,
+            OriginalPrice = priceResult.OriginalPrice,
             CreatedAt = DateTime.UtcNow
         };
 

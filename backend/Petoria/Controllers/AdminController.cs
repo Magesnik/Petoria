@@ -38,7 +38,8 @@ public class AdminController : ControllerBase
                 .Where(r => r.UserId == user.Id && (r.Status == "Completed" || r.Status == "Confirmed"))
                 .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
             var hotelsCreated = await _context.Hotels.CountAsync(h => h.CreatedById == user.Id);
-            var commentsCount = await _context.Comments.CountAsync(c => c.UserId == user.Id && c.ParentCommentId == null);
+            var commentsCount = await _context.Comments.CountAsync(c => c.UserId == user.Id);
+            var reviewsCount = await _context.HotelReviews.CountAsync(r => r.UserId == user.Id);
 
             userStats.Add(new UserStatsResponseDto
             {
@@ -52,7 +53,8 @@ public class AdminController : ControllerBase
                 ReservationsCount = reservationsCount,
                 TotalSpent = totalSpent,
                 HotelsCreated = hotelsCreated,
-                CommentsCount = commentsCount
+                CommentsCount = commentsCount,
+                ReviewsCount = reviewsCount
             });
         }
 
@@ -123,7 +125,7 @@ public class AdminController : ControllerBase
 
         // Get user's comments with hotel and rating details
         var comments = await _context.Comments
-            .Where(c => c.UserId == id && c.ParentCommentId == null) // Only top-level comments
+            .Where(c => c.UserId == id)
             .Include(c => c.Hotel)
             .Include(c => c.Ratings)
             .Include(c => c.Replies)
@@ -134,10 +136,27 @@ public class AdminController : ControllerBase
                 Text = c.Text,
                 HotelId = c.HotelId,
                 HotelName = c.Hotel!.Name,
+                ParentCommentId = c.ParentCommentId,
                 CreatedAt = c.CreatedAt,
                 LikesCount = c.Ratings.Count(r => r.IsLike),
                 DislikesCount = c.Ratings.Count(r => !r.IsLike),
                 RepliesCount = c.Replies.Count
+            })
+            .ToListAsync();
+
+        // Get user's reviews with hotel details
+        var reviews = await _context.HotelReviews
+            .Where(r => r.UserId == id)
+            .Include(r => r.Hotel)
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new UserReviewDto
+            {
+                Id = r.Id,
+                ReviewText = r.ReviewText,
+                Rating = r.Rating,
+                HotelId = r.HotelId,
+                HotelName = r.Hotel!.Name,
+                CreatedAt = r.CreatedAt
             })
             .ToListAsync();
 
@@ -158,7 +177,8 @@ public class AdminController : ControllerBase
             Favorites = favorites,
             Reservations = reservations,
             HotelsCreated = hotelsCreated,
-            Comments = comments
+            Comments = comments,
+            Reviews = reviews
         });
     }
 
@@ -234,6 +254,7 @@ public class AdminController : ControllerBase
             );
         var totalHotels = await _context.Hotels.CountAsync();
         var totalComments = await _context.Comments.CountAsync();
+        var totalReviews = await _context.HotelReviews.CountAsync();
 
         return Ok(new DashboardStatsResponseDto
         {
@@ -244,7 +265,8 @@ public class AdminController : ControllerBase
             TotalReservations = totalReservations,
             TotalRevenue = totalRevenue,
             TotalHotels = totalHotels,
-            TotalComments = totalComments
+            TotalComments = totalComments,
+            TotalReviews = totalReviews
         });
     }
 

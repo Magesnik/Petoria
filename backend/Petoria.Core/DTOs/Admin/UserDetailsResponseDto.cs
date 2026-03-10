@@ -17,6 +17,7 @@ public class UserDetailsResponseDto
     public List<UserReservationDto> Reservations { get; set; } = new();
     public List<UserHotelDto> HotelsCreated { get; set; } = new();
     public List<UserCommentDto> Comments { get; set; } = new();
+    public List<UserReviewDto> Reviews { get; set; } = new();
 }
 
 /// <summary>
@@ -72,8 +73,22 @@ public class UserCommentDto
     public string Text { get; set; } = string.Empty;
     public int HotelId { get; set; }
     public string HotelName { get; set; } = string.Empty;
+    public int? ParentCommentId { get; set; }
     public DateTime CreatedAt { get; set; }
     public int LikesCount { get; set; }
     public int DislikesCount { get; set; }
     public int RepliesCount { get; set; }
+}
+
+/// <summary>
+/// Вложен DTO за ревюта на потребителя.
+/// </summary>
+public class UserReviewDto
+{
+    public int Id { get; set; }
+    public string ReviewText { get; set; } = string.Empty;
+    public int Rating { get; set; }
+    public int HotelId { get; set; }
+    public string HotelName { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
 }

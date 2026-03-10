@@ -27,8 +27,11 @@ public class DealsController : ControllerBase
         var hotelsWithActiveDiscounts = await _context.RoomTypes
             .Include(rt => rt.Hotel)
             .Include(rt => rt.Discounts)
-            .Where(rt => rt.Discounts.Any(d => 
-                d.EndDate >= today && 
+            .Where(rt => rt.Hotel != null &&
+                !rt.Hotel.IsSuspendedBySuperAdmin &&
+                rt.Hotel.IsAvailable &&
+                rt.Discounts.Any(d =>
+                d.EndDate >= today &&
                 d.StartDate <= thirtyDaysFromNow))
             .Select(rt => new
             {
@@ -79,18 +82,20 @@ public class DealsController : ControllerBase
     public async Task<ActionResult<IEnumerable<LastMinuteOfferResponseDto>>> GetLastMinuteDeals()
     {
         var today = DateTime.UtcNow.Date;
-        var sevenDaysFromNow = today.AddDays(7);
-        
-        // Get room types with low availability (≤3 rooms) in next 7 days
+        var twoDaysFromNow = today.AddDays(1); // today + tomorrow only
+
+        // Get room types with available rooms in the next 2 days (last-minute)
         var roomTypesWithLowAvailability = await _context.RoomTypes
             .Include(rt => rt.Hotel)
             .Include(rt => rt.Availabilities)
             .Include(rt => rt.Discounts)
-            .Where(rt => rt.Availabilities.Any(a => 
-                a.Date >= today && 
-                a.Date <= sevenDaysFromNow && 
-                a.AvailableCount > 0 && 
-                a.AvailableCount <= 3 &&
+            .Where(rt => rt.Hotel != null &&
+                !rt.Hotel.IsSuspendedBySuperAdmin &&
+                rt.Hotel.IsAvailable &&
+                rt.Availabilities.Any(a =>
+                a.Date >= today &&
+                a.Date <= twoDaysFromNow &&
+                a.AvailableCount > 0 &&
                 !a.IsBlocked))
             .ToListAsync();
 
@@ -98,9 +103,9 @@ public class DealsController : ControllerBase
         
         foreach (var roomType in roomTypesWithLowAvailability)
         {
-            // Get earliest available date
+            // Get earliest available date (only within the 2-day window)
             var earliestDate = roomType.Availabilities
-                .Where(a => a.Date >= today && a.AvailableCount > 0 && !a.IsBlocked)
+                .Where(a => a.Date >= today && a.Date <= twoDaysFromNow && a.AvailableCount > 0 && !a.IsBlocked)
                 .OrderBy(a => a.Date)
                 .FirstOrDefault()?.Date ?? today;
 
@@ -127,10 +132,10 @@ public class DealsController : ControllerBase
                 saveAmount = roomType.PricePerNight * 0.05m;
             }
 
-            // Get minimum available rooms count in the period
+            // Get available rooms count for the earliest available date
             var minAvailable = roomType.Availabilities
-                .Where(a => a.Date >= today && a.Date <= sevenDaysFromNow && !a.IsBlocked)
-                .Min(a => (int?)a.AvailableCount) ?? 0;
+                .Where(a => a.Date == earliestDate && !a.IsBlocked)
+                .Sum(a => a.AvailableCount);
 
             result.Add(new LastMinuteOfferResponseDto
             {
@@ -157,10 +162,10 @@ public class DealsController : ControllerBase
             });
         }
 
-        // Sort by highest discount first, then by days until check-in
+        // Sort by days until check-in (today first), then by discount
         return Ok(result
-            .OrderByDescending(r => r.DiscountPercentage)
-            .ThenBy(r => r.DaysUntilCheckIn)
+            .OrderBy(r => r.DaysUntilCheckIn)
+            .ThenByDescending(r => r.DiscountPercentage)
             .ToList());
     }
 
@@ -194,8 +199,11 @@ public class DealsController : ControllerBase
         var hotelsWithActiveDiscounts = await _context.RoomTypes
             .Include(rt => rt.Hotel)
             .Include(rt => rt.Discounts)
-            .Where(rt => rt.Discounts.Any(d => 
-                d.StartDate <= today && 
+            .Where(rt => rt.Hotel != null &&
+                !rt.Hotel.IsSuspendedBySuperAdmin &&
+                rt.Hotel.IsAvailable &&
+                rt.Discounts.Any(d =>
+                d.StartDate <= today &&
                 d.EndDate >= today))
             .Select(rt => new
             {

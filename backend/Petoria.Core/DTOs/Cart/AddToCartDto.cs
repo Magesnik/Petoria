@@ -19,7 +19,4 @@ public class AddToCartDto
 
     [Range(ValidationConstants.RoomType.CapacityMin, ValidationConstants.RoomType.CapacityMax)]
     public int NumberOfRooms { get; set; } = 1;
-
-    public decimal TotalPrice { get; set; }
-    public decimal OriginalPrice { get; set; }
 }

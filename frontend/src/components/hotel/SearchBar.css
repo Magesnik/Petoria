@@ -43,7 +43,8 @@
 .field-content input[type="date"],
 .field-content select {
     border: none;
-    font-size: 16px; /* Minimum 16px to prevent iOS Safari auto-zoom on focus */
+    font-size: 16px;
+    /* Minimum 16px to prevent iOS Safari auto-zoom on focus */
     color: #333;
     background: transparent;
     outline: none;
@@ -54,7 +55,8 @@
 }
 
 .field-content select {
-    -webkit-appearance: none; /* Required for iOS Safari */
+    -webkit-appearance: none;
+    /* Required for iOS Safari */
     appearance: none;
 }
 
@@ -75,6 +77,7 @@
     align-items: center;
     gap: 8px;
     font-weight: 500;
+    color: #333;
 }
 
 .number-controls button {
@@ -180,6 +183,10 @@
 
 [data-theme='dark'] .number-controls button {
     background: #333;
+    color: #fff;
+}
+
+[data-theme='dark'] .number-controls span {
     color: #fff;
 }
 

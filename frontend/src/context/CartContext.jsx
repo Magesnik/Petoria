@@ -47,8 +47,6 @@ export const CartProvider = ({ children }) => {
                 checkInDate: item.checkInDate,
                 checkOutDate: item.checkOutDate,
                 numberOfRooms: item.numberOfRooms || 1,
-                totalPrice: item.priceInfo?.totalPrice || 0,
-                originalPrice: item.priceInfo?.originalPrice || item.priceInfo?.totalPrice || 0,
             };
             const newItem = await api.post('/cart', payload);
             setCartItems(prev => [newItem, ...prev]);

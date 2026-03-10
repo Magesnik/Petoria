@@ -17,4 +17,5 @@ public class UserStatsResponseDto
     public decimal TotalSpent { get; set; }
     public int HotelsCreated { get; set; }
     public int CommentsCount { get; set; }
+    public int ReviewsCount { get; set; }
 }

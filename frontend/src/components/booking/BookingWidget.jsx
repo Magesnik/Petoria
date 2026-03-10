@@ -15,6 +15,13 @@ const toLocalDateStr = (date) => {
     return `${y}-${m}-${d}`;
 };
 
+const getTodayStr = () => toLocalDateStr(new Date());
+const getTomorrowStr = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return toLocalDateStr(d);
+};
+
 const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) => {
     const { user } = useAuth();
     const { t } = useLanguage();
@@ -43,6 +50,18 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
 
     // Add to cart dialog
     const [cartDialogItem, setCartDialogItem] = useState(null);
+
+    // Check if a room has last-minute availability (today or tomorrow)
+    const isLastMinuteRoom = (room) => {
+        const today = getTodayStr();
+        const tomorrow = getTomorrowStr();
+        return availability.some(a =>
+            a.roomTypeId === room.id &&
+            (a.date.split('T')[0] === today || a.date.split('T')[0] === tomorrow) &&
+            a.availableCount > 0 &&
+            !a.isBlocked
+        );
+    };
 
     const fetchRoomTypes = React.useCallback(async () => {
         try {
@@ -217,22 +236,26 @@ const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) =>
                 <div className="booking-section">
                     <label>{t('roomTypeLabel')}</label>
                     <div className="room-type-grid">
-                        {roomTypes.map(room => (
-                            <div
-                                key={room.id}
-                                className={`room-type-card ${selectedRoomType?.id === room.id ? 'selected' : ''}`}
-                                onClick={() => setSelectedRoomType(room)}
-                            >
-                                <div className="room-type-name">{room.name}</div>
-                                <div className="room-type-details">
-                                    <span className="room-capacity">👥 {room.capacity} {t('guests')}</span>
-                                    <span className="room-price">{convertAndFormat(room.pricePerNight)}/{t('perNight')}</span>
+                        {roomTypes.map(room => {
+                            const lastMinute = isLastMinuteRoom(room);
+                            const discountedPrice = lastMinute ? room.pricePerNight * 0.95 : null;
+                            return (
+                                <div
+                                    key={room.id}
+                                    className={`room-type-card ${selectedRoomType?.id === room.id ? 'selected' : ''}`}
+                                    onClick={() => setSelectedRoomType(room)}
+                                >
+                                    <div className="room-type-name">{room.name}</div>
+                                    <div className="room-type-details">
+                                        <span className="room-capacity">👥 {room.capacity} {t('guests')}</span>
+                                        <span className="room-price">{convertAndFormat(room.pricePerNight)}/{t('perNight')}</span>
+                                    </div>
+                                    {room.description && (
+                                        <div className="room-type-description">{room.description}</div>
+                                    )}
                                 </div>
-                                {room.description && (
-                                    <div className="room-type-description">{room.description}</div>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
