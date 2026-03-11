@@ -78,7 +78,7 @@ public class RoomsController : ControllerBase
 
     // POST: api/hotels/5/rooms
     [HttpPost]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<ActionResult<RoomTypeResponseDto>> CreateRoomType(int hotelId, CreateRoomTypeDto dto)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -91,9 +91,10 @@ public class RoomsController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-        if (!isSuperAdmin && hotel.CreatedById != userId)
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+        if (!isSuperAdmin && hotel.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only add rooms to hotels that you created");
+            return Forbid("You can only add rooms to hotels that you created or moderate");
         }
 
         // Map DTO → Entity
@@ -133,7 +134,7 @@ public class RoomsController : ControllerBase
 
     // PUT: api/hotels/5/rooms/1
     [HttpPut("{id}")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> UpdateRoomType(int hotelId, int id, UpdateRoomTypeDto dto)
     {
         var existingRoom = await _context.RoomTypes
@@ -149,9 +150,11 @@ public class RoomsController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-        if (!isSuperAdmin && existingRoom.Hotel?.CreatedById != userId)
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+
+        if (!isSuperAdmin && existingRoom.Hotel?.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only edit rooms in hotels that you created");
+            return Forbid("You can only edit rooms in hotels that you created or moderate");
         }
 
         // Map DTO → Entity (update)
@@ -170,7 +173,7 @@ public class RoomsController : ControllerBase
 
     // DELETE: api/hotels/5/rooms/1
     [HttpDelete("{id}")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> DeleteRoomType(int hotelId, int id)
     {
         var roomType = await _context.RoomTypes
@@ -186,9 +189,11 @@ public class RoomsController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-        if (!isSuperAdmin && roomType.Hotel?.CreatedById != userId)
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+
+        if (!isSuperAdmin && roomType.Hotel?.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only delete rooms in hotels that you created");
+            return Forbid("You can only delete rooms in hotels that you created or moderate");
         }
 
         _context.RoomTypes.Remove(roomType);

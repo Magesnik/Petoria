@@ -69,13 +69,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const isAdmin = () => {
-        // Roles might be returned from profile endpoint? 
-        // ProfileDto in backend Controller returns: Id, Email, FirstName, LastName, AvatarUrl. 
-        // It DOES NOT currently return Roles. We need to check this.
-        // Let's assume we need to update ProfileController to return roles or store them in state differently.
-        // For now, let's look at what Login returns. Login returns AuthResponse which has Roles.
-        // But /api/profile might need to return Roles too for persistence on refresh.
-        return user?.roles?.includes('Admin') || false;
+        return user?.roles?.some(r => r === 'Admin' || r === 'SuperAdmin') || false;
     };
 
     const isSuperAdmin = () => {

@@ -117,7 +117,7 @@ public class AvailabilityController : ControllerBase
 
     // POST: api/hotels/5/availability/bulk - Set availability for a date range
     [HttpPost("bulk")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> SetBulkAvailability(int hotelId, BulkAvailabilityRequestDto request)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -130,9 +130,10 @@ public class AvailabilityController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-        if (!isSuperAdmin && hotel.CreatedById != userId)
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+        if (!isSuperAdmin && hotel.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only manage availability for hotels that you created");
+            return Forbid("You can only manage availability for hotels that you created or moderate");
         }
 
         // Verify room type belongs to this hotel
@@ -176,7 +177,7 @@ public class AvailabilityController : ControllerBase
 
     // PUT: api/hotels/5/availability/block - Block or unblock dates
     [HttpPut("block")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> BlockDates(int hotelId, BlockDatesRequestDto request)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -189,9 +190,10 @@ public class AvailabilityController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-        if (!isSuperAdmin && hotel.CreatedById != userId)
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+        if (!isSuperAdmin && hotel.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only manage availability for hotels that you created");
+            return Forbid("You can only manage availability for hotels that you created or moderate");
         }
 
         // Get room types to block
@@ -240,7 +242,7 @@ public class AvailabilityController : ControllerBase
 
     // POST: api/hotels/5/availability/initialize - Initialize availability for all room types
     [HttpPost("initialize")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> InitializeAvailability(int hotelId, [FromQuery] int daysAhead = 90)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
@@ -253,9 +255,10 @@ public class AvailabilityController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
-        if (!isSuperAdmin && hotel.CreatedById != userId)
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == hotelId && hm.UserId == userId);
+        if (!isSuperAdmin && hotel.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only manage availability for hotels that you created");
+            return Forbid("You can only manage availability for hotels that you created or moderate");
         }
 
         var roomTypes = await _context.RoomTypes

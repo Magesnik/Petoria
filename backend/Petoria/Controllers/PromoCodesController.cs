@@ -31,7 +31,7 @@ public class PromoCodesController : ControllerBase
         // Authorization check: Owner or Moderator or Admin
         var isOwner = hotel.CreatedById == userId;
         var isModerator = await _context.HotelModerators.AnyAsync(m => m.HotelId == hotelId && m.UserId == userId);
-        var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+        var isAdmin = User.IsInRole(Petoria.Constants.Roles.Admin) || User.IsInRole(Petoria.Constants.Roles.SuperAdmin);
 
         if (!isOwner && !isModerator && !isAdmin)
         {
@@ -180,11 +180,11 @@ public class PromoCodesController : ControllerBase
         if (promoCode == null) return NotFound("Promo code not found");
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+        var isAdmin = User.IsInRole(Petoria.Constants.Roles.Admin) || User.IsInRole(Petoria.Constants.Roles.SuperAdmin);
 
         if (promoCode.HotelId == null)
         {
-            if (!User.IsInRole("SuperAdmin")) return Forbid();
+            if (!User.IsInRole(Petoria.Constants.Roles.SuperAdmin)) return Forbid();
         }
         else
         {
@@ -215,11 +215,11 @@ public class PromoCodesController : ControllerBase
         if (promoCode == null) return NotFound("Promo code not found");
 
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var isAdmin = User.IsInRole("Admin") || User.IsInRole("SuperAdmin");
+        var isAdmin = User.IsInRole(Petoria.Constants.Roles.Admin) || User.IsInRole(Petoria.Constants.Roles.SuperAdmin);
 
         if (promoCode.HotelId == null)
         {
-            if (!User.IsInRole("SuperAdmin")) return Forbid();
+            if (!User.IsInRole(Petoria.Constants.Roles.SuperAdmin)) return Forbid();
         }
         else
         {

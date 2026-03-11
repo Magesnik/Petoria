@@ -364,7 +364,7 @@ public class HotelsController : ControllerBase
 
     // GET: api/hotels/my - Get hotels created by current user
     [HttpGet("my")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetMyHotels()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -715,7 +715,7 @@ public class HotelsController : ControllerBase
 
     // POST: api/hotels
     [HttpPost]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<ActionResult<HotelResponseDto>> CreateHotel(CreateHotelDto dto)
     {
         try
@@ -794,7 +794,7 @@ public class HotelsController : ControllerBase
     }
     // PUT: api/hotels/5
     [HttpPut("{id}")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto)
     {
         var existingHotel = await _context.Hotels.FindAsync(id);
@@ -806,10 +806,11 @@ public class HotelsController : ControllerBase
         // Check authorization: SuperAdmin can edit any, Admin can only edit own hotels
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
+        var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == id && hm.UserId == userId);
         
-        if (!isSuperAdmin && existingHotel.CreatedById != userId)
+        if (!isSuperAdmin && existingHotel.CreatedById != userId && !isModerator)
         {
-            return Forbid("You can only edit hotels that you created");
+            return Forbid("You can only edit hotels that you created or moderate");
         }
 
         // Validate activation rule: Cannot activate if no rooms
@@ -863,7 +864,7 @@ public class HotelsController : ControllerBase
 
     // DELETE: api/hotels/5
     [HttpDelete("{id}")]
-    [Authorize(Roles = Petoria.Constants.Roles.Admin)]
+    [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<IActionResult> DeleteHotel(int id)
     {
         var hotel = await _context.Hotels.FindAsync(id);
