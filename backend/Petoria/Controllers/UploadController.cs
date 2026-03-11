@@ -37,9 +37,9 @@ public class UploadController : ControllerBase
             }
 
             // Validate file size (max 25MB)
-            if (file.Length > 25 * 1024 * 1024)
+            if (file.Length > 10 * 1024 * 1024)
             {
-                return BadRequest(new { message = "File size exceeds 25MB limit" });
+                return BadRequest(new { message = "File size exceeds 10MB limit" });
             }
 
             var result = await _photoService.AddPhotoAsync(file);

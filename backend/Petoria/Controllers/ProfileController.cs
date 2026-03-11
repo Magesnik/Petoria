@@ -153,9 +153,9 @@ public class ProfileController : ControllerBase
         }
 
         // Validate file size (max 25MB)
-        if (file.Length > 25 * 1024 * 1024)
+        if (file.Length > 10 * 1024 * 1024)
         {
-            return BadRequest("File size must be less than 25MB");
+            return BadRequest("File size must be less than 10MB");
         }
 
         try
