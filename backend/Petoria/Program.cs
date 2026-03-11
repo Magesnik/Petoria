@@ -119,7 +119,7 @@ builder.Services.AddCors(options =>
         corsBuilder => corsBuilder
             .WithOrigins(allowedOrigins)
             .WithMethods("GET", "POST", "PUT", "DELETE")
-            .WithHeaders("Content-Type", "Authorization")
+            .WithHeaders("Content-Type", "Authorization", "x-requested-with", "x-signalr-user-agent")
             .AllowCredentials()); // Allow cookies
 });
 
