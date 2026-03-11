@@ -96,6 +96,14 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 1000,
                 Window = TimeSpan.FromMinutes(1)
             }));
+
+    // Stricter rate limit for authentication endpoints (brute force protection)
+    options.AddFixedWindowLimiter("auth", limiterOptions =>
+    {
+        limiterOptions.AutoReplenishment = true;
+        limiterOptions.PermitLimit = 10;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+    });
 });
 
 
@@ -110,8 +118,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         corsBuilder => corsBuilder
             .WithOrigins(allowedOrigins)
-            .AllowAnyMethod()
-            .AllowAnyHeader()
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .WithHeaders("Content-Type", "Authorization")
             .AllowCredentials()); // Allow cookies
 });
 
@@ -197,9 +205,10 @@ using (var scope = app.Services.CreateScope())
     await authService.InitializeRolesAndAdminAsync();
 }
 
-// Seed demo data (only runs when the database is empty)
-using (var scope = app.Services.CreateScope())
+// Seed demo data (only runs in Development when the database is empty)
+if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
     await Petoria.Infrastructure.Data.DatabaseSeeder.SeedAsync(scope.ServiceProvider);
 }
 
@@ -209,7 +218,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
@@ -225,6 +234,14 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)");
+    context.Response.Headers.Append("Content-Security-Policy",
+        "default-src 'self'; " +
+        "script-src 'self' https://accounts.google.com https://apis.google.com https://js.stripe.com; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; " +
+        "img-src 'self' data: blob: https://res.cloudinary.com https://*.tile.openstreetmap.org; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "frame-src https://accounts.google.com https://js.stripe.com; " +
+        "connect-src 'self' https://accounts.google.com https://api.bigdatacloud.net https://*.stripe.com");
     await next();
 });
 

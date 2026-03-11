@@ -95,8 +95,8 @@ public class AuthService : IAuthService
                     return null;
                 }
 
-                // Assign SuperAdmin role to specific email
-                if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
+                        // Assign SuperAdmin role if email is in configured list
+                if (IsSuperAdminEmail(payload.Email))
                 {
                     await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.SuperAdmin);
                     await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.Admin);
@@ -104,8 +104,8 @@ public class AuthService : IAuthService
             }
             else
             {
-                // User exists - ensure pepi.200712@gmail.com has SuperAdmin role
-                if (payload.Email.Equals("pepi.200712@gmail.com", StringComparison.OrdinalIgnoreCase))
+                // Ensure configured SuperAdmin emails have proper roles
+                if (IsSuperAdminEmail(payload.Email))
                 {
                     if (!await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
                     {
@@ -220,12 +220,13 @@ public class AuthService : IAuthService
         }
 
         // Check if admin user exists
-        var adminEmail = "admin@admin.com";
+        var adminEmail = _configuration["AdminSettings:DefaultAdminEmail"] ?? "admin@admin.com";
+        var adminPassword = _configuration["AdminSettings:DefaultAdminPassword"];
         var adminUser = await _userManager.FindByEmailAsync(adminEmail);
 
-        if (adminUser == null)
+        if (adminUser == null && !string.IsNullOrEmpty(adminPassword))
         {
-            // Create admin user
+            // Create admin user only if password is configured
             adminUser = new ApplicationUser
             {
                 UserName = adminEmail,
@@ -235,13 +236,13 @@ public class AuthService : IAuthService
                 EmailConfirmed = true
             };
 
-            var result = await _userManager.CreateAsync(adminUser, "123456Q@w");
+            var result = await _userManager.CreateAsync(adminUser, adminPassword);
             if (result.Succeeded)
             {
                 await _userManager.AddToRoleAsync(adminUser, Petoria.Constants.Roles.Admin);
             }
         }
-        else
+        else if (adminUser != null)
         {
             // Ensure existing admin user has Admin role
             if (!await _userManager.IsInRoleAsync(adminUser, Petoria.Constants.Roles.Admin))
@@ -250,21 +251,35 @@ public class AuthService : IAuthService
             }
         }
 
-        // Ensure pepi.200712@gmail.com has SuperAdmin role
-        var superAdminEmail = "pepi.200712@gmail.com";
-        var superAdminUser = await _userManager.FindByEmailAsync(superAdminEmail);
-        if (superAdminUser != null)
+        // Ensure configured SuperAdmin emails have proper roles
+        var superAdminEmails = _configuration["AdminSettings:SuperAdminEmails"]
+            ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            ?? Array.Empty<string>();
+
+        foreach (var email in superAdminEmails)
         {
-            if (!await _userManager.IsInRoleAsync(superAdminUser, Petoria.Constants.Roles.SuperAdmin))
+            var superAdminUser = await _userManager.FindByEmailAsync(email);
+            if (superAdminUser != null)
             {
-                await _userManager.AddToRoleAsync(superAdminUser, Petoria.Constants.Roles.SuperAdmin);
-            }
-            // Also ensure they have Admin role for backwards compatibility
-            if (!await _userManager.IsInRoleAsync(superAdminUser, Petoria.Constants.Roles.Admin))
-            {
-                await _userManager.AddToRoleAsync(superAdminUser, Petoria.Constants.Roles.Admin);
+                if (!await _userManager.IsInRoleAsync(superAdminUser, Petoria.Constants.Roles.SuperAdmin))
+                {
+                    await _userManager.AddToRoleAsync(superAdminUser, Petoria.Constants.Roles.SuperAdmin);
+                }
+                if (!await _userManager.IsInRoleAsync(superAdminUser, Petoria.Constants.Roles.Admin))
+                {
+                    await _userManager.AddToRoleAsync(superAdminUser, Petoria.Constants.Roles.Admin);
+                }
             }
         }
+    }
+
+    private bool IsSuperAdminEmail(string email)
+    {
+        var superAdminEmails = _configuration["AdminSettings:SuperAdminEmails"]
+            ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            ?? Array.Empty<string>();
+
+        return superAdminEmails.Any(e => e.Equals(email, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task<AuthResponse> GenerateJwtToken(ApplicationUser user, List<string> roles)

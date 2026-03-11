@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Petoria.Controllers;
 using Petoria.Core.DTOs.SupportMessage;
@@ -22,7 +23,8 @@ public class SupportMessagesControllerTests : ControllerTestBase
         var mockEmailService = new Mock<IEmailService>();
         var mockScopeFactory = new Mock<Microsoft.Extensions.DependencyInjection.IServiceScopeFactory>();
 
-        var controller = new SupportMessagesController(Context, mockUserManager.Object, mockEmailService.Object, mockScopeFactory.Object);
+        var mockLogger = new Mock<ILogger<SupportMessagesController>>();
+        var controller = new SupportMessagesController(Context, mockUserManager.Object, mockEmailService.Object, mockScopeFactory.Object, mockLogger.Object);
         SetControllerUser(controller, userId, roles);
         return controller;
     }

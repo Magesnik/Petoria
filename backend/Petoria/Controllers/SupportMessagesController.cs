@@ -21,13 +21,15 @@ namespace Petoria.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailService _emailService;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILogger<SupportMessagesController> _logger;
 
-        public SupportMessagesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService, IServiceScopeFactory scopeFactory)
+        public SupportMessagesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService, IServiceScopeFactory scopeFactory, ILogger<SupportMessagesController> logger)
         {
             _context = context;
             _userManager = userManager;
             _emailService = emailService;
             _scopeFactory = scopeFactory;
+            _logger = logger;
         }
 
         // POST: api/support/messages
@@ -84,7 +86,7 @@ namespace Petoria.Controllers
                 catch (Exception ex)
                 {
                     // We log the exception but don't fail the request if email sending fails.
-                    Console.WriteLine($"Failed to send support email: {ex.Message}");
+                    _logger.LogError(ex, "Failed to send support email");
                 }
             });
 

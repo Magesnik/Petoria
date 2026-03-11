@@ -75,9 +75,7 @@ const Register = () => {
         try {
             const data = await api.post('/auth/google-login', { googleToken: credentialResponse.credential });
 
-            if (data.token) localStorage.setItem('jwt_token', data.token);
-
-            // Store token with avatar URL
+            // Token is stored in HttpOnly cookie by the server
             const avatarUrl = getAssetUrl(data.avatarUrl);
 
             login({

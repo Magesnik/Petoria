@@ -54,7 +54,7 @@ public class UploadController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error uploading file");
-            return StatusCode(500, new { message = "Error uploading file", error = ex.Message });
+            return StatusCode(500, new { message = "Error uploading file" });
         }
     }
 
@@ -76,7 +76,7 @@ public class UploadController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting file");
-            return StatusCode(500, new { message = "Error deleting file", error = ex.Message });
+            return StatusCode(500, new { message = "Error deleting file" });
         }
     }
 }

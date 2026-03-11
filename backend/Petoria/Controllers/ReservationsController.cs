@@ -19,17 +19,20 @@ public class ReservationsController : ControllerBase
     private readonly IEmailService _emailService;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IPricingService _pricingService;
+    private readonly ILogger<ReservationsController> _logger;
 
     public ReservationsController(
         ApplicationDbContext context,
         IEmailService emailService,
         UserManager<ApplicationUser> userManager,
-        IPricingService pricingService)
+        IPricingService pricingService,
+        ILogger<ReservationsController> logger)
     {
         _context = context;
         _emailService = emailService;
         _userManager = userManager;
         _pricingService = pricingService;
+        _logger = logger;
     }
 
     // GET: api/reservations/my - Get current user's reservations
@@ -285,7 +288,7 @@ public class ReservationsController : ControllerBase
             catch (Exception ex)
             {
                 // Log exception in production, but don't fail the reservation
-                Console.WriteLine($"Error sending email: {ex.Message}");
+                _logger.LogError(ex, "Error sending email");
             }
         }
 
@@ -478,7 +481,7 @@ public class ReservationsController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error parsing cancellation policies: {ex.Message}");
+            _logger.LogError(ex, "Error parsing cancellation policies");
         }
     }
 
@@ -514,7 +517,7 @@ public class ReservationsController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error sending cancellation email: {ex.Message}");
+            _logger.LogError(ex, "Error sending cancellation email");
         }
     }
 
@@ -688,7 +691,7 @@ public class ReservationsController : ControllerBase
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending cart confirmation email: {ex.Message}");
+                _logger.LogError(ex, "Error sending cart confirmation email");
             }
         }
 

@@ -83,7 +83,11 @@ public class HotelsController : ControllerBase
         // Filter by star rating
         if (!string.IsNullOrWhiteSpace(starRating))
         {
-            var stars = starRating.Split(',').Select(s => int.Parse(s.Trim())).ToList();
+            var stars = starRating.Split(',')
+                .Select(s => int.TryParse(s.Trim(), out var v) ? v : (int?)null)
+                .Where(v => v.HasValue)
+                .Select(v => v!.Value)
+                .ToList();
             if (stars.Any())
             {
                 query = query.Where(h => stars.Contains(h.StarRating));
@@ -605,7 +609,11 @@ public class HotelsController : ControllerBase
         // Filter by star rating
         if (!string.IsNullOrWhiteSpace(starRating))
         {
-            var stars = starRating.Split(',').Select(s => int.Parse(s.Trim())).ToList();
+            var stars = starRating.Split(',')
+                .Select(s => int.TryParse(s.Trim(), out var v) ? v : (int?)null)
+                .Where(v => v.HasValue)
+                .Select(v => v!.Value)
+                .ToList();
             if (stars.Any())
             {
                 query = query.Where(h => stars.Contains(h.StarRating));
@@ -709,7 +717,7 @@ public class HotelsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Error during geocoding", error = ex.Message });
+            return StatusCode(500, new { message = "Error during geocoding" });
         }
     }
 
@@ -786,10 +794,7 @@ public class HotelsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { 
-                message = ex.Message, 
-                innerException = ex.InnerException?.Message
-            });
+            return StatusCode(500, new { message = "An unexpected error occurred while creating the hotel." });
         }
     }
     // PUT: api/hotels/5

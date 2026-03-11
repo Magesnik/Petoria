@@ -49,12 +49,6 @@ async function request(endpoint, options = {}) {
         delete headers['Content-Type'];
     }
 
-    // Add Authorization header if token exists in localStorage (fallback for third-party cookie blocks)
-    const token = localStorage.getItem('jwt_token');
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const config = {
         ...options,
         headers,

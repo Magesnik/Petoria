@@ -184,7 +184,7 @@ public class ProfileController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Error uploading avatar", error = ex.Message });
+            return StatusCode(500, new { message = "Error uploading avatar" });
         }
     }
 
@@ -232,7 +232,7 @@ public class ProfileController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Error deleting avatar", error = ex.Message });
+            return StatusCode(500, new { message = "Error deleting avatar" });
         }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Petoria.Controllers;
 using Petoria.Core.Contracts;
@@ -46,7 +47,8 @@ public class ReservationsControllerTests : ControllerTestBase
         mockUserManager.Setup(m => m.GetRolesAsync(It.IsAny<ApplicationUser>()))
             .ReturnsAsync(new List<string>(roles));
 
-        var controller = new ReservationsController(Context, _mockEmailService.Object, mockUserManager.Object, _mockPricingService.Object);
+        var mockLogger = new Mock<ILogger<ReservationsController>>();
+        var controller = new ReservationsController(Context, _mockEmailService.Object, mockUserManager.Object, _mockPricingService.Object, mockLogger.Object);
         SetControllerUser(controller, userId, roles);
         return controller;
     }

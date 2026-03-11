@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Petoria.Core.Contracts;
 using Petoria.Core.Models.Auth;
 
@@ -7,6 +8,7 @@ namespace Petoria.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -34,7 +36,11 @@ public class AuthController : ControllerBase
             {
                 return BadRequest(new { message = "EmailNotConfirmed" });
             }
-            return BadRequest(new { message = ex.Message });
+            if (ex.Message.StartsWith("Registration failed:"))
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            return BadRequest(new { message = "Registration failed. Please try again." });
         }
     }
 
@@ -84,7 +90,7 @@ public class AuthController : ControllerBase
             {
                 return BadRequest("UserIsBlocked");
             }
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = "Login failed. Please try again." });
         }
     }
 
@@ -108,7 +114,7 @@ public class AuthController : ControllerBase
             {
                 return BadRequest("UserIsBlocked");
             }
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = "Google login failed. Please try again." });
         }
     }
 

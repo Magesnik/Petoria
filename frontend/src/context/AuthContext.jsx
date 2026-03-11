@@ -20,13 +20,10 @@ export const AuthProvider = ({ children }) => {
                 setUser(data);
             } else {
                 // 200 OK but null or invalid data means not logged in
-                localStorage.removeItem('jwt_token');
                 setUser(null);
             }
         } catch {
             // 401 or other error means not logged in
-            // console.debug("Not authenticated or session expired");
-            localStorage.removeItem('jwt_token');
             setUser(null);
         } finally {
             setLoading(false);
@@ -45,7 +42,6 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         // Clear state immediately to prevent infinite loops if logout call also returns 401
-        localStorage.removeItem('jwt_token');
         setUser(null);
 
         try {

@@ -57,7 +57,7 @@ import ScrollToTop from './components/common/ScrollToTop';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="21847094498-c94136osjkahal0fjg0nk9q4mc7e4um9.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <ThemeProvider>
           <LanguageProvider>
