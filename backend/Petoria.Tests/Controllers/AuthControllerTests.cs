@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Petoria.Controllers;
 using Petoria.Core.Contracts;
@@ -15,7 +16,15 @@ public class AuthControllerTests : ControllerTestBase
     public AuthControllerTests()
     {
         _mockAuthService = new Mock<IAuthService>();
-        _controller = new AuthController(_mockAuthService.Object);
+
+        // Mock IHttpClientFactory — captcha is skipped when SecretKey is empty
+        var mockHttpClientFactory = new Mock<IHttpClientFactory>();
+
+        // Mock IConfiguration with empty SecretKey so captcha check is bypassed in tests
+        var mockConfig = new Mock<IConfiguration>();
+        mockConfig.Setup(c => c["HcaptchaSettings:SecretKey"]).Returns(string.Empty);
+
+        _controller = new AuthController(_mockAuthService.Object, mockHttpClientFactory.Object, mockConfig.Object);
         SetControllerUser(_controller, "user1");
     }
 

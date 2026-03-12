@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
 using Petoria.Core.Contracts;
 using Petoria.Core.Models.Auth;
 
@@ -8,19 +10,44 @@ namespace Petoria.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         _authService = authService;
+        _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
+    [EnableRateLimiting("register")] // 10 reg/min per IP — prevents spam & email bombing
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
+        // hCaptcha verification
+        var secretKey = _configuration["HcaptchaSettings:SecretKey"];
+        if (!string.IsNullOrEmpty(secretKey))
+        {
+            if (string.IsNullOrEmpty(model.HcaptchaToken))
+                return BadRequest(new { message = "CaptchaRequired" });
+
+            var client = _httpClientFactory.CreateClient();
+            var verifyResponse = await client.PostAsync(
+                _configuration["HcaptchaSettings:VerifyUrl"],
+                new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["secret"] = secretKey,
+                    ["response"] = model.HcaptchaToken
+                }));
+
+            var json = await verifyResponse.Content.ReadFromJsonAsync<JsonElement>();
+            if (!json.GetProperty("success").GetBoolean())
+                return BadRequest(new { message = "CaptchaFailed" });
+        }
+
         try
         {
             var result = await _authService.RegisterAsync(model);
@@ -67,6 +94,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("auth")] // 10 attempts/min per IP — brute force protection
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
         try 
@@ -95,6 +123,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("google-login")]
+    [EnableRateLimiting("auth")] // 10 attempts/min per IP
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginModel model)
     {
         try

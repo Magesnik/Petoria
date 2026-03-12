@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useRef } from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { api, getAssetUrl } from '../../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -7,10 +8,14 @@ import { useAuth } from '../../context/AuthContext';
 
 import './Auth.css';
 
+const HCAPTCHA_SITE_KEY = '9f25f3bc-361e-4095-88e9-9372a58c5f89';
+
 const Register = () => {
     const { t } = useLanguage();
     const { login } = useAuth();
     const navigate = useNavigate();
+    const captchaRef = useRef(null);
+    const [captchaToken, setCaptchaToken] = useState(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -62,11 +67,22 @@ const Register = () => {
             return;
         }
 
+        if (!captchaToken) {
+            setError(t('captchaRequired'));
+            return;
+        }
+
         try {
-            await api.post('/auth/register', formData);
+            await api.post('/auth/register', { ...formData, hcaptchaToken: captchaToken });
             setSuccess(true);
         } catch (err) {
-            setError(err.message || 'Registration failed');
+            captchaRef.current?.resetCaptcha();
+            setCaptchaToken(null);
+            if (err.message === 'CaptchaRequired' || err.message === 'CaptchaFailed') {
+                setError(t('captchaFailed'));
+            } else {
+                setError(err.message || 'Registration failed');
+            }
             console.error(err);
         }
     };
@@ -171,6 +187,15 @@ const Register = () => {
                                         minLength="6"
                                         pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$"
                                         title={t('passwordInvalid')}
+                                    />
+                                </div>
+
+                                <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                                    <HCaptcha
+                                        sitekey={HCAPTCHA_SITE_KEY}
+                                        onVerify={(token) => setCaptchaToken(token)}
+                                        onExpire={() => setCaptchaToken(null)}
+                                        ref={captchaRef}
                                     />
                                 </div>
 

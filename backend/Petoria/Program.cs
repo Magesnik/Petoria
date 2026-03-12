@@ -97,12 +97,23 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1)
             }));
 
-    // Stricter rate limit for authentication endpoints (brute force protection)
-    options.AddFixedWindowLimiter("auth", limiterOptions =>
+    // Stricter rate limit for login/google-login (brute force protection)
+    // SlidingWindow: no burst attacks possible (unlike FixedWindow where 2x requests hit at window boundary)
+    options.AddSlidingWindowLimiter("auth", limiterOptions =>
     {
         limiterOptions.AutoReplenishment = true;
         limiterOptions.PermitLimit = 10;
         limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.SegmentsPerWindow = 6; // 6 segments of 10s → smooth enforcement
+    });
+
+    // Limit for registration — prevents account creation spam & email bombing
+    options.AddSlidingWindowLimiter("register", limiterOptions =>
+    {
+        limiterOptions.AutoReplenishment = true;
+        limiterOptions.PermitLimit = 10;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.SegmentsPerWindow = 6;
     });
 });
 

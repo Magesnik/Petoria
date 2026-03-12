@@ -32,6 +32,8 @@
     "lastNameInvalid": "Last name must contain only letters and be at least 4 characters long.",
     "emailInvalid": "Please enter a valid email address.",
     "passwordInvalid": "Password must be at least 6 characters long and contain an uppercase letter, a lowercase letter, a number, and a special character.",
+    "captchaRequired": "Please confirm you are not a robot.",
+    "captchaFailed": "Captcha verification failed. Please try again.",
     "emailNotConfirmedError": "Please confirm your email address before logging in.",
     "userIsBlockedError": "Your account has been blocked. Please contact support for assistance.",
     "emailConfirmationTitle": "Email Confirmation",

@@ -25,4 +25,6 @@ public class RegisterModel
     [MinLength(ValidationConstants.User.PasswordMinLength, ErrorMessage = ValidationConstants.User.PasswordMinLengthError)]
     [RegularExpression(ValidationConstants.User.PasswordRegex, ErrorMessage = ValidationConstants.User.PasswordRegexError)]
     public string Password { get; set; } = string.Empty;
+
+    public string? HcaptchaToken { get; set; }
 }
