@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 
 import './Auth.css';
 
-const HCAPTCHA_SITE_KEY = '9f25f3bc-361e-4095-88e9-9372a58c5f89';
+const HCAPTCHA_SITE_KEY = '60f0dc46-e892-4c72-8d14-21ae3fe492a6';
 
 const Register = () => {
     const { t } = useLanguage();
