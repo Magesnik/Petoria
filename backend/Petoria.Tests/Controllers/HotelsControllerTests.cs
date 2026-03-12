@@ -217,4 +217,94 @@ public class HotelsControllerTests : ControllerTestBase
 
         Assert.IsType<OkObjectResult>(result.Result);
     }
+
+    [Fact]
+    public async Task GetModeratedHotels_ReturnsModeratedHotels()
+    {
+        var (hotel, _) = await SeedHotelWithOwner("owner1");
+        var mod = await SeedUser("mod1");
+        Context.HotelModerators.Add(new HotelModerator { HotelId = hotel.Id, UserId = mod.Id });
+        await Context.SaveChangesAsync();
+        var controller = CreateController("mod1");
+
+        var result = await controller.GetModeratedHotels();
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(ok.Value);
+    }
+
+    [Fact]
+    public async Task GetPriceRange_WithRooms_ReturnsMinMaxPrices()
+    {
+        var (hotel, _) = await SeedHotelWithOwner("owner1");
+        await SeedRoomType(hotel.Id, "Budget", 50m);
+        await SeedRoomType(hotel.Id, "Suite", 200m);
+        var controller = CreateController("anyone");
+
+        var result = await controller.GetPriceRange();
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var json = System.Text.Json.JsonSerializer.Serialize(ok.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal(50m, doc.RootElement.GetProperty("minPrice").GetDecimal());
+        Assert.Equal(200m, doc.RootElement.GetProperty("maxPrice").GetDecimal());
+    }
+
+    [Fact]
+    public async Task GetPriceRange_NoRooms_ReturnsDefaultRange()
+    {
+        var controller = CreateController("anyone");
+
+        var result = await controller.GetPriceRange();
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var json = System.Text.Json.JsonSerializer.Serialize(ok.Value);
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        Assert.Equal(0m, doc.RootElement.GetProperty("minPrice").GetDecimal());
+        Assert.Equal(1000m, doc.RootElement.GetProperty("maxPrice").GetDecimal());
+    }
+
+    [Fact]
+    public async Task UpdateHotel_Owner_ReturnsNoContent()
+    {
+        var (hotel, _) = await SeedHotelWithOwner("owner1");
+        var controller = CreateController("owner1", Petoria.Constants.Roles.Admin);
+
+        var dto = new UpdateHotelDto
+        {
+            Name = "Updated Hotel",
+            Description = "Updated description",
+            Location = "Updated Location",
+            City = "Sofia",
+            Country = "Bulgaria",
+            StarRating = 4,
+            IsAvailable = true
+        };
+
+        var result = await controller.UpdateHotel(hotel.Id, dto);
+
+        Assert.IsType<NoContentResult>(result);
+    }
+
+    [Fact]
+    public async Task UpdateHotel_NonOwner_ReturnsForbid()
+    {
+        var (hotel, _) = await SeedHotelWithOwner("owner1");
+        var controller = CreateController("other_user", Petoria.Constants.Roles.Admin);
+
+        var dto = new UpdateHotelDto
+        {
+            Name = "Hijack Hotel",
+            Description = "Should fail",
+            Location = "Nowhere",
+            City = "Sofia",
+            Country = "Bulgaria",
+            StarRating = 3,
+            IsAvailable = false
+        };
+
+        var result = await controller.UpdateHotel(hotel.Id, dto);
+
+        Assert.IsType<ForbidResult>(result);
+    }
 }

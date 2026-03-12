@@ -4,7 +4,7 @@ public static class ValidationConstants
 {
     public static class Hotel
     {
-        public const int NameMaxLength = 200;
+        public const int NameMaxLength = 100;
         public const int DescriptionMaxLength = 2000;
         public const int LocationMaxLength = 300;
         public const int CityMaxLength = 100;

@@ -222,4 +222,35 @@ public class ReservationsControllerTests : ControllerTestBase
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
+
+    [Fact]
+    public async Task ConfirmCart_ValidItems_ReturnsOkAndCreatesReservation()
+    {
+        var (hotel, _) = await SeedHotelWithOwner("owner1");
+        var room = await SeedRoomType(hotel.Id, "Standard", 100m, 5);
+        await SeedUser("user1");
+        var controller = CreateController("user1");
+
+        var request = new ConfirmCartRequest
+        {
+            Items = new List<ConfirmCartItem>
+            {
+                new ConfirmCartItem
+                {
+                    HotelId = hotel.Id,
+                    RoomTypeId = room.Id,
+                    CheckInDate = DateTime.Today.AddDays(10),
+                    CheckOutDate = DateTime.Today.AddDays(12),
+                    NumberOfRooms = 1
+                }
+            }
+        };
+
+        var result = await controller.ConfirmCart(request);
+
+        Assert.IsType<OkObjectResult>(result);
+        var saved = Context.Reservations.FirstOrDefault(r => r.UserId == "user1");
+        Assert.NotNull(saved);
+        Assert.Equal("Confirmed", saved.Status);
+    }
 }
