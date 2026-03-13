@@ -72,6 +72,11 @@ const HotelFilters = ({
         setShowCountryDropdown(false);
     };
 
+    // Sync citySearch when city is reset externally (e.g. country change)
+    useEffect(() => {
+        if (!filters.city) setCitySearch('');
+    }, [filters.city]);
+
     const handleClearCity = () => {
         onFilterChange('city', '');
         setCitySearch('');

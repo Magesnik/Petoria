@@ -1,6 +1,6 @@
 .home {
-    padding-top: 80px;
-    /* Space for fixed header */
+    padding-top: calc(80px + env(safe-area-inset-top));
+    /* Space for fixed header + iOS notch */
 }
 
 /* Hero Section */
@@ -256,7 +256,7 @@
 
 @media (max-width: 768px) {
     .home {
-        padding-top: 70px;
+        padding-top: calc(70px + env(safe-area-inset-top));
     }
 
     .hero {
@@ -265,7 +265,7 @@
     }
 
     .hero-content {
-        padding: 0 15px;
+        padding: 20px 15px 0;
     }
 
     .hero h1 {
@@ -322,7 +322,7 @@
 
 @media (max-width: 480px) {
     .home {
-        padding-top: 60px;
+        padding-top: calc(60px + env(safe-area-inset-top));
     }
 
     .hero {

@@ -455,15 +455,20 @@ public class HotelsController : ControllerBase
         return Ok(hotels);
     }
 
-    // GET: api/hotels/cities
+    // GET: api/hotels/cities?country=Spain
     [HttpGet("cities")]
-    public async Task<ActionResult<IEnumerable<string>>> GetCities()
+    public async Task<ActionResult<IEnumerable<string>>> GetCities([FromQuery] string? country = null)
     {
-        var cities = await _context.Hotels
-            .Where(h => !string.IsNullOrEmpty(h.City) && 
-                        h.IsAvailable && 
+        var query = _context.Hotels
+            .Where(h => !string.IsNullOrEmpty(h.City) &&
+                        h.IsAvailable &&
                         !h.IsSuspendedBySuperAdmin &&
-                        _context.RoomTypes.Any(rt => rt.HotelId == h.Id))
+                        _context.RoomTypes.Any(rt => rt.HotelId == h.Id));
+
+        if (!string.IsNullOrEmpty(country))
+            query = query.Where(h => h.Country == country);
+
+        var cities = await query
             .Select(h => h.City)
             .Distinct()
             .OrderBy(c => c)
