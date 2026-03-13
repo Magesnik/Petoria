@@ -150,6 +150,19 @@ const AdminDashboard = () => {
         }
     };
 
+    const deleteUser = async (userId) => {
+        if (!window.confirm(t('confirmDeleteUser') || 'Наистина ли искате да изтриете този потребител? Това действие е необратимо!')) return;
+        try {
+            await api.delete(`/admin/users/${userId}`);
+            setUsers(prev => prev.filter(u => u.id !== userId));
+            setSelectedUser(null);
+            setUserDetails(null);
+            fetchData();
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const blockUser = async (userId) => {
         if (!window.confirm(t('confirmBlockUser'))) return;
         try {
@@ -579,6 +592,11 @@ const AdminDashboard = () => {
                                                         {t('blockUser')}
                                                     </button>
                                                 )
+                                            )}
+                                            {!userDetails.roles?.includes('SuperAdmin') && (
+                                                <button className="btn-delete-user" onClick={() => deleteUser(userDetails.id)}>
+                                                    {t('deleteUser') || 'Изтрий'}
+                                                </button>
                                             )}
                                         </div>
                                     </div>

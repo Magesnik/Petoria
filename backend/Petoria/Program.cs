@@ -58,6 +58,7 @@ builder.Services.AddScoped<Petoria.Core.Contracts.IAuthService, Petoria.Core.Ser
 builder.Services.AddScoped<Petoria.Core.Contracts.IPhotoService, Petoria.Core.Services.CloudinaryService>();
 builder.Services.AddScoped<Petoria.Core.Contracts.IEmailService, Petoria.Core.Services.EmailService>();
 builder.Services.AddScoped<Petoria.Core.Contracts.IPricingService, Petoria.Core.Services.PricingService>();
+builder.Services.AddHostedService<Petoria.Services.UnconfirmedUserCleanupService>();
 
 // SignalR
 builder.Services.AddSignalR();
@@ -214,6 +215,31 @@ using (var scope = app.Services.CreateScope())
 {
     var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
     await authService.InitializeRolesAndAdminAsync();
+}
+
+// One-time startup: purge ALL existing unconfirmed users (EmailConfirmed = false).
+// Google OAuth users always have EmailConfirmed = true, so they are never affected.
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider
+        .GetRequiredService<UserManager<ApplicationUser>>();
+    var startupLogger = scope.ServiceProvider
+        .GetRequiredService<ILogger<Program>>();
+
+    var unconfirmedUsers = userManager.Users
+        .Where(u => !u.EmailConfirmed)
+        .ToList();
+
+    if (unconfirmedUsers.Count > 0)
+    {
+        startupLogger.LogInformation(
+            "Startup cleanup: deleting {Count} unconfirmed user(s).", unconfirmedUsers.Count);
+
+        foreach (var user in unconfirmedUsers)
+        {
+            await userManager.DeleteAsync(user);
+        }
+    }
 }
 
 // Seed demo data (only runs in Development when the database is empty)

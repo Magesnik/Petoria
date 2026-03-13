@@ -590,6 +590,7 @@
 .btn-promote-super,
 .btn-demote-super,
 .btn-admin-block,
+.btn-delete-user,
 .btn-unblock {
     padding: 0.25rem 0.6rem;
     border: none;
@@ -631,6 +632,11 @@
     color: white;
 }
 
+.btn-delete-user {
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    color: white;
+}
+
 .btn-unblock {
     background: rgba(16, 185, 129, 0.1);
     color: #059669;
@@ -642,6 +648,7 @@
 .btn-promote-super:hover,
 .btn-demote-super:hover,
 .btn-admin-block:hover,
+.btn-delete-user:hover,
 .btn-unblock:hover,
 .btn-delete-review:hover,
 .btn-delete-comment:hover {

@@ -27,7 +27,7 @@ public class AdminController : ControllerBase
     [HttpGet("users")]
     public async Task<ActionResult<IEnumerable<UserStatsResponseDto>>> GetAllUsers()
     {
-        var users = await _userManager.Users.ToListAsync();
+        var users = await _userManager.Users.Where(u => u.EmailConfirmed).ToListAsync();
         var userStats = new List<UserStatsResponseDto>();
 
         foreach (var user in users)
@@ -281,6 +281,28 @@ public class AdminController : ControllerBase
     }
 
 
+    // DELETE: api/admin/users/{id}
+    [HttpDelete("users/{id}")]
+    public async Task<IActionResult> DeleteUser(string id)
+    {
+        var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id == currentUserId)
+            return BadRequest("Cannot delete yourself");
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return NotFound("User not found");
+
+        if (await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
+            return BadRequest("Cannot delete a SuperAdmin");
+
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return Ok(new { message = $"User {user.Email} has been deleted" });
+    }
+
     // PUT: api/admin/users/{id}/block
     [HttpPut("users/{id}/block")]
     public async Task<ActionResult> BlockUser(string id)
@@ -319,7 +341,7 @@ public class AdminController : ControllerBase
     [HttpGet("stats")]
     public async Task<ActionResult<DashboardStatsResponseDto>> GetDashboardStats()
     {
-        var totalUsers = await _userManager.Users.CountAsync();
+        var totalUsers = await _userManager.Users.CountAsync(u => u.EmailConfirmed);
         var adminUsers = (await _userManager.GetUsersInRoleAsync("Admin")).Count;
         var superAdminUsers = (await _userManager.GetUsersInRoleAsync("SuperAdmin")).Count;
         var totalFavorites = await _context.Favorites.CountAsync();
