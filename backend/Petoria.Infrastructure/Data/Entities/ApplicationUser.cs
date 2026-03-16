@@ -12,4 +12,6 @@ public class ApplicationUser : IdentityUser
     public string? Theme { get; set; }
     public string? Currency { get; set; }
     public string? Language { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 }

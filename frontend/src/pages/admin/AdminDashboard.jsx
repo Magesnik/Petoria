@@ -17,7 +17,10 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loadingUsers, setLoadingUsers] = useState(true);
+    const [loadingStats, setLoadingStats] = useState(true);
+    const [loadingModerators, setLoadingModerators] = useState(true);
+    const [loadingHotels, setLoadingHotels] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchModeratorTerm, setSearchModeratorTerm] = useState('');
     const [searchHotelTerm, setSearchHotelTerm] = useState('');
@@ -36,42 +39,31 @@ const AdminDashboard = () => {
         }
     };
 
-    const fetchData = async () => {
-        try {
-            let usersData = [];
-            let statsData = null;
-            let messagesCount = 0;
-            let moderatorsData = [];
+    const fetchData = () => {
+        // Each section loads independently — page renders progressively
+        api.get('/admin/users')
+            .then(data => setUsers(data))
+            .catch(err => setError(err.message))
+            .finally(() => setLoadingUsers(false));
 
-            const [usersRes, statsRes, messagesRes, moderatorsRes, hotelsRes] = await Promise.allSettled([
-                api.get('/admin/users'),
-                api.get('/admin/stats'),
-                api.get('/support/messages/admin/unread-count'),
-                api.get('/admin/moderators'),
-                api.get('/admin/hotels')
-            ]);
+        api.get('/admin/stats')
+            .then(data => setStats(data))
+            .catch(() => {})
+            .finally(() => setLoadingStats(false));
 
-            if (usersRes.status === 'fulfilled') usersData = usersRes.value;
-            else throw new Error('Failed to fetch users');
+        api.get('/support/messages/admin/unread-count')
+            .then(count => setUnreadMessagesCount(count))
+            .catch(() => {});
 
-            if (statsRes.status === 'fulfilled') statsData = statsRes.value;
-            else throw new Error('Failed to fetch stats');
+        api.get('/admin/moderators')
+            .then(data => setModerators(data))
+            .catch(() => {})
+            .finally(() => setLoadingModerators(false));
 
-            if (messagesRes.status === 'fulfilled') messagesCount = messagesRes.value;
-
-            if (moderatorsRes.status === 'fulfilled') moderatorsData = moderatorsRes.value;
-
-            if (hotelsRes.status === 'fulfilled') setAdminHotels(hotelsRes.value);
-
-            setUsers(usersData);
-            setStats(statsData);
-            setUnreadMessagesCount(messagesCount);
-            setModerators(moderatorsData);
-            setLoading(false);
-        } catch (err) {
-            setError(err.message);
-            setLoading(false);
-        }
+        api.get('/admin/hotels')
+            .then(data => setAdminHotels(data))
+            .catch(() => {})
+            .finally(() => setLoadingHotels(false));
     };
 
     useEffect(() => {
@@ -158,6 +150,19 @@ const AdminDashboard = () => {
         }
     };
 
+    const deleteUser = async (userId) => {
+        if (!window.confirm(t('confirmDeleteUser') || 'Наистина ли искате да изтриете този потребител? Това действие е необратимо!')) return;
+        try {
+            await api.delete(`/admin/users/${userId}`);
+            setUsers(prev => prev.filter(u => u.id !== userId));
+            setSelectedUser(null);
+            setUserDetails(null);
+            fetchData();
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const blockUser = async (userId) => {
         if (!window.confirm(t('confirmBlockUser'))) return;
         try {
@@ -220,18 +225,6 @@ const AdminDashboard = () => {
 
     if (!isSuperAdmin()) {
         return null;
-    }
-
-    if (loading) {
-        return (
-            <>
-
-                <div className="admin-dashboard loading">
-                    <div className="loading-spinner"></div>
-                    <p>{t('loadingDashboard')}</p>
-                </div>
-            </>
-        );
     }
 
     return (
@@ -302,59 +295,71 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                {stats && (
-                    <div className="stats-grid">
-                        <div className="stat-card">
-                            <div className="stat-icon">👥</div>
-                            <div className="stat-info">
-                                <span className="stat-value">{stats.totalUsers}</span>
-                                <span className="stat-label">{t('totalUsers')}</span>
+                <div className="stats-grid">
+                    {loadingStats ? (
+                        Array.from({ length: 7 }).map((_, i) => (
+                            <div key={i} className="stat-card skeleton-card">
+                                <div className="skeleton-icon"></div>
+                                <div className="stat-info">
+                                    <span className="skeleton-value"></span>
+                                    <span className="skeleton-label"></span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">🔐</div>
-                            <div className="stat-info">
-                                <span className="stat-value">{stats.adminUsers}</span>
-                                <span className="stat-label">{t('admins')}</span>
+                        ))
+                    ) : stats ? (
+                        <>
+                            <div className="stat-card">
+                                <div className="stat-icon">👥</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{stats.totalUsers}</span>
+                                    <span className="stat-label">{t('totalUsers')}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">🏨</div>
-                            <div className="stat-info">
-                                <span className="stat-value">{stats.totalHotels}</span>
-                                <span className="stat-label">{t('hotels')}</span>
+                            <div className="stat-card">
+                                <div className="stat-icon">🔐</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{stats.adminUsers}</span>
+                                    <span className="stat-label">{t('admins')}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">❤️</div>
-                            <div className="stat-info">
-                                <span className="stat-value">{stats.totalFavorites}</span>
-                                <span className="stat-label">{t('favorites')}</span>
+                            <div className="stat-card">
+                                <div className="stat-icon">🏨</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{stats.totalHotels}</span>
+                                    <span className="stat-label">{t('hotels')}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">📅</div>
-                            <div className="stat-info">
-                                <span className="stat-value">{stats.totalReservations}</span>
-                                <span className="stat-label">{t('reservations')}</span>
+                            <div className="stat-card">
+                                <div className="stat-icon">❤️</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{stats.totalFavorites}</span>
+                                    <span className="stat-label">{t('favorites')}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="stat-card">
-                            <div className="stat-icon">💬</div>
-                            <div className="stat-info">
-                                <span className="stat-value">{stats.totalReviews || 0}</span>
-                                <span className="stat-label">{t('comments')}</span>
+                            <div className="stat-card">
+                                <div className="stat-icon">📅</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{stats.totalReservations}</span>
+                                    <span className="stat-label">{t('reservations')}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="stat-card revenue">
-                            <div className="stat-icon">💰</div>
-                            <div className="stat-info">
-                                <span className="stat-value">${stats.totalRevenue?.toLocaleString() || 0}</span>
-                                <span className="stat-label">{t('totalRevenue')}</span>
+                            <div className="stat-card">
+                                <div className="stat-icon">💬</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{stats.totalReviews || 0}</span>
+                                    <span className="stat-label">{t('comments')}</span>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                )}
+                            <div className="stat-card revenue">
+                                <div className="stat-icon">💰</div>
+                                <div className="stat-info">
+                                    <span className="stat-value">${stats.totalRevenue?.toLocaleString() || 0}</span>
+                                    <span className="stat-label">{t('totalRevenue')}</span>
+                                </div>
+                            </div>
+                        </>
+                    ) : null}
+                </div>
 
                 <div className="dashboard-content">
                     <div className="users-panel">
@@ -391,7 +396,17 @@ const AdminDashboard = () => {
                                     />
                                 </div>
                                 <div className="users-list">
-                                    {filteredUsers.map(u => (
+                                    {loadingUsers ? (
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <div key={i} className="user-card skeleton-card">
+                                                <div className="skeleton-avatar"></div>
+                                                <div className="user-info" style={{ flex: 1 }}>
+                                                    <span className="skeleton-text" style={{ width: '60%' }}></span>
+                                                    <span className="skeleton-text" style={{ width: '80%' }}></span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : filteredUsers.map(u => (
                                         <div
                                             key={u.id}
                                             className={`user-card ${selectedUser === u.id ? 'selected' : ''}`}
@@ -436,7 +451,16 @@ const AdminDashboard = () => {
                                     />
                                 </div>
                                 <div className="moderators-list">
-                                    {filteredModerators.length === 0 ? (
+                                    {loadingModerators ? (
+                                        Array.from({ length: 3 }).map((_, i) => (
+                                            <div key={i} className="moderator-card-admin skeleton-card">
+                                                <div className="moderator-info" style={{ flex: 1 }}>
+                                                    <span className="skeleton-text" style={{ width: '50%' }}></span>
+                                                    <span className="skeleton-text" style={{ width: '70%' }}></span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : filteredModerators.length === 0 ? (
                                         <p className="empty-message">{t('noModerators') || 'No moderators assigned'}</p>
                                     ) : (
                                         filteredModerators.map(m => (
@@ -471,7 +495,16 @@ const AdminDashboard = () => {
                                     />
                                 </div>
                                 <div className="hotels-admin-list">
-                                    {filteredAdminHotels.length === 0 ? (
+                                    {loadingHotels ? (
+                                        Array.from({ length: 4 }).map((_, i) => (
+                                            <div key={i} className="hotel-admin-card skeleton-card">
+                                                <div className="hotel-admin-info" style={{ flex: 1 }}>
+                                                    <span className="skeleton-text" style={{ width: '55%' }}></span>
+                                                    <span className="skeleton-text" style={{ width: '40%' }}></span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : filteredAdminHotels.length === 0 ? (
                                         <p className="empty-message">{t('noHotels')}</p>
                                     ) : (
                                         filteredAdminHotels.map(h => (
@@ -559,6 +592,11 @@ const AdminDashboard = () => {
                                                         {t('blockUser')}
                                                     </button>
                                                 )
+                                            )}
+                                            {!userDetails.roles?.includes('SuperAdmin') && (
+                                                <button className="btn-delete-user" onClick={() => deleteUser(userDetails.id)}>
+                                                    {t('deleteUser') || 'Изтрий'}
+                                                </button>
                                             )}
                                         </div>
                                     </div>

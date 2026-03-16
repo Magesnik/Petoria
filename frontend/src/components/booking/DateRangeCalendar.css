@@ -312,13 +312,25 @@
 }
 
 /* Responsive */
-@media (max-width: 400px) {
+@media (max-width: 480px) {
     .date-range-calendar .day-cell {
-        min-height: 36px;
+        min-height: 38px;
+        gap: 0;
     }
 
     .date-range-calendar .day-number {
         font-size: 0.75rem;
+    }
+
+    .availability-indicator {
+        font-size: 0.5rem;
+        padding: 0px 2px;
+    }
+}
+
+@media (max-width: 360px) {
+    .date-range-calendar .day-cell {
+        min-height: 34px;
     }
 
     .availability-indicator {

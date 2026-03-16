@@ -117,9 +117,8 @@ const Hotels = () => {
 
     const fetchFilterData = React.useCallback(async () => {
         try {
-            // Fetch all filter data in parallel
             const [citiesData, countriesData, amenitiesData, priceRangeData] = await Promise.all([
-                api.get('/hotels/cities'), // Ensure these API calls trigger correctly 
+                api.get('/hotels/cities'),
                 api.get('/hotels/countries'),
                 api.get('/hotels/amenities'),
                 api.get('/hotels/price-range')
@@ -131,6 +130,16 @@ const Hotels = () => {
             setPriceRange(priceRangeData);
         } catch (err) {
             console.error('Error fetching filter data:', err);
+        }
+    }, []);
+
+    const fetchCitiesForCountry = React.useCallback(async (country) => {
+        try {
+            const url = country ? `/hotels/cities?country=${encodeURIComponent(country)}` : '/hotels/cities';
+            const data = await api.get(url);
+            setCities(data);
+        } catch (err) {
+            console.error('Error fetching cities:', err);
         }
     }, []);
 
@@ -221,10 +230,13 @@ const Hotels = () => {
     }, [filters, searchQuery, view, fetchHotels, fetchHotelsForMap]);
 
     const handleFilterChange = (filterName, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [filterName]: value
-        }));
+        if (filterName === 'country') {
+            // Reset city when country changes and fetch cities for the new country
+            setFilters(prev => ({ ...prev, country: value, city: '' }));
+            fetchCitiesForCountry(value);
+        } else {
+            setFilters(prev => ({ ...prev, [filterName]: value }));
+        }
     };
 
     const handleClearFilters = () => {
