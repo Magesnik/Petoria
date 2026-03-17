@@ -1,5 +1,6 @@
 namespace Petoria.Core.DTOs.PromoCode;
 
+/// <summary>Отговор: данни за промо код (код, процент, активации)</summary>
 public class PromoCodeDto
 {
     public int Id { get; set; }

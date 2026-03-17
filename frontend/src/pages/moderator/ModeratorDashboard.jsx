@@ -4,7 +4,9 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './ModeratorDashboard.css'; // We'll create this CSS
 
+/** Таблo на модератора — управлявани хотели с брой непрочетени съобщения. */
 const ModeratorDashboard = () => {
+    // Хотели, за които потребителят е модератор
     const [hotels, setHotels] = useState([]);
     const [unreadCounts, setUnreadCounts] = useState({});
     const [loading, setLoading] = useState(true);

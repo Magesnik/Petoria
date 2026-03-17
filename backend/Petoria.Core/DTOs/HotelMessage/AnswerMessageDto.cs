@@ -3,9 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.HotelMessage;
 
-/// <summary>
-/// DTO за отговор на администратор на съобщение
-/// </summary>
+/// <summary>Заявка: отговор на съобщение от хотела</summary>
 public class AnswerMessageDto
 {
     [Required(ErrorMessage = "Отговорът е задължителен")]

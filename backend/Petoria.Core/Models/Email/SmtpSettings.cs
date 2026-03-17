@@ -1,5 +1,6 @@
 namespace Petoria.Core.Models.Email
 {
+    /// <summary>SMTP конфигурация за изпращане на имейли (хост, порт, потребител)</summary>
     public class SmtpSettings
     {
         public string Host { get; set; } = string.Empty;

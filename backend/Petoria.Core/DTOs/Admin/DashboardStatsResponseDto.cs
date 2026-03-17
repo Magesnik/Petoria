@@ -1,8 +1,6 @@
 namespace Petoria.Core.DTOs.Admin;
 
-/// <summary>
-/// DTO за обща статистика на dashboard-а (SuperAdmin).
-/// </summary>
+/// <summary>Отговор: статистика за админ таблото (потребители, хотели, приходи)</summary>
 public class DashboardStatsResponseDto
 {
     public int TotalUsers { get; set; }

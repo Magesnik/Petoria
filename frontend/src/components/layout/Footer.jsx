@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import './Footer.css';
 
+/** Футър на приложението с навигация, контакти и социални връзки. */
 const Footer = () => {
     const { t } = useLanguage();
     const currentYear = new Date().getFullYear();

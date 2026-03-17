@@ -54,6 +54,7 @@ function sortHotels(hotels, sortBy) {
     }
 }
 
+/** Страница със списък хотели — филтри, сортиране, карта и пагинация. */
 const Hotels = () => {
     const { t } = useLanguage();
     const [hotels, setHotels] = useState([]);

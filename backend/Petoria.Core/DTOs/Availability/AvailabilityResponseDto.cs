@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Availability;
 
-/// <summary>
-/// DTO за изходящи данни за наличност на стая.
-/// Показва наличността за конкретна дата и тип стая.
-/// </summary>
+/// <summary>Отговор: наличност на стая за дата (свободни стаи, блокирана, отстъпка)</summary>
 public class AvailabilityResponseDto
 {
     public int RoomTypeId { get; set; }

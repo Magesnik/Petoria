@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Petoria.Constants;
 using Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Резервация: потребител, хотел, тип стая, дати, брой стаи, цена, статус, възстановена сума.
+/// </summary>
 public class Reservation
 {
     [Key]
@@ -21,14 +24,14 @@ public class Reservation
     [ForeignKey("HotelId")]
     public Hotel? Hotel { get; set; }
 
-    // Room type selection
+    // Избор на тип стая
     public int? RoomTypeId { get; set; }
 
     [ForeignKey("RoomTypeId")]
     public RoomType? RoomType { get; set; }
 
     [Range(ValidationConstants.Reservation.RoomsMin, ValidationConstants.Reservation.RoomsMax)]
-    public int NumberOfRooms { get; set; } = 1;  // How many rooms of this type
+    public int NumberOfRooms { get; set; } = 1;  // Колко стаи от този тип
 
     [Required]
     public DateTime CheckInDate { get; set; }
@@ -40,14 +43,20 @@ public class Reservation
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
 
+    /// <summary>
+    /// Възстановена сума при анулиране.
+    /// </summary>
     [Column(TypeName = "decimal(18,2)")]
     public decimal RefundAmount { get; set; } = 0;
 
+    /// <summary>
+    /// Задържана сума при анулиране.
+    /// </summary>
     [Column(TypeName = "decimal(18,2)")]
     public decimal RetainedAmount { get; set; } = 0;
 
     [MaxLength(ValidationConstants.Reservation.StatusMaxLength)]
-    public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
+    public string Status { get; set; } = "Pending"; // Чакаща, Потвърдена, Отказана, Завършена
 
     [MaxLength(ValidationConstants.Reservation.NotesMaxLength)]
     public string? Notes { get; set; }

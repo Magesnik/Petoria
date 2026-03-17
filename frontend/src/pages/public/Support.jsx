@@ -4,16 +4,20 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './Support.css';
 
+/** Страница за поддръжка с форма за съобщения и секция с често задавани въпроси. */
 const Support = () => {
     const { t } = useLanguage();
+    // Данни от формуляра за поддръжка
     const [formData, setFormData] = useState({
         subject: '',
         message: '',
     });
     const [submitMessage, setSubmitMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    // Индекс на отворения FAQ въпрос
     const [openFaq, setOpenFaq] = useState(null);
 
+    // Обновява полетата на формуляра при промяна
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -22,6 +26,7 @@ const Support = () => {
         setErrorMessage('');
     };
 
+    // Изпраща съобщение до поддръжката
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');

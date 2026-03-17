@@ -6,6 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './HotelMessages.css';
 
+/** Страница за управление на входящи съобщения от потребители до хотела. */
 const HotelMessages = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ const HotelMessages = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Reply state
+    // Активно съобщение за отговор и текст на реплика
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState('');
     const [sendingReply, setSendingReply] = useState(false);

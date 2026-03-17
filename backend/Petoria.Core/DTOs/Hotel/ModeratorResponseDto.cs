@@ -1,5 +1,6 @@
 namespace Petoria.Core.DTOs.Hotel;
 
+/// <summary>Отговор: данни за модератор на хотел</summary>
 public class ModeratorResponseDto
 {
     public string UserId { get; set; } = string.Empty;

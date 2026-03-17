@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Deals;
 
-/// <summary>
-/// DTO за Last Minute оферти.
-/// Показва хотели с ниска наличност в следващите 7 дни.
-/// </summary>
+/// <summary>Отговор: last-minute оферта (днес/утре)</summary>
 public class LastMinuteOfferResponseDto
 {
     public int HotelId { get; set; }

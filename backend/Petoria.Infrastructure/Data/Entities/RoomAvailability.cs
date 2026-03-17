@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Наличност на стая за конкретна дата: брой свободни, блокирана ли е.
+/// </summary>
 public class RoomAvailability
 {
     [Key]

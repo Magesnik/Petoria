@@ -7,25 +7,30 @@ import GlobalPromoCodes from './GlobalPromoCodes';
 
 import './AdminDashboard.css';
 
+/** Административно табло за SuperAdmin — потребители, модератори, хотели и статистики. */
 const AdminDashboard = () => {
     const { isSuperAdmin } = useAuth();
     const { t, language } = useLanguage();
     const navigate = useNavigate();
+    // Основни данни — потребители, модератори, хотели и статистики
     const [users, setUsers] = useState([]);
     const [moderators, setModerators] = useState([]);
     const [adminHotels, setAdminHotels] = useState([]);
     const [stats, setStats] = useState(null);
+    // Избран потребител за преглед на детайли
     const [selectedUser, setSelectedUser] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [loadingStats, setLoadingStats] = useState(true);
     const [loadingModerators, setLoadingModerators] = useState(true);
     const [loadingHotels, setLoadingHotels] = useState(true);
+    // Термини за търсене по секции
     const [searchTerm, setSearchTerm] = useState('');
     const [searchModeratorTerm, setSearchModeratorTerm] = useState('');
     const [searchHotelTerm, setSearchHotelTerm] = useState('');
     const [error, setError] = useState(null);
     const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+    // Активен таб и видимост на промо кодовете
     const [activeDashboardTab, setActiveDashboardTab] = useState('users');
     const [showPromoCodes, setShowPromoCodes] = useState(false);
 

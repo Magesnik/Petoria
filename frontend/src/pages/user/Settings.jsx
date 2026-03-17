@@ -7,11 +7,13 @@ import { useCurrency } from '../../context/CurrencyContext';
 
 import './Settings.css';
 
+/** Страница с настройки — профил, парола, аватар, тема, език и валута. */
 const Settings = () => {
     const { t, language, toggleLanguage } = useLanguage();
     const { theme, toggleTheme } = useTheme();
     const { currency, changeCurrency, availableCurrencies, convertAndFormat } = useCurrency();
     const { user, login } = useAuth();
+    // Данни за профила на потребителя
     const [formData, setFormData] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',

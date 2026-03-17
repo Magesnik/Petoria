@@ -2,26 +2,30 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { getBaseUrl } from '../utils/api';
 import * as signalR from '@microsoft/signalr';
 
+/** Контекст за брояч на онлайн потребители чрез SignalR */
 const LiveUsersContext = createContext();
 
+/** Доставчик на контекста за онлайн потребители */
 export const LiveUsersProvider = ({ children }) => {
     const [liveUsers, setLiveUsers] = useState(0);
 
     useEffect(() => {
         let isMounted = true;
-        // Setup global SignalR connection
+        // Създаване на глобална SignalR връзка
         const newConnection = new signalR.HubConnectionBuilder()
             .withUrl(`${getBaseUrl()}/hubs/liveusers`)
             .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Error)
             .build();
 
+        // Слушане за обновяване на броя потребители
         newConnection.on("UpdateUserCount", (count) => {
             if (isMounted) {
                 setLiveUsers(count);
             }
         });
 
+        // Стартиране на връзката
         const startConnection = async () => {
             try {
                 if (newConnection.state === signalR.HubConnectionState.Disconnected && isMounted) {
@@ -29,7 +33,7 @@ export const LiveUsersProvider = ({ children }) => {
                 }
             } catch (err) {
                 if (err.name !== 'AbortError') {
-                    console.error('SignalR Connection Error: ', err);
+                    console.error('Грешка при SignalR връзка: ', err);
                 }
             }
         };
@@ -39,8 +43,8 @@ export const LiveUsersProvider = ({ children }) => {
         return () => {
             isMounted = false;
             if (newConnection && newConnection.state !== signalR.HubConnectionState.Disconnected) {
-                // Background stop without await to prevent blocking unmount
-                newConnection.stop().catch(e => console.error("SignalR stop error", e));
+                // Спиране на връзката във фонов режим без await
+                newConnection.stop().catch(e => console.error("Грешка при спиране на SignalR", e));
             }
         };
     }, []);
@@ -52,4 +56,5 @@ export const LiveUsersProvider = ({ children }) => {
     );
 };
 
+/** Хук за достъп до броя на онлайн потребители */
 export const useLiveUsers = () => useContext(LiveUsersContext);

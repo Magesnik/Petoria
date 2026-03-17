@@ -11,6 +11,7 @@ import BookingWidget from '../../components/booking/BookingWidget';
 import RoomTypeManager from '../../components/booking/RoomTypeManager';
 import './HotelDetails.css';
 
+/** Детайлна страница на хотел с галерия, описание, стаи, резервация и отзиви. */
 const HotelDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const HotelDetails = () => {
     const [hotel, setHotel] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    // Текущ индекс на показваното изображение в галерията
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
 

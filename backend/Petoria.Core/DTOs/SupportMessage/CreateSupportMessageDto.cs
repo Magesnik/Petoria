@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Petoria.Constants;
 namespace Petoria.Core.DTOs.SupportMessage
 {
+    /// <summary>Заявка: ново съобщение до поддръжката</summary>
     public class CreateSupportMessageDto
     {
         [Required(ErrorMessage = ValidationConstants.SupportMessage.SubjectRequired)]

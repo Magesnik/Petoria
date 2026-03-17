@@ -16,13 +16,14 @@ const toLocalDateStr = (date) => {
 };
 
 
+/** Уиджет за резервация — избор на стая, дати, гости и добавяне в количката. */
 const BookingWidget = ({ hotelId, hotelName, hotelImage, onBookingComplete }) => {
     const { user } = useAuth();
     const { t } = useLanguage();
     const { convertAndFormat } = useCurrency();
     const { addToCart } = useCart();
 
-    // State for room types
+    // Налични типове стаи
     const [roomTypes, setRoomTypes] = useState([]);
     const [selectedRoomType, setSelectedRoomType] = useState(null);
 

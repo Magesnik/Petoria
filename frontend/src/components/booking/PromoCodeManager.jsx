@@ -3,15 +3,18 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './PromoCodeManager.css';
 
+/** Мениджър за промо кодове на хотел — създаване, редактиране и изтриване. */
 const PromoCodeManager = ({ hotelId }) => {
     const { t } = useLanguage();
     const [promoCodes, setPromoCodes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    // Режим на редактиране и ID на редактирания код
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
 
+    // Данни от формуляра за нов/редактиран промо код
     const [formData, setFormData] = useState({
         code: '',
         discountPercentage: '',

@@ -7,6 +7,9 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за потребителски профил: преглед, редакция, качване/изтриване на аватар
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
@@ -21,7 +24,9 @@ public class ProfileController : ControllerBase
         _photoService = photoService;
     }
 
-    // GET: api/profile
+    /// <summary>
+    /// Връща профила на текущия потребител или null ако не е автентикиран
+    /// </summary>
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<ProfileResponseDto>> GetProfile()
@@ -29,7 +34,7 @@ public class ProfileController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            // Return 200 OK with null to avoid 401 browser console errors
+            // Връща 200 OK с null, за да избегне 401 грешки в конзолата на браузъра
             return Ok(null);
         }
 
@@ -44,17 +49,16 @@ public class ProfileController : ControllerBase
             return Unauthorized(new { message = "UserIsBlocked" });
         }
 
-        // Map Entity → Response DTO
+        // Преобразуване на Entity → Response DTO
         var roles = await _userManager.GetRolesAsync(user);
 
-        // Access database context directly or via service to get total spent
-        // We'll calculate it inline since we don't have a specific service for this injected in this action.
+        // Достъп до контекста на базата данни за изчисляване на общата похарчена сума
         var dbContext = HttpContext.RequestServices.GetRequiredService<Petoria.Infrastructure.Data.ApplicationDbContext>();
-        
+
         var totalSpent = await dbContext.Reservations
             .Where(r => r.UserId == userId)
-            .SumAsync(r => 
-                (r.Status == "Completed" || r.Status == "Confirmed") ? r.TotalPrice : 
+            .SumAsync(r =>
+                (r.Status == "Completed" || r.Status == "Confirmed") ? r.TotalPrice :
                 (r.Status == "Cancelled") ? r.RetainedAmount : 0
             );
 
@@ -73,7 +77,9 @@ public class ProfileController : ControllerBase
         });
     }
 
-    // PUT: api/profile
+    /// <summary>
+    /// Обновява профилните данни на текущия потребител
+    /// </summary>
     [HttpPut]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto request)
     {
@@ -89,11 +95,11 @@ public class ProfileController : ControllerBase
             return NotFound();
         }
 
-        // Map DTO → Entity (update only provided fields)
+        // Преобразуване на DTO → Entity (обновяване само на подадените полета)
         if (!string.IsNullOrEmpty(request.FirstName)) user.FirstName = request.FirstName;
         if (!string.IsNullOrEmpty(request.LastName)) user.LastName = request.LastName;
 
-        // Update preferences if provided
+        // Обновяване на предпочитанията, ако са подадени
         if (!string.IsNullOrEmpty(request.Theme)) user.Theme = request.Theme;
         if (!string.IsNullOrEmpty(request.Currency)) user.Currency = request.Currency;
         if (!string.IsNullOrEmpty(request.Language)) user.Language = request.Language;
@@ -104,7 +110,7 @@ public class ProfileController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-        // Map Entity → Response DTO
+        // Преобразуване на Entity → Response DTO
         return Ok(new
         {
             message = "Profile updated successfully",
@@ -123,7 +129,9 @@ public class ProfileController : ControllerBase
         });
     }
 
-    // POST: api/profile/avatar
+    /// <summary>
+    /// Качва нов аватар за текущия потребител
+    /// </summary>
     [HttpPost("avatar")]
     public async Task<IActionResult> UploadAvatar(IFormFile file)
     {
@@ -144,7 +152,7 @@ public class ProfileController : ControllerBase
             return BadRequest("No file uploaded");
         }
 
-        // Validate file type
+        // Валидиране на типа на файла
         var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".avif" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(extension))
@@ -152,7 +160,7 @@ public class ProfileController : ControllerBase
             return BadRequest("Only JPG, JPEG, and PNG files are allowed");
         }
 
-        // Validate file size (max 25MB)
+        // Валидиране на размера на файла (макс. 10MB)
         if (file.Length > 10 * 1024 * 1024)
         {
             return BadRequest("File size must be less than 10MB");
@@ -167,7 +175,7 @@ public class ProfileController : ControllerBase
                 return BadRequest(uploadResult.Error.Message);
             }
 
-            // Update user avatar URL
+            // Обновяване на URL адреса на аватара
             user.AvatarUrl = uploadResult.SecureUrl.AbsoluteUri;
             var result = await _userManager.UpdateAsync(user);
 
@@ -188,7 +196,9 @@ public class ProfileController : ControllerBase
         }
     }
 
-    // DELETE: api/profile/avatar
+    /// <summary>
+    /// Изтрива аватара на текущия потребител
+    /// </summary>
     [HttpDelete("avatar")]
     public async Task<IActionResult> DeleteAvatar()
     {
@@ -211,15 +221,10 @@ public class ProfileController : ControllerBase
 
         try
         {
-            // Note: Since we don't store the PublicId in the user entity, we might not be able to delete from Cloudinary easily 
-            // unless we extract it from the URL or store it. 
-            // For now, we will just clear the URL from the user profile.
-            // Ideally, we should store the PublicId in the User entity.
+            // Забележка: Не съхраняваме PublicId в потребителската entity,
+            // затова засега просто изчистваме URL от профила.
 
-            // Attempt to extract PublicId from URL if possible (Cloudinary URLs usually contain it)
-            // But for simplicity/safety, just clear the reference for now or implementing basic extraction if standard format.
-            
-            // Remove avatar URL from user
+            // Премахване на URL адреса на аватара от потребителя
             user.AvatarUrl = null;
             var result = await _userManager.UpdateAsync(user);
 

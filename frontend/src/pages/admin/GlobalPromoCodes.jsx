@@ -3,19 +3,22 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './AdminDashboard.css'; // Reusing some admin dashboard styles or creating new ones
 
+/** Панел за управление на глобални промо кодове — създаване, преглед и изтриване. */
 const GlobalPromoCodes = () => {
     const { t, language } = useLanguage();
+    // Списък с промо кодове и статус на зареждане
     const [promoCodes, setPromoCodes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
 
-    // Form state
+    // Полета на формуляра за нов промо код
     const [code, setCode] = useState('');
     const [discountPercentage, setDiscountPercentage] = useState('');
     const [maxActivations, setMaxActivations] = useState(100);
     const [validDays, setValidDays] = useState(30);
 
+    // Зарежда всички глобални промо кодове от API
     const fetchPromoCodes = async () => {
         try {
             setLoading(true);
@@ -33,6 +36,7 @@ const GlobalPromoCodes = () => {
         fetchPromoCodes();
     }, []);
 
+    // Създава нов глобален промо код и опреснява списъка
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
@@ -54,6 +58,7 @@ const GlobalPromoCodes = () => {
         }
     };
 
+    // Изтрива промо код след потвърждение
     const handleDelete = async (id) => {
         if (!window.confirm(t('confirmDeletePromo') || 'Are you sure you want to delete this global promo code?')) return;
         try {

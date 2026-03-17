@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за отстъпки на стаи: CRUD за периодични отстъпки, активна отстъпка по дата
+/// </summary>
 [Route("api")]
 [ApiController]
 public class DiscountsController : ControllerBase
@@ -19,7 +22,9 @@ public class DiscountsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/hotels/{hotelId}/discounts
+    /// <summary>
+    /// Връща всички отстъпки за даден хотел
+    /// </summary>
     [HttpGet("hotels/{hotelId}/discounts")]
     public async Task<ActionResult<IEnumerable<DiscountResponseDto>>> GetHotelDiscounts(int hotelId)
     {
@@ -45,7 +50,9 @@ public class DiscountsController : ControllerBase
         return Ok(discounts);
     }
 
-    // GET: api/rooms/{roomTypeId}/active-discount
+    /// <summary>
+    /// Връща активната отстъпка за тип стая по дата
+    /// </summary>
     [HttpGet("rooms/{roomTypeId}/active-discount")]
     public async Task<ActionResult<DiscountResponseDto>> GetActiveDiscount(int roomTypeId, [FromQuery] DateTime? date)
     {
@@ -80,7 +87,9 @@ public class DiscountsController : ControllerBase
         return Ok(discount);
     }
 
-    // POST: api/hotels/{hotelId}/discounts
+    /// <summary>
+    /// Създава нова отстъпка за тип стая в хотел
+    /// </summary>
     [Authorize]
     [HttpPost("hotels/{hotelId}/discounts")]
     public async Task<ActionResult<DiscountResponseDto>> CreateDiscount(int hotelId, [FromBody] CreateDiscountDto dto)
@@ -91,7 +100,7 @@ public class DiscountsController : ControllerBase
             return Unauthorized();
         }
 
-        // Verify hotel ownership
+        // Проверка на собствеността върху хотела
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)
         {
@@ -104,22 +113,22 @@ public class DiscountsController : ControllerBase
             return Forbid();
         }
 
-        // Verify room type belongs to hotel
+        // Проверка дали типът стая принадлежи на хотела
         var roomType = await _context.RoomTypes
             .FirstOrDefaultAsync(rt => rt.Id == dto.RoomTypeId && rt.HotelId == hotelId);
-        
+
         if (roomType == null)
         {
             return BadRequest(new { message = "Room type not found or does not belong to this hotel" });
         }
 
-        // Validate dates
+        // Валидиране на датите
         if (dto.EndDate <= dto.StartDate)
         {
             return BadRequest(new { message = "End date must be after start date" });
         }
 
-        // Map DTO → Entity
+        // Преобразуване на DTO → Entity
         var discount = new RoomDiscount
         {
             RoomTypeId = dto.RoomTypeId,
@@ -133,7 +142,7 @@ public class DiscountsController : ControllerBase
         _context.RoomDiscounts.Add(discount);
         await _context.SaveChangesAsync();
 
-        // Map Entity → Response DTO
+        // Преобразуване на Entity → Response DTO
         return Ok(new DiscountResponseDto
         {
             Id = discount.Id,
@@ -149,7 +158,9 @@ public class DiscountsController : ControllerBase
         });
     }
 
-    // PUT: api/discounts/{id}
+    /// <summary>
+    /// Обновява съществуваща отстъпка по идентификатор
+    /// </summary>
     [Authorize]
     [HttpPut("discounts/{id}")]
     public async Task<IActionResult> UpdateDiscount(int id, [FromBody] UpdateDiscountDto dto)
@@ -170,20 +181,20 @@ public class DiscountsController : ControllerBase
             return NotFound();
         }
 
-        // Verify ownership
+        // Проверка на собствеността
         var isSuperAdmin = User.IsInRole("SuperAdmin");
         if (discount.RoomType?.Hotel?.CreatedById != userId && !isSuperAdmin)
         {
             return Forbid();
         }
 
-        // Validate dates
+        // Валидиране на датите
         if (dto.EndDate <= dto.StartDate)
         {
             return BadRequest(new { message = "End date must be after start date" });
         }
 
-        // Map DTO → Entity (update)
+        // Преобразуване на DTO → Entity (обновяване)
         discount.StartDate = dto.StartDate;
         discount.EndDate = dto.EndDate;
         discount.DiscountPercentage = dto.DiscountPercentage;
@@ -194,7 +205,9 @@ public class DiscountsController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/discounts/{id}
+    /// <summary>
+    /// Изтрива отстъпка по идентификатор
+    /// </summary>
     [Authorize]
     [HttpDelete("discounts/{id}")]
     public async Task<IActionResult> DeleteDiscount(int id)
@@ -215,7 +228,7 @@ public class DiscountsController : ControllerBase
             return NotFound();
         }
 
-        // Verify ownership
+        // Проверка на собствеността
         var isSuperAdmin = User.IsInRole("SuperAdmin");
         if (discount.RoomType?.Hotel?.CreatedById != userId && !isSuperAdmin)
         {

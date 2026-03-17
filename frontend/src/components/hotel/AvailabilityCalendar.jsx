@@ -11,6 +11,7 @@ const toLocalDateStr = (date) => {
     return `${y}-${m}-${d}`;
 };
 
+/** Календар за наличност на стаи с управление на дати, блокиране и отстъпки. */
 const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false, onDateSelect }) => {
     const { t, language } = useLanguage();
     const safeRoomTypes = React.useMemo(() => Array.isArray(roomTypes) ? roomTypes : [], [roomTypes]);
@@ -20,7 +21,7 @@ const AvailabilityCalendar = ({ hotelId, roomTypes = [], isModeratorMode = false
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // Selection state for bulk edit
+    // Избрани дати за групово редактиране
     const [selectionStart, setSelectionStart] = useState(null);
     const [selectionEnd, setSelectionEnd] = useState(null);
     const [showBulkEdit, setShowBulkEdit] = useState(false);

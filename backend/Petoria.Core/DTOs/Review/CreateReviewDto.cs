@@ -3,10 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Review;
 
-/// <summary>
-/// DTO за създаване/обновяване на ревю.
-/// UserId и HotelId идват съответно от JWT токен и URL маршрут.
-/// </summary>
+/// <summary>Заявка: създаване/обновяване на ревю с рейтинг</summary>
 public class CreateReviewDto
 {
     [Required(ErrorMessage = ValidationConstants.HotelReview.RatingRequired)]

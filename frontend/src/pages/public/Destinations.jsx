@@ -3,6 +3,7 @@
 
 import './Home.css';
 
+/** Placeholder страница за дестинации — предстои разработка. */
 const Destinations = () => {
     return (
         <div className="home-page">

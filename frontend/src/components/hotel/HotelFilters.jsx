@@ -3,6 +3,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import './HotelFilters.css';
 
+/** Страничен панел с филтри за хотели — цена, държава, град, рейтинг и удобства. */
 const HotelFilters = ({
     filters,
     onFilterChange,
@@ -14,6 +15,7 @@ const HotelFilters = ({
 }) => {
     const { t } = useLanguage();
     const { convertPrice, convertToBase, currencySymbol } = useCurrency();
+    // Локални search стойности за dropdown-ите
     const [citySearch, setCitySearch] = useState('');
     const [countrySearch, setCountrySearch] = useState('');
     const [amenitySearch, setAmenitySearch] = useState('');

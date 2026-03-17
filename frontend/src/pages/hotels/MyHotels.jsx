@@ -7,11 +7,13 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './MyHotels.css';
 
+/** Страница с хотелите на текущия потребител и непрочетени съобщения. */
 const MyHotels = () => {
     const { isAdmin } = useAuth();
     const { convertAndFormat } = useCurrency();
     const { t } = useLanguage();
     const navigate = useNavigate();
+    // Хотели на потребителя и брой непрочетени съобщения по хотел
     const [hotels, setHotels] = useState([]);
     const [unreadCounts, setUnreadCounts] = useState({});
     const [loading, setLoading] = useState(true);

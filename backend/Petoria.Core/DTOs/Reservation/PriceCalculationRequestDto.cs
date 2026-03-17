@@ -3,10 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Reservation;
 
-/// <summary>
-/// DTO за заявка за изчисляване на цена. 
-/// Не създава резервация, а само калкулира крайната цена с отстъпки.
-/// </summary>
+/// <summary>Заявка: изчисление на цена без реална резервация</summary>
 public class PriceCalculationRequestDto
 {
     [Required(ErrorMessage = "RoomTypeId е задължителен")]

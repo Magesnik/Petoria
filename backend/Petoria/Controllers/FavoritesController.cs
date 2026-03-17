@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за любими хотели: списък, добавяне, премахване, toggle, проверка
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
@@ -20,7 +23,9 @@ public class FavoritesController : ControllerBase
         _context = context;
     }
 
-    // GET: api/favorites
+    /// <summary>
+    /// Връща списък с любимите хотели на текущия потребител
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FavoriteResponseDto>>> GetUserFavorites()
     {
@@ -41,7 +46,7 @@ public class FavoritesController : ControllerBase
                 HotelCity = f.Hotel.City,
                 HotelCountry = f.Hotel.Country,
                 HotelImageUrl = f.Hotel.ImageUrl,
-                // Get min price from room types
+                // Вземане на минималната цена от типовете стаи
                 HotelPricePerNight = _context.RoomTypes
                     .Where(rt => rt.HotelId == f.HotelId)
                     .OrderBy(rt => rt.PricePerNight)
@@ -55,7 +60,9 @@ public class FavoritesController : ControllerBase
         return Ok(favorites);
     }
 
-    // GET: api/favorites/ids
+    /// <summary>
+    /// Връща списък с идентификаторите на любимите хотели на потребителя
+    /// </summary>
     [HttpGet("ids")]
     public async Task<ActionResult<IEnumerable<int>>> GetUserFavoriteIds()
     {
@@ -73,7 +80,9 @@ public class FavoritesController : ControllerBase
         return Ok(favoriteIds);
     }
 
-    // POST: api/favorites/{hotelId}
+    /// <summary>
+    /// Добавя хотел към любимите на потребителя
+    /// </summary>
     [HttpPost("{hotelId}")]
     public async Task<ActionResult> AddFavorite(int hotelId)
     {
@@ -83,14 +92,14 @@ public class FavoritesController : ControllerBase
             return Unauthorized();
         }
 
-        // Check if hotel exists
+        // Проверка дали хотелът съществува
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)
         {
             return NotFound("Hotel not found");
         }
 
-        // Check if already favorited
+        // Проверка дали вече е добавен в любими
         var existingFavorite = await _context.Favorites
             .FirstOrDefaultAsync(f => f.UserId == userId && f.HotelId == hotelId);
 
@@ -112,7 +121,9 @@ public class FavoritesController : ControllerBase
         return Ok(new { message = "Hotel added to favorites", hotelId });
     }
 
-    // DELETE: api/favorites/{hotelId}
+    /// <summary>
+    /// Премахва хотел от любимите на потребителя
+    /// </summary>
     [HttpDelete("{hotelId}")]
     public async Task<ActionResult> RemoveFavorite(int hotelId)
     {
@@ -136,7 +147,9 @@ public class FavoritesController : ControllerBase
         return Ok(new { message = "Hotel removed from favorites", hotelId });
     }
 
-    // POST: api/favorites/toggle/{hotelId}
+    /// <summary>
+    /// Превключва статуса на хотел в любими (добавя/премахва)
+    /// </summary>
     [HttpPost("toggle/{hotelId}")]
     public async Task<ActionResult> ToggleFavorite(int hotelId)
     {
@@ -146,7 +159,7 @@ public class FavoritesController : ControllerBase
             return Unauthorized();
         }
 
-        // Check if hotel exists
+        // Проверка дали хотелът съществува
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null)
         {
@@ -158,14 +171,14 @@ public class FavoritesController : ControllerBase
 
         if (existingFavorite != null)
         {
-            // Remove favorite
+            // Премахване от любими
             _context.Favorites.Remove(existingFavorite);
             await _context.SaveChangesAsync();
             return Ok(new { isFavorite = false, hotelId });
         }
         else
         {
-            // Add favorite
+            // Добавяне в любими
             var favorite = new Favorite
             {
                 UserId = userId,
@@ -178,7 +191,9 @@ public class FavoritesController : ControllerBase
         }
     }
 
-    // GET: api/favorites/check/{hotelId}
+    /// <summary>
+    /// Проверява дали хотел е в любимите на потребителя
+    /// </summary>
     [HttpGet("check/{hotelId}")]
     public async Task<ActionResult> CheckFavorite(int hotelId)
     {

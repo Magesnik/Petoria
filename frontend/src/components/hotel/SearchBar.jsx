@@ -4,10 +4,12 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './SearchBar.css';
 
+/** Търсачка за хотели с филтри по дестинация, дати, нощувки, гости и удобства. */
 const SearchBar = ({ initialValues = {} }) => {
     const navigate = useNavigate();
     const { t } = useLanguage();
 
+    // Налични страни и удобства заредени от API
     const [countries, setCountries] = useState([]);
     const [allAmenities, setAllAmenities] = useState([]);
 
@@ -52,6 +54,7 @@ const SearchBar = ({ initialValues = {} }) => {
         fetchFilterData();
     }, []);
 
+    // Изпраща заявката и навигира към страницата с хотели
     const handleSubmit = (e) => {
         e.preventDefault();
 

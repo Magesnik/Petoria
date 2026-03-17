@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Petoria.Constants;
 using Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Тип стая: име, описание, цена на нощувка, капацитет, общ брой стаи, снимка.
+/// </summary>
 public class RoomType
 {
     [Key]
@@ -40,9 +43,9 @@ public class RoomType
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation property for availability records
+    // Навигационно свойство за записи за наличност
     public ICollection<RoomAvailability> Availabilities { get; set; } = new List<RoomAvailability>();
-    
-    // Navigation property for discounts
+
+    // Навигационно свойство за отстъпки
     public ICollection<RoomDiscount> Discounts { get; set; } = new List<RoomDiscount>();
 }

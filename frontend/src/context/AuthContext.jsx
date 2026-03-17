@@ -1,29 +1,31 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { api, getAssetUrl } from '../utils/api';
 
+/** Контекст за автентикация: потребителски данни, login/logout, проверка на роли */
 const AuthContext = createContext(null);
 
+/** Доставчик на автентикационния контекст */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    /** Проверява дали потребителят е логнат чрез GET /profile */
     const checkUser = async () => {
         try {
             const data = await api.get('/profile');
-            // Ensure data is a valid object before setting it as user
-            // This prevents issues where 'null', '""', or HTML strings are treated as valid users
+            // Проверка дали данните са валиден обект преди да се запишат
             if (data && typeof data === 'object') {
-                // Fix avatar URL if it's a relative path
+                // Поправка на URL на аватара ако е относителен път
                 if (data.avatarUrl && data.avatarUrl.startsWith('/uploads/')) {
                     data.avatarUrl = getAssetUrl(data.avatarUrl);
                 }
                 setUser(data);
             } else {
-                // 200 OK but null or invalid data means not logged in
+                // 200 OK но невалидни данни означава, че не е логнат
                 setUser(null);
             }
         } catch {
-            // 401 or other error means not logged in
+            // 401 или друга грешка означава, че не е логнат
             setUser(null);
         } finally {
             setLoading(false);
@@ -34,14 +36,15 @@ export const AuthProvider = ({ children }) => {
         checkUser();
     }, []);
 
+    /** Записва потребителските данни в state при успешен вход */
     const login = (userData) => {
-        // Cookie is already set by the server response in Login.jsx
-        // just update state
+        // Бисквитката вече е зададена от сървъра в Login.jsx
         setUser(userData);
     };
 
+    /** Излизане от профила и пренасочване към началната страница */
     const logout = async () => {
-        // Clear state immediately to prevent infinite loops if logout call also returns 401
+        // Изчистваме state веднага за да предотвратим безкрайни цикли при 401
         setUser(null);
 
         try {
@@ -49,11 +52,12 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Logout failed", error);
         }
-        
-        // Refresh to ensure clean state if needed, or just clear user
+
+        // Презареждане за чисто състояние
         window.location.href = '/';
     };
 
+    // Слушател за неоторизирани заявки — автоматичен logout при 401
     useEffect(() => {
         const handleUnauthorized = () => {
             console.warn("Unauthorized request detected, logging out...");
@@ -64,10 +68,12 @@ export const AuthProvider = ({ children }) => {
         return () => window.removeEventListener('auth-unauthorized', handleUnauthorized);
     }, []);
 
+    /** Проверява дали потребителят е администратор */
     const isAdmin = () => {
         return user?.roles?.some(r => r === 'Admin' || r === 'SuperAdmin') || false;
     };
 
+    /** Проверява дали потребителят е супер администратор */
     const isSuperAdmin = () => {
         return user?.roles?.includes('SuperAdmin') || false;
     };
@@ -79,4 +85,5 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+/** Хук за достъп до автентикационния контекст */
 export const useAuth = () => useContext(AuthContext);

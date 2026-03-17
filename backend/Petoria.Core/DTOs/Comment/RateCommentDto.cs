@@ -2,9 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Petoria.Core.DTOs.Comment;
 
-/// <summary>
-/// DTO за оценяване на коментар (like/dislike).
-/// </summary>
+/// <summary>Заявка: лайк/дислайк на коментар</summary>
 public class RateCommentDto
 {
     [Required]

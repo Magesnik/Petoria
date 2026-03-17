@@ -6,6 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './AdminSupportMessages.css';
 
+/** Страница за преглед и отговор на съобщения за поддръжка от потребители. */
 const AdminSupportMessages = () => {
     const { isSuperAdmin } = useAuth();
     const { t } = useLanguage();
@@ -14,9 +15,11 @@ const AdminSupportMessages = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    // Текст и цел на активния отговор
     const [replyText, setReplyText] = useState('');
     const [replyingTo, setReplyingTo] = useState(null);
     const [sendingReply, setSendingReply] = useState(false);
+    // Активен филтър: 'all' | 'answered' | 'pending'
     const [filter, setFilter] = useState('all');
     const [deletingId, setDeletingId] = useState(null);
 

@@ -4,6 +4,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './HotelMap.css';
+import { useCurrency } from '../../context/CurrencyContext';
 
 // Icon paths
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -36,6 +37,7 @@ const FitBounds = ({ hotels }) => {
 
 const HotelMap = ({ hotels, onHotelClick }) => {
     const [mapReady, setMapReady] = useState(false);
+    const { convertAndFormat } = useCurrency();
 
     const defaultIcon = React.useMemo(() => {
         return L.icon({
@@ -123,7 +125,7 @@ const HotelMap = ({ hotels, onHotelClick }) => {
                                             <div className="popup-price">
                                                 <span className="popup-price-label">Цена:</span>
                                                 <span className="popup-price-value">
-                                                    ${hotel.pricePerNight}
+                                                    {convertAndFormat(hotel.displayPrice || hotel.pricePerNight)}
                                                 </span>
                                                 <span className="popup-price-night">/нощувка</span>
                                             </div>

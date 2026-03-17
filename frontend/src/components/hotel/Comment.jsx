@@ -4,11 +4,14 @@ import { useAuth } from '../../context/AuthContext';
 import CommentForm from './CommentForm';
 import './Comment.css';
 
+/** Единичен коментар с харесвания, отговор и рекурсивни реплики. */
 const Comment = ({ comment, hotelId, onDeleted, onRatingUpdated }) => {
     const [showReplyForm, setShowReplyForm] = useState(false);
+    // Локален списък с реплики (може да нараства при добавяне)
     const [replies, setReplies] = useState(comment.replies || []);
     const { user } = useAuth();
 
+    // Форматира датата като относително време (преди X минути/часове/дни)
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();

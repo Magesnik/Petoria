@@ -3,9 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Discount;
 
-/// <summary>
-/// DTO за създаване на отстъпка.
-/// </summary>
+/// <summary>Заявка: създаване на отстъпка за тип стая</summary>
 public class CreateDiscountDto
 {
     [Required(ErrorMessage = ValidationConstants.Availability.RoomTypeRequired)]

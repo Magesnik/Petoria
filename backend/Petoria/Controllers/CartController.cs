@@ -8,6 +8,9 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за количка: преглед, добавяне, премахване, изчистване, брояч
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
@@ -22,7 +25,9 @@ public class CartController : ControllerBase
         _pricingService = pricingService;
     }
 
-    // GET: api/cart - Get current user's cart items
+    /// <summary>
+    /// Връща артикулите в количката на текущия потребител
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CartItemResponseDto>>> GetCart()
     {
@@ -57,7 +62,9 @@ public class CartController : ControllerBase
         return Ok(responseItems);
     }
 
-    // POST: api/cart - Add item to cart
+    /// <summary>
+    /// Добавя артикул в количката
+    /// </summary>
     [HttpPost]
     public async Task<ActionResult<CartItemResponseDto>> AddToCart(AddToCartDto request)
     {
@@ -116,7 +123,9 @@ public class CartController : ControllerBase
         });
     }
 
-    // DELETE: api/cart/{id} - Remove item from cart
+    /// <summary>
+    /// Премахва артикул от количката по идентификатор
+    /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> RemoveFromCart(int id)
     {
@@ -133,7 +142,9 @@ public class CartController : ControllerBase
         return Ok(new { message = "Item removed from cart" });
     }
 
-    // DELETE: api/cart - Clear entire cart
+    /// <summary>
+    /// Изчиства цялата количка на текущия потребител
+    /// </summary>
     [HttpDelete]
     public async Task<IActionResult> ClearCart()
     {
@@ -150,7 +161,9 @@ public class CartController : ControllerBase
         return Ok(new { message = "Cart cleared" });
     }
 
-    // GET: api/cart/count - Get cart item count
+    /// <summary>
+    /// Връща броя артикули в количката на потребителя
+    /// </summary>
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetCartCount()
     {

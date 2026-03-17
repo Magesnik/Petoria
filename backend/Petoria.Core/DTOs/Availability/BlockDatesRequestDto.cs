@@ -2,10 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Petoria.Core.DTOs.Availability;
 
-/// <summary>
-/// DTO за блокиране/отблокиране на дати.
-/// Ако RoomTypeId е null — блокира всички типове стаи.
-/// </summary>
+/// <summary>Заявка: блокиране/отблокиране на дати за стая</summary>
 public class BlockDatesRequestDto
 {
     /// <summary>

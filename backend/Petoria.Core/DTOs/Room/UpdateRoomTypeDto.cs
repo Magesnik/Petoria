@@ -3,10 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Room;
 
-/// <summary>
-/// DTO за обновяване на тип стая.
-/// Id и HotelId идват от URL маршрута.
-/// </summary>
+/// <summary>Заявка: обновяване на тип стая</summary>
 public class UpdateRoomTypeDto
 {
     [Required(ErrorMessage = ValidationConstants.RoomType.NameRequired)]

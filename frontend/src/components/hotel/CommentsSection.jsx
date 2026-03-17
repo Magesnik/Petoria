@@ -5,6 +5,7 @@ import Comment from './Comment';
 import CommentForm from './CommentForm';
 import './CommentsSection.css';
 
+/** Секция с коментари на хотел — зарежда, добавя, изтрива и обновява рейтинги. */
 const CommentsSection = ({ hotelId }) => {
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);

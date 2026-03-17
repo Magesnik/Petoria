@@ -7,6 +7,10 @@ using Petoria.Core.Models.Email;
 
 namespace Petoria.Core.Services
 {
+    /// <summary>
+    /// Услуга за изпращане на имейли чрез SendGrid API.
+    /// Използва се за потвърждения на регистрация, резервации и анулирания.
+    /// </summary>
     public class EmailService : IEmailService
     {
         private readonly SmtpSettings _smtpSettings;
@@ -18,6 +22,7 @@ namespace Petoria.Core.Services
             _logger = logger;
         }
 
+        /// <summary>Изпраща HTML имейл чрез SendGrid. Логва успех или грешка.</summary>
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
             try
@@ -25,7 +30,7 @@ namespace Petoria.Core.Services
                 var apiKey = _smtpSettings.ApiKey;
                 if (string.IsNullOrEmpty(apiKey))
                 {
-                    // Fallback to Password if ApiKey is not set explicitly (user might put it in Password field)
+                    // Резервен вариант — използване на Password полето ако ApiKey не е зададен
                     apiKey = _smtpSettings.Password;
                 }
 

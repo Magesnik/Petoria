@@ -1,5 +1,6 @@
 namespace Petoria.Core.DTOs.Cart;
 
+/// <summary>Отговор: артикул от количката с хотел и стая информация</summary>
 public class CartItemResponseDto
 {
     public int Id { get; set; }

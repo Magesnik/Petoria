@@ -1,8 +1,6 @@
 namespace Petoria.Core.DTOs.HotelMessage;
 
-/// <summary>
-/// DTO за изходящи данни на съобщение
-/// </summary>
+/// <summary>Отговор: съобщение с данни за автора и отговор</summary>
 public class HotelMessageResponseDto
 {
     public int Id { get; set; }

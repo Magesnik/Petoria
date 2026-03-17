@@ -5,10 +5,12 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './About.css';
 
+/** Страница „За нас" с история, мисия, ценности и екип на платформата. */
 const About = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
 
+    // Масив с ценностите на компанията
     const values = [
         { icon: '⭐', title: t('valueQuality'), text: t('valueQualityText') },
         { icon: '🤝', title: t('valueTrust'), text: t('valueTrustText') },

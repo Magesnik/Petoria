@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PaymentSuccess.css';
 
+/** Страница при отменено плащане — информира потребителя и предлага навигация. */
 const PaymentCancel = () => {
     const navigate = useNavigate();
 

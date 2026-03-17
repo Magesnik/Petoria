@@ -7,6 +7,9 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за коментари: CRUD операции, нишки с отговори, лайк/дислайк.
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class CommentsController : ControllerBase
@@ -19,7 +22,7 @@ public class CommentsController : ControllerBase
     }
 
     /// <summary>
-    /// Помощен метод за map-ване на Comment Entity → CommentResponseDto.
+    /// Помощен метод за преобразуване на Comment Entity → CommentResponseDto.
     /// </summary>
     private CommentResponseDto MapToCommentResponse(Comment c, string? currentUserId, bool includeReplies = false)
     {
@@ -41,10 +44,10 @@ public class CommentsController : ControllerBase
 
         if (includeReplies && c.Replies != null)
         {
-            // Pass true to recursively map nested replies
-            // ensure we rely on the data being loaded via Include
+            // Рекурсивно преобразуване на вложените отговори
+            // Разчитаме на данните, заредени чрез Include
             dto.Replies = c.Replies
-                .OrderBy(r => r.CreatedAt) // Ensure replies are ordered chronologically
+                .OrderBy(r => r.CreatedAt) // Отговорите се подреждат хронологично
                 .Select(r => MapToCommentResponse(r, currentUserId, true))
                 .ToList();
         }
@@ -52,29 +55,31 @@ public class CommentsController : ControllerBase
         return dto;
     }
 
-    // GET: api/hotels/{hotelId}/comments
+    /// <summary>
+    /// Връща всички коментари от най-високо ниво за даден хотел с вложени отговори.
+    /// </summary>
     [HttpGet("~/api/hotels/{hotelId}/comments")]
     public async Task<ActionResult<IEnumerable<CommentResponseDto>>> GetHotelComments(int hotelId)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         var comments = await _context.Comments
-            .Where(c => c.HotelId == hotelId && c.ParentCommentId == null) // Only top-level comments
+            .Where(c => c.HotelId == hotelId && c.ParentCommentId == null) // Само коментари от най-високо ниво
             .Include(c => c.User)
             .Include(c => c.Ratings)
-            // Depth 1
+            // Ниво 1
             .Include(c => c.Replies)
                 .ThenInclude(r => r.User)
             .Include(c => c.Replies)
                 .ThenInclude(r => r.Ratings)
-            // Depth 2
+            // Ниво 2
             .Include(c => c.Replies)
                 .ThenInclude(r => r.Replies)
                     .ThenInclude(rr => rr.User)
             .Include(c => c.Replies)
                 .ThenInclude(r => r.Replies)
                     .ThenInclude(rr => rr.Ratings)
-            // Depth 3
+            // Ниво 3
             .Include(c => c.Replies)
                 .ThenInclude(r => r.Replies)
                     .ThenInclude(rr => rr.Replies)
@@ -83,7 +88,7 @@ public class CommentsController : ControllerBase
                 .ThenInclude(r => r.Replies)
                     .ThenInclude(rr => rr.Replies)
                         .ThenInclude(rrr => rrr.Ratings)
-            .OrderByDescending(c => c.Ratings.Count(r => r.IsLike) - c.Ratings.Count(r => !r.IsLike)) // Sort by net likes
+            .OrderByDescending(c => c.Ratings.Count(r => r.IsLike) - c.Ratings.Count(r => !r.IsLike)) // Сортиране по нетни лайкове
             .ToListAsync();
 
         var result = comments.Select(c => MapToCommentResponse(c, userId, includeReplies: true));
@@ -91,7 +96,9 @@ public class CommentsController : ControllerBase
         return Ok(result);
     }
 
-    // POST: api/comments
+    /// <summary>
+    /// Създава нов коментар или отговор на съществуващ коментар.
+    /// </summary>
     [HttpPost]
     [Authorize]
     public async Task<ActionResult<CommentResponseDto>> CreateComment([FromBody] CreateCommentDto request)
@@ -102,14 +109,14 @@ public class CommentsController : ControllerBase
             return Unauthorized();
         }
 
-        // Validate hotel exists
+        // Валидация дали хотелът съществува
         var hotel = await _context.Hotels.FindAsync(request.HotelId);
         if (hotel == null)
         {
             return NotFound("Hotel not found");
         }
 
-        // Validate parent comment exists if it's a reply
+        // Валидация дали родителският коментар съществува (ако е отговор)
         if (request.ParentCommentId.HasValue)
         {
             var parentComment = await _context.Comments.FindAsync(request.ParentCommentId.Value);
@@ -119,7 +126,7 @@ public class CommentsController : ControllerBase
             }
         }
 
-        // Map DTO → Entity
+        // Преобразуване на DTO → Entity
         var comment = new Comment
         {
             HotelId = request.HotelId,
@@ -133,10 +140,10 @@ public class CommentsController : ControllerBase
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
 
-        // Reload with user info
+        // Презареждане с информация за потребителя
         await _context.Entry(comment).Reference(c => c.User).LoadAsync();
 
-        // Map Entity → Response DTO
+        // Преобразуване на Entity → Response DTO
         return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, new CommentResponseDto
         {
             Id = comment.Id,
@@ -154,7 +161,9 @@ public class CommentsController : ControllerBase
         });
     }
 
-    // GET: api/comments/{id}
+    /// <summary>
+    /// Връща конкретен коментар по ID.
+    /// </summary>
     [HttpGet("{id}")]
     public async Task<ActionResult<CommentResponseDto>> GetComment(int id)
     {
@@ -173,7 +182,9 @@ public class CommentsController : ControllerBase
         return Ok(MapToCommentResponse(comment, userId));
     }
 
-    // PUT: api/comments/{id}
+    /// <summary>
+    /// Редактира текста на собствен коментар.
+    /// </summary>
     [HttpPut("{id}")]
     [Authorize]
     public async Task<IActionResult> UpdateComment(int id, [FromBody] UpdateCommentDto request)
@@ -190,13 +201,13 @@ public class CommentsController : ControllerBase
             return NotFound();
         }
 
-        // Only allow updating own comments
+        // Позволено е редактиране само на собствени коментари
         if (comment.UserId != userId)
         {
             return Forbid();
         }
 
-        // Map DTO → Entity (update)
+        // Преобразуване на DTO → Entity (обновяване)
         comment.Text = request.Text;
         comment.UpdatedAt = DateTime.UtcNow;
 
@@ -205,7 +216,9 @@ public class CommentsController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/comments/{id}
+    /// <summary>
+    /// Изтрива собствен коментар заедно с всички отговори и оценки.
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteComment(int id)
@@ -226,16 +239,16 @@ public class CommentsController : ControllerBase
             return NotFound();
         }
 
-        // Only allow deleting own comments
+        // Позволено е изтриване само на собствени коментари
         if (comment.UserId != userId)
         {
             return Forbid();
         }
 
-        // Delete all ratings first
+        // Първо изтриваме всички оценки
         _context.CommentRatings.RemoveRange(comment.Ratings);
 
-        // Delete all replies and their ratings
+        // Изтриваме всички отговори и техните оценки
         foreach (var reply in comment.Replies)
         {
             var replyRatings = await _context.CommentRatings.Where(r => r.CommentId == reply.Id).ToListAsync();
@@ -249,7 +262,9 @@ public class CommentsController : ControllerBase
         return NoContent();
     }
 
-    // POST: api/comments/{id}/rate
+    /// <summary>
+    /// Поставя лайк или дислайк на коментар (превключва при повторно натискане).
+    /// </summary>
     [HttpPost("{id}/rate")]
     [Authorize]
     public async Task<IActionResult> RateComment(int id, [FromBody] RateCommentDto request)
@@ -266,26 +281,26 @@ public class CommentsController : ControllerBase
             return NotFound();
         }
 
-        // Check if user already rated this comment
+        // Проверка дали потребителят вече е оценил този коментар
         var existingRating = await _context.CommentRatings
             .FirstOrDefaultAsync(r => r.CommentId == id && r.UserId == userId);
 
         if (existingRating != null)
         {
-            // If same rating clicked again, remove it
+            // Ако същата оценка е натисната отново — премахваме я
             if (existingRating.IsLike == request.IsLike)
             {
                 _context.CommentRatings.Remove(existingRating);
             }
             else
             {
-                // Update to opposite rating
+                // Обновяване към противоположна оценка
                 existingRating.IsLike = request.IsLike;
             }
         }
         else
         {
-            // Create new rating
+            // Създаване на нова оценка
             var rating = new CommentRating
             {
                 CommentId = id,
@@ -298,7 +313,7 @@ public class CommentsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        // Get updated counts
+        // Вземане на актуализираните бройки
         var likesCount = await _context.CommentRatings.CountAsync(r => r.CommentId == id && r.IsLike);
         var dislikesCount = await _context.CommentRatings.CountAsync(r => r.CommentId == id && !r.IsLike);
         var userRating = await _context.CommentRatings
@@ -314,7 +329,9 @@ public class CommentsController : ControllerBase
         });
     }
 
-    // GET: api/comments/{id}/replies
+    /// <summary>
+    /// Връща отговорите на конкретен коментар.
+    /// </summary>
     [HttpGet("{id}/replies")]
     public async Task<ActionResult<IEnumerable<CommentResponseDto>>> GetCommentReplies(int id)
     {

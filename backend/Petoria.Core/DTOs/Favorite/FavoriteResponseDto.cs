@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Favorite;
 
-/// <summary>
-/// DTO за изходящи данни на любим хотел.
-/// Включва основна информация за хотела без тежки полета.
-/// </summary>
+/// <summary>Отговор: любим хотел с основна информация</summary>
 public class FavoriteResponseDto
 {
     public int Id { get; set; }

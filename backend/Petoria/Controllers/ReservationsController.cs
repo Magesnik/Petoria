@@ -11,6 +11,9 @@ using Petoria.Core.Utilities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за резервации: създаване, калкулация на цени, анулиране с възстановяване, потвърждение от количка.
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class ReservationsController : ControllerBase
@@ -35,13 +38,15 @@ public class ReservationsController : ControllerBase
         _logger = logger;
     }
 
-    // GET: api/reservations/my - Get current user's reservations
+    /// <summary>
+    /// Връща резервациите на текущия потребител.
+    /// </summary>
     [HttpGet("my")]
     [Authorize]
     public async Task<ActionResult<IEnumerable<ReservationResponseDto>>> GetMyReservations()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
@@ -76,7 +81,9 @@ public class ReservationsController : ControllerBase
         return Ok(reservations);
     }
 
-    // POST: api/reservations/calculate - Calculate price without creating reservation
+    /// <summary>
+    /// Калкулира цената на резервация без да я създава.
+    /// </summary>
     [HttpPost("calculate")]
     public async Task<ActionResult<PriceCalculationResponseDto>> CalculatePrice(PriceCalculationRequestDto request)
     {
@@ -107,35 +114,37 @@ public class ReservationsController : ControllerBase
         });
     }
 
-    // POST: api/reservations - Create a new reservation
+    /// <summary>
+    /// Създава нова резервация с валидация на дати, наличност и изпращане на имейл.
+    /// </summary>
     [HttpPost]
     [Authorize]
     public async Task<ActionResult<ReservationResponseDto>> CreateReservation(CreateReservationDto request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        // Validate hotel exists
+        // Валидация дали хотелът съществува
         var hotel = await _context.Hotels.FindAsync(request.HotelId);
         if (hotel == null)
         {
             return NotFound(new { message = "Hotel not found" });
         }
 
-        // Validate room type exists and belongs to hotel
+        // Валидация дали типът стая съществува и принадлежи на хотела
         var roomType = await _context.RoomTypes
             .FirstOrDefaultAsync(rt => rt.Id == request.RoomTypeId && rt.HotelId == request.HotelId);
-        
+
         if (roomType == null)
         {
             return NotFound(new { message = "Room type not found" });
         }
 
-        // Validate dates
+        // Валидация на датите
         if (request.CheckInDate.Date < DateTime.UtcNow.Date)
         {
             return BadRequest(new { message = "Check-in date cannot be in the past" });
@@ -146,13 +155,13 @@ public class ReservationsController : ControllerBase
             return BadRequest(new { message = "Check-out date must be after check-in date" });
         }
 
-        // Check availability for all dates in the range
+        // Проверка на наличността за всички дати от диапазона
         for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
         {
             var availability = await _context.RoomAvailabilities
                 .FirstOrDefaultAsync(ra => ra.RoomTypeId == request.RoomTypeId && ra.Date == date);
 
-            // If no record exists, use TotalRooms as available count
+            // Ако няма запис, използваме общия брой стаи като наличен
             var availableCount = availability?.AvailableCount ?? roomType.TotalRooms;
             var isBlocked = availability?.IsBlocked ?? false;
 
@@ -167,7 +176,7 @@ public class ReservationsController : ControllerBase
             }
         }
 
-        // Calculate total price using PricingService (includes last-minute 5% discount)
+        // Изчисляване на общата цена чрез PricingService (включва 5% last-minute отстъпка)
         var priceResult = await _pricingService.CalculatePriceAsync(
             request.RoomTypeId,
             request.CheckInDate,
@@ -177,7 +186,7 @@ public class ReservationsController : ControllerBase
         var totalPrice = priceResult.TotalPrice;
         var numberOfNights = priceResult.NumberOfNights;
 
-        // Create reservation — Map DTO → Entity
+        // Създаване на резервация — преобразуване на DTO → Entity
         var reservation = new Reservation
         {
             UserId = userId,
@@ -195,8 +204,8 @@ public class ReservationsController : ControllerBase
 
         _context.Reservations.Add(reservation);
         await _context.SaveChangesAsync();
-        
-        // Send email
+
+        // Изпращане на имейл
         var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
         if (!string.IsNullOrEmpty(userEmail))
         {
@@ -206,24 +215,24 @@ public class ReservationsController : ControllerBase
                 var body = $@"
                     <div style=""font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333;"">
                         <div style=""max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"">
-                            
-                            <!-- Header -->
+
+                            <!-- Хедър -->
                             <div style=""background-color: #2F61E6; padding: 25px; text-align: center;"">
                                 <h1 style=""color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;"">Petoria</h1>
                             </div>
-                            
-                            <!-- Body -->
+
+                            <!-- Тяло -->
                             <div style=""padding: 30px;"">
                                 <h2 style=""color: #2c3e50; font-size: 20px; margin-top: 0;"">Успешна резервация! 🎉</h2>
                                 <p style=""font-size: 16px; line-height: 1.5; color: #555;"">
                                     Здравейте, <br><br>
                                     Вашата резервация в <strong>{hotel.Name}</strong> е успешно потвърдена. Очакваме ви с нетърпение!
                                 </p>
-                                
-                                <!-- Details Card -->
+
+                                <!-- Карта с детайли -->
                                 <div style=""background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; margin: 25px 0;"">
                                     <h3 style=""margin-top: 0; color: #4a5568; font-size: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;"">Детайли за настаняването</h3>
-                                    
+
                                     <table style=""width: 100%; border-collapse: collapse; margin-top: 15px;"">
                                         <tr>
                                             <td style=""padding: 8px 0; color: #718096; width: 40%;"">Тип стая:</td>
@@ -247,8 +256,8 @@ public class ReservationsController : ControllerBase
                                         </tr>
                                     </table>
                                 </div>
-                                
-                                <!-- Total Price -->
+
+                                <!-- Обща цена -->
                                 <div style=""background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; margin-bottom: 25px;"">
                                     <table style=""width: 100%; border-collapse: collapse;"">
                                         {(roomType.PricePerNight * request.NumberOfRooms * numberOfNights > totalPrice ? $@"
@@ -267,19 +276,19 @@ public class ReservationsController : ControllerBase
                                         </tr>
                                     </table>
                                 </div>
-                                
+
                                 <p style=""font-size: 15px; color: #718096; margin-bottom: 0;"">
                                     Благодарим ви, че избрахте Petoria! За въпроси, свържете се с нас.
                                 </p>
                             </div>
-                            
-                            <!-- Footer -->
+
+                            <!-- Футър -->
                             <div style=""background-color: #f7fafc; padding: 20px; text-align: center; border-top: 1px solid #edf2f7;"">
                                 <p style=""margin: 0; color: #a0aec0; font-size: 13px;"">
                                     &copy; {DateTime.UtcNow.Year} Petoria. Всички права запазени.
                                 </p>
                             </div>
-                            
+
                         </div>
                     </div>
                 ";
@@ -287,12 +296,12 @@ public class ReservationsController : ControllerBase
             }
             catch (Exception ex)
             {
-                // Log exception in production, but don't fail the reservation
+                // Логваме грешката, но не провалваме резервацията
                 _logger.LogError(ex, "Error sending email");
             }
         }
 
-        // Update availability for all dates
+        // Обновяване на наличността за всички дати
         for (var date = request.CheckInDate.Date; date < request.CheckOutDate.Date; date = date.AddDays(1))
         {
             var availability = await _context.RoomAvailabilities
@@ -305,7 +314,7 @@ public class ReservationsController : ControllerBase
             }
             else
             {
-                // Create availability record with reduced count
+                // Създаване на запис за наличност с намален брой
                 _context.RoomAvailabilities.Add(new RoomAvailability
                 {
                     RoomTypeId = request.RoomTypeId,
@@ -320,7 +329,7 @@ public class ReservationsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        // Return response — Map Entity → Response DTO
+        // Връщане на отговор — преобразуване на Entity → Response DTO
         return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, new ReservationResponseDto
         {
             Id = reservation.Id,
@@ -341,7 +350,9 @@ public class ReservationsController : ControllerBase
         });
     }
 
-    // GET: api/reservations/5 - Get a specific reservation
+    /// <summary>
+    /// Връща конкретна резервация по ID (само за собственика, модератор, собственик на хотел или SuperAdmin).
+    /// </summary>
     [HttpGet("{id}")]
     [Authorize]
     public async Task<ActionResult<ReservationResponseDto>> GetReservation(int id)
@@ -359,15 +370,15 @@ public class ReservationsController : ControllerBase
             return NotFound();
         }
 
-        // Check if user is moderator for this hotel
+        // Проверка дали потребителят е модератор на този хотел
         var isModerator = await _context.HotelModerators
             .AnyAsync(hm => hm.HotelId == reservation.HotelId && hm.UserId == userId);
-        
-        // Check if user is owner
+
+        // Проверка дали потребителят е собственик на хотела
         var isOwner = await _context.Hotels
             .AnyAsync(h => h.Id == reservation.HotelId && h.CreatedById == userId);
 
-        // Only allow user to see their own reservations (or SuperAdmin, Moderator, or Owner)
+        // Позволяваме достъп само на собственика на резервацията, SuperAdmin, модератор или собственик на хотела
         if (!isSuperAdmin && reservation.UserId != userId && !isModerator && !isOwner)
         {
             return Forbid();
@@ -393,7 +404,9 @@ public class ReservationsController : ControllerBase
         });
     }
 
-    // PUT: api/reservations/5/cancel - Cancel a reservation
+    /// <summary>
+    /// Анулира резервация с изчисляване на възстановяване по политика за анулиране.
+    /// </summary>
     [HttpPut("{id}/cancel")]
     [Authorize]
     public async Task<IActionResult> CancelReservation(int id)
@@ -410,15 +423,15 @@ public class ReservationsController : ControllerBase
             return NotFound();
         }
 
-        // Check if user is moderator for this hotel
+        // Проверка дали потребителят е модератор на този хотел
         var isModerator = await _context.HotelModerators
             .AnyAsync(hm => hm.HotelId == reservation.HotelId && hm.UserId == userId);
-        
-        // Check if user is owner
+
+        // Проверка дали потребителят е собственик на хотела
         var isOwner = await _context.Hotels
             .AnyAsync(h => h.Id == reservation.HotelId && h.CreatedById == userId);
 
-        // Only allow user to cancel their own reservations (or SuperAdmin, Moderator, or Owner)
+        // Позволяваме анулиране само на собственика, SuperAdmin, модератор или собственик на хотела
         if (!isSuperAdmin && reservation.UserId != userId && !isModerator && !isOwner)
         {
             return Forbid();
@@ -429,7 +442,7 @@ public class ReservationsController : ControllerBase
             return BadRequest(new { message = "Reservation is already cancelled" });
         }
 
-        // Restore availability
+        // Възстановяване на наличността
         if (reservation.RoomTypeId.HasValue)
         {
             for (var date = reservation.CheckInDate.Date; date < reservation.CheckOutDate.Date; date = date.AddDays(1))
@@ -448,33 +461,31 @@ public class ReservationsController : ControllerBase
     reservation.Status = "Cancelled";
     reservation.UpdatedAt = DateTime.UtcNow;
 
-    // Calculate Refund based on Hotel Cancellation Policies
+    // Изчисляване на възстановяването по политиката за анулиране на хотела
     var hotel = await _context.Hotels.FindAsync(reservation.HotelId);
-    decimal refundPercentage = 100m; // Default to 100% refund if no policies exist
+    decimal refundPercentage = 100m; // По подразбиране 100% възстановяване, ако няма политики
     int daysBeforeCheckIn = (int)Math.Floor((reservation.CheckInDate.Date - DateTime.UtcNow.Date).TotalDays);
-    
+
     if (hotel != null && !string.IsNullOrEmpty(hotel.CancellationPolicies) && hotel.CancellationPolicies != "[]")
     {
-        try 
+        try
         {
             var policies = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(hotel.CancellationPolicies);
             if (policies != null && policies.Any())
             {
-                // Find the policy that matches (the smallest daysBefore that is >= daysBeforeCheckIn)
+                // Намираме политиката, която съответства (най-малкото daysBefore, което е >= дните до настаняването)
                 var activePolicy = policies
                     .Where(p => (int)p.GetProperty("daysBefore").GetInt32() >= daysBeforeCheckIn)
                     .OrderBy(p => (int)p.GetProperty("daysBefore").GetInt32())
                     .FirstOrDefault();
-                    
+
                 if (activePolicy.ValueKind != System.Text.Json.JsonValueKind.Undefined)
                 {
                     refundPercentage = (decimal)activePolicy.GetProperty("refundPercentage").GetInt32();
                 }
                 else if (daysBeforeCheckIn >= 0)
                 {
-                    // If they are closer to check-in than ANY policy, it depends on business logic.
-                    // The frontend prompt says: "За липсващи дни до самата дата на настаняване (0 дни) се приема 0% (без възстановяване)."
-                    // If they are cancelling closer than the strictest policy, refund is 0%.
+                    // Ако анулирането е по-близо до настаняването от най-строгата политика — 0% възстановяване
                     refundPercentage = 0m;
                 }
             }
@@ -490,7 +501,7 @@ public class ReservationsController : ControllerBase
 
     await _context.SaveChangesAsync();
 
-    // Send email
+    // Изпращане на имейл за анулиране
     var cancelUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
@@ -524,7 +535,9 @@ public class ReservationsController : ControllerBase
     return Ok(new { message = "Reservation cancelled successfully" });
 }
 
-    // POST: api/reservations/confirm-cart - Create reservations after successful Stripe payment
+    /// <summary>
+    /// Потвърждава резервации от количка след успешно Stripe плащане.
+    /// </summary>
     [HttpPost("confirm-cart")]
     [Authorize]
     public async Task<IActionResult> ConfirmCart([FromBody] ConfirmCartRequest request)
@@ -535,14 +548,14 @@ public class ReservationsController : ControllerBase
 
         var createdReservations = new List<int>();
 
-        // Find promo code
+        // Търсене на промо код
         PromoCode promo = null;
         if (!string.IsNullOrEmpty(request.PromoCode))
         {
             promo = await _context.PromoCodes.FirstOrDefaultAsync(p => p.Code == request.PromoCode);
             if (promo != null && (!promo.IsActive || promo.CurrentActivations >= promo.MaxActivations || promo.ExpirationDate <= DateTime.UtcNow))
             {
-                promo = null; // invalid
+                promo = null; // невалиден
             }
         }
         bool promoUsed = false;
@@ -558,7 +571,7 @@ public class ReservationsController : ControllerBase
                 .FirstOrDefaultAsync(rt => rt.Id == item.RoomTypeId && rt.HotelId == item.HotelId);
             if (roomType == null) continue;
 
-            // Calculate total price with discounts
+            // Изчисляване на общата цена с отстъпки
             var discounts = await _context.RoomDiscounts
                 .Where(d => d.RoomTypeId == item.RoomTypeId &&
                             d.EndDate >= item.CheckInDate.Date &&
@@ -581,17 +594,17 @@ public class ReservationsController : ControllerBase
             }
             totalPrice *= item.NumberOfRooms;
 
-            // Before global/hotel promo code
+            // Преди прилагане на глобален/хотелски промо код
             grandTotalOriginal += totalPrice;
 
-            // Apply global or hotel-specific promo code discount
+            // Прилагане на глобален или хотелски промо код
             if (promo != null && (promo.HotelId == null || promo.HotelId == item.HotelId))
             {
                 totalPrice = totalPrice * (1 - promo.DiscountPercentage / 100m);
                 promoUsed = true;
             }
 
-            // After global/hotel promo code
+            // След прилагане на глобален/хотелски промо код
             grandTotalPaid += totalPrice;
 
             var reservation = new Reservation
@@ -611,7 +624,7 @@ public class ReservationsController : ControllerBase
 
             _context.Reservations.Add(reservation);
 
-            // Update availability
+            // Обновяване на наличността
             for (var date = item.CheckInDate.Date; date < item.CheckOutDate.Date; date = date.AddDays(1))
             {
                 var availability = await _context.RoomAvailabilities
@@ -640,7 +653,7 @@ public class ReservationsController : ControllerBase
             createdReservations.Add(reservation.Id);
         }
 
-        // Increment promo code usage if it was successfully applied to at least one reservation
+        // Увеличаване на броя използвания на промо кода, ако е бил успешно приложен
         if (promoUsed && promo != null)
         {
             promo.CurrentActivations++;
@@ -648,10 +661,10 @@ public class ReservationsController : ControllerBase
             await _context.SaveChangesAsync();
         }
 
-        // Send aggregated email
+        // Изпращане на обобщен имейл
         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-        
+
         if (!string.IsNullOrEmpty(userEmail) && !string.IsNullOrEmpty(userIdStr) && request.Items.Any())
         {
             try
@@ -672,7 +685,7 @@ public class ReservationsController : ControllerBase
                 {
                     var itemHotel = await _context.Hotels.FindAsync(item.HotelId);
                     var itemRoomType = await _context.RoomTypes.FindAsync(item.RoomTypeId);
-                    
+
                     if (itemHotel != null && itemRoomType != null)
                     {
                         ctx.Items.Add(new ConfirmationEmailItem
@@ -713,4 +726,3 @@ public class ConfirmCartItem
     public DateTime CheckOutDate { get; set; }
     public int NumberOfRooms { get; set; }
 }
-

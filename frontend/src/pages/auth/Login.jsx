@@ -7,20 +7,24 @@ import { useAuth } from '../../context/AuthContext';
 
 import './Auth.css';
 
+/** Страница за вход с имейл/парола и Google OAuth. */
 const Login = () => {
     const { t } = useLanguage();
     const { login } = useAuth();
     const navigate = useNavigate();
+    // Данни от формуляра за вход
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
     const [error, setError] = useState('');
 
+    // Обновява полетата при промяна
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Изпраща заявка за вход и съхранява потребителските данни
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -53,6 +57,7 @@ const Login = () => {
         }
     };
 
+    // Обработва успешна Google автентикация
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             const data = await api.post('/auth/google-login', { googleToken: credentialResponse.credential });

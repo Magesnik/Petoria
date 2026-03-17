@@ -7,10 +7,12 @@ import { useAuth } from '../../context/AuthContext';
 import HotelCard from '../../components/hotel/HotelCard';
 import './Favorites.css';
 
+/** Страница с любими хотели на потребителя, зредена от FavoritesContext. */
 const Favorites = () => {
     const { t } = useLanguage();
     const { favorites, getFavoritesWithDetails, loading: favoritesLoading } = useFavorites();
     const { user } = useAuth();
+    // Детайлни данни за любимите хотели (от API)
     const [favoriteHotels, setFavoriteHotels] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

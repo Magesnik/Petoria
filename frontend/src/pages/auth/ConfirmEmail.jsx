@@ -4,11 +4,14 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './ConfirmEmail.css'; // We'll add some basic styles next or inline
 
+/** Страница за потвърждение на имейл адрес чрез uid и token от URL параметрите. */
 const ConfirmEmail = () => {
     const [searchParams] = useSearchParams();
-    const [status, setStatus] = useState('confirming'); // 'confirming', 'success', 'error'
+    // Статус на потвърждението: 'confirming' | 'success' | 'error'
+    const [status, setStatus] = useState('confirming');
     const { t } = useLanguage();
 
+    // Изпраща заявка за потвърждение при зареждане
     useEffect(() => {
         const confirmEmail = async () => {
             const uid = searchParams.get('uid');

@@ -34,9 +34,11 @@ const MapViewController = ({ center }) => {
     return null;
 };
 
+/** Компонент за избор на локация чрез интерактивна карта с обратно геокодиране. */
 const LocationPicker = ({ onLocationSelect, initialLat = null, initialLng = null }) => {
     const { t } = useLanguage();
 
+    // Leaflet иконка за маркера
     const defaultIcon = React.useMemo(() => {
         return L.icon({
             iconUrl: icon,

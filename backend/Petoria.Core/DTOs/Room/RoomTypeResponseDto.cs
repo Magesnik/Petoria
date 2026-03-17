@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Room;
 
-/// <summary>
-/// DTO за изходящи данни на тип стая.
-/// Връща се вместо Entity-то, НЕ съдържа навигационни свойства.
-/// </summary>
+/// <summary>Отговор: данни за тип стая (цена, капацитет, брой)</summary>
 public class RoomTypeResponseDto
 {
     public int Id { get; set; }

@@ -5,6 +5,10 @@ using Petoria.Infrastructure.Data;
 
 namespace Petoria.Core.Services;
 
+/// <summary>
+/// Услуга за изчисление на цени на резервации.
+/// Отчита отстъпки по дати, last-minute оферти (5%) и безплатен престой за модератори/собственици.
+/// </summary>
 public class PricingService : IPricingService
 {
     private readonly ApplicationDbContext _context;
@@ -32,15 +36,15 @@ public class PricingService : IPricingService
                         d.StartDate <= checkOutDate.Date)
             .ToListAsync();
 
-        // Check if this is a last-minute booking (check-in is today or tomorrow)
+        // Проверка за last-minute резервация (настаняване днес или утре)
         var today = DateTime.UtcNow.Date;
         var isLastMinute = checkInDate.Date >= today && checkInDate.Date <= today.AddDays(1);
-        // Verify there are still available rooms on check-in date for last-minute
+        // Проверка дали има свободни стаи на датата на настаняване
         if (isLastMinute)
         {
             var checkInAvailability = await _context.RoomAvailabilities
                 .FirstOrDefaultAsync(a => a.RoomTypeId == roomTypeId && a.Date == checkInDate.Date);
-            // If no DB record exists, default to TotalRooms available (same logic as AvailabilityController)
+            // Ако няма запис в БД, по подразбиране се използва TotalRooms
             var availableCount = checkInAvailability?.AvailableCount ?? roomType.TotalRooms;
             var isBlocked = checkInAvailability?.IsBlocked ?? false;
             isLastMinute = !isBlocked && availableCount >= numberOfRooms;
@@ -68,7 +72,7 @@ public class PricingService : IPricingService
             }
             else if (isLastMinute)
             {
-                // 5% last-minute discount for same-day check-in with no other discount
+                // 5% last-minute отстъпка при настаняване днес/утре без друга отстъпка
                 effectiveDiscountPct = 5;
                 dayFinal = dayOriginal * 0.95m;
             }

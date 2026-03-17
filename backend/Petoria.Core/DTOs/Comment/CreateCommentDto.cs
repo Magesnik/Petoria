@@ -3,10 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Comment;
 
-/// <summary>
-/// DTO за създаване на коментар.
-/// UserId се взима от JWT токена автоматично.
-/// </summary>
+/// <summary>Заявка: създаване на нов коментар или отговор</summary>
 public class CreateCommentDto
 {
     [Required(ErrorMessage = "HotelId е задължителен")]

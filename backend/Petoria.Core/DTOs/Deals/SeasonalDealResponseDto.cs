@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Deals;
 
-/// <summary>
-/// DTO за сезонни оферти.
-/// Като DiscountedHotelResponseDto, но с допълнително поле за сезон.
-/// </summary>
+/// <summary>Отговор: сезонна оферта с отстъпка</summary>
 public class SeasonalDealResponseDto
 {
     public int Id { get; set; }

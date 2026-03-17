@@ -1,8 +1,6 @@
 namespace Petoria.Core.DTOs.HotelMessage;
 
-/// <summary>
-/// DTO за брой непрочетени съобщения към хотел
-/// </summary>
+/// <summary>Отговор: брой непрочетени съобщения по хотели</summary>
 public class UnreadCountDto
 {
     public int HotelId { get; set; }

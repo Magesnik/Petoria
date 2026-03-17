@@ -5,6 +5,9 @@ using Stripe.Checkout;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за Stripe плащания: създаване на checkout сесия
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class StripeController : ControllerBase
@@ -17,19 +20,23 @@ public class StripeController : ControllerBase
         StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
     }
 
-    // GET: api/stripe/config
+    /// <summary>
+    /// Връща публичния ключ на Stripe за клиентската страна
+    /// </summary>
     [HttpGet("config")]
     public IActionResult GetConfig()
     {
         return Ok(new { publishableKey = _configuration["Stripe:PublishableKey"] });
     }
 
-    // POST: api/stripe/create-checkout-session
+    /// <summary>
+    /// Създава Stripe checkout сесия за плащане
+    /// </summary>
     [HttpPost("create-checkout-session")]
     [Authorize]
     public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest request)
     {
-        // Bulgaria's official BGN→EUR fixed rate (1 EUR = 1.95583 BGN)
+        // Официален фиксиран курс BGN→EUR (1 EUR = 1.95583 BGN)
         const decimal bgnToEur = 1.95583m;
 
         var lineItems = request.Items.Select(item => new SessionLineItemOptions
@@ -37,7 +44,7 @@ public class StripeController : ControllerBase
             PriceData = new SessionLineItemPriceDataOptions
             {
                 Currency = "eur",
-                UnitAmount = (long)Math.Round(item.TotalPrice / bgnToEur * 100), // EUR cents
+                UnitAmount = (long)Math.Round(item.TotalPrice / bgnToEur * 100), // центове в EUR
                 ProductData = new SessionLineItemPriceDataProductDataOptions
                 {
                     Name = $"{item.HotelName} – {item.RoomTypeName}",

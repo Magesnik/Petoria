@@ -4,12 +4,15 @@ import { api } from '../../utils/api';
 import { useCart } from '../../context/CartContext';
 import './PaymentSuccess.css';
 
+/** Страница при успешно плащане — потвърждава резервациите и изчиства количката. */
 const PaymentSuccess = () => {
     const navigate = useNavigate();
     const { clearCart } = useCart();
-    const [status, setStatus] = useState('confirming'); // 'confirming' | 'success' | 'error'
+    // Статус на потвърждение: 'confirming' | 'success' | 'error'
+    const [status, setStatus] = useState('confirming');
     const [errorMsg, setErrorMsg] = useState('');
 
+    // Изпраща резервациите към API след успешно плащане чрез Stripe
     useEffect(() => {
         const confirm = async () => {
             try {

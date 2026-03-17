@@ -3,15 +3,18 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './DiscountManager.css';
 
+/** Мениджър за отстъпки на стаи — добавяне, редактиране и изтриване по дати. */
 const DiscountManager = ({ hotelId, roomTypes }) => {
     const { t, language } = useLanguage();
     const [discounts, setDiscounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    // Видимост на формата и ID на редактираната отстъпка
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
 
+    // Данни от формуляра за нова/редактирана отстъпка
     const [formData, setFormData] = useState({
         roomTypeId: '',
         startDate: '',

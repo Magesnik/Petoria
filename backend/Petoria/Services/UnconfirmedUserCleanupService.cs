@@ -3,9 +3,15 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Services;
 
+/// <summary>
+/// Фонова услуга, която периодично (на всеки 5 мин.) изтрива потребители,
+/// които не са потвърдили имейла си в рамките на 30 минути от регистрацията.
+/// </summary>
 public sealed class UnconfirmedUserCleanupService : BackgroundService
 {
+    /// <summary>Интервал на проверка — на всеки 5 минути</summary>
     private static readonly TimeSpan Interval = TimeSpan.FromMinutes(5);
+    /// <summary>Прозорец за потвърждение — 30 минути от регистрацията</summary>
     private static readonly TimeSpan ConfirmationWindow = TimeSpan.FromMinutes(30);
 
     private readonly IServiceScopeFactory _scopeFactory;

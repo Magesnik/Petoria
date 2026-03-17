@@ -8,11 +8,13 @@ import './CreateHotel.css';
 
 const LocationPicker = React.lazy(() => import('../../components/common/LocationPicker'));
 
+/** Страница за създаване на нов хотел с форма, карта за локация и качване на снимки. */
 const CreateHotel = () => {
     const { isAdmin } = useAuth();
     const { t } = useLanguage();
     const navigate = useNavigate();
 
+    // Основни данни за хотела
     const [formData, setFormData] = useState({
         name: '',
         description: '',

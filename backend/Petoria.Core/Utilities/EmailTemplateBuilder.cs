@@ -4,14 +4,19 @@ using Petoria.Core.Models.Email;
 
 namespace Petoria.Core.Utilities
 {
+    /// <summary>
+    /// Генерира HTML имейл шаблони за потвърждение на резервация и анулиране.
+    /// Поддържа двуезични шаблони (BG/EN) с вграден CSS стайлинг.
+    /// </summary>
     public static class EmailTemplateBuilder
     {
+        /// <summary>Зарежда CSS стиловете за имейл шаблоните от вграден ресурс.</summary>
         private static string GetEmailCss()
         {
             try
             {
                 var assembly = typeof(EmailTemplateBuilder).Assembly;
-                // Assembly name is Petoria.Core, resource path logic uses default namespace
+                // Зареждане на CSS файла от вградените ресурси на асемблито
                 using var stream = assembly.GetManifestResourceStream("Petoria.Core.Utilities.EmailStyles.css");
                 if (stream == null) return string.Empty;
                 using var reader = new StreamReader(stream);
@@ -23,6 +28,7 @@ namespace Petoria.Core.Utilities
             }
         }
 
+        /// <summary>Обвива HTML съдържанието с DOCTYPE, head и CSS стилове.</summary>
         private static string WrapHtml(string bodyContent)
         {
             var css = GetEmailCss();
@@ -40,6 +46,7 @@ namespace Petoria.Core.Utilities
                 </html>";
         }
 
+        /// <summary>Генерира имейл шаблон за потвърждение на резервация с детайли за стаи, цени и отстъпки.</summary>
         public static (string Subject, string Body) BuildConfirmationEmail(ConfirmationEmailContext ctx)
         {
             bool isEn = ctx.UserLanguage?.ToLower() == "en";
@@ -158,6 +165,7 @@ namespace Petoria.Core.Utilities
             return (subject, WrapHtml(bodyContent));
         }
 
+        /// <summary>Генерира имейл шаблон за анулиране на резервация с информация за възстановяване на сумата.</summary>
         public static (string Subject, string Body) BuildCancellationEmail(CancellationEmailContext ctx)
         {
             bool isEn = ctx.UserLanguage?.ToLower() == "en";

@@ -3,11 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Room;
 
-/// <summary>
-/// DTO за създаване на тип стая.
-/// HotelId идва от URL маршрута.
-/// НЕ съдържа: Id, HotelId, CreatedAt, UpdatedAt, навигационни свойства.
-/// </summary>
+/// <summary>Заявка: създаване на тип стая</summary>
 public class CreateRoomTypeDto
 {
     [Required(ErrorMessage = ValidationConstants.RoomType.NameRequired)]

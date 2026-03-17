@@ -6,6 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './MyMessages.css';
 
+/** Страница с всички съобщения на потребителя — хотелски и поддръжка, с филтри. */
 const MyMessages = () => {
     const { user } = useAuth();
     const { t, language } = useLanguage();
@@ -14,7 +15,8 @@ const MyMessages = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [filter, setFilter] = useState('all'); // 'all', 'answered', 'pending'
+    // Активен филтър: 'all' | 'answered' | 'pending'
+    const [filter, setFilter] = useState('all');
 
     const markSupportMessagesAsRead = React.useCallback(async (messages) => {
         for (const msg of messages) {

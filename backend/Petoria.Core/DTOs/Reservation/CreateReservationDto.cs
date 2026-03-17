@@ -2,11 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Petoria.Constants;
 namespace Petoria.Core.DTOs.Reservation;
 
-/// <summary>
-/// DTO за създаване на резервация.
-/// UserId се взима от JWT токена, не от клиента.
-/// НЕ съдържа: Id, UserId, TotalPrice (изчислява се), Status, CreatedAt, UpdatedAt.
-/// </summary>
+/// <summary>Заявка: нова резервация</summary>
 public class CreateReservationDto
 {
     [Required(ErrorMessage = ValidationConstants.Reservation.HotelRequired)]

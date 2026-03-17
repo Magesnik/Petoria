@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Review;
 
-/// <summary>
-/// DTO за изходящи данни на ревю.
-/// Включва информация за потребителя, който е оставил ревюто.
-/// </summary>
+/// <summary>Отговор: ревю с автор и рейтинг</summary>
 public class ReviewResponseDto
 {
     public int Id { get; set; }
@@ -13,10 +10,7 @@ public class ReviewResponseDto
     public ReviewUserDto User { get; set; } = null!;
 }
 
-/// <summary>
-/// Вложен DTO за потребителската информация в ревю.
-/// Показва само публична информация — НЕ съдържа email, пароли и т.н.
-/// </summary>
+/// <summary>Вложен DTO: потребителска информация в ревю</summary>
 public class ReviewUserDto
 {
     public string Id { get; set; } = string.Empty;

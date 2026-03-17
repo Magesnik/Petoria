@@ -4,8 +4,7 @@ using Petoria.Constants;
 namespace Petoria.Infrastructure.Data.Entities;
 
 /// <summary>
-/// Съобщения от потребители към администратори на хотели.
-/// Използва се за въпроси и поддръжка.
+/// Съобщение до хотел от гост: тема, текст, отговор, прочетено ли е.
 /// </summary>
 public class HotelMessage
 {
@@ -26,15 +25,21 @@ public class HotelMessage
 
     public bool IsAnswered { get; set; } = false;
 
+    /// <summary>
+    /// Отговор от администратор на хотела.
+    /// </summary>
     public string? AdminResponse { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? AnsweredAt { get; set; }
 
+    /// <summary>
+    /// Дали потребителят е прочел отговора.
+    /// </summary>
     public bool IsReadByUser { get; set; } = false;
 
-    // Navigation properties
+    // Навигационни свойства
     public Hotel Hotel { get; set; } = null!;
     public ApplicationUser User { get; set; } = null!;
 }

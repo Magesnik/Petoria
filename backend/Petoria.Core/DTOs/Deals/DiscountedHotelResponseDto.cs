@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Deals;
 
-/// <summary>
-/// DTO за хотел с активна отстъпка.
-/// Показва оригинална и намалена цена.
-/// </summary>
+/// <summary>Отговор: хотел с активна отстъпка</summary>
 public class DiscountedHotelResponseDto
 {
     public int Id { get; set; }

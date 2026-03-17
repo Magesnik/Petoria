@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import './DateRangeCalendar.css';
 
+/** Календар за избор на период за настаняване с визуализация на наличността. */
 const DateRangeCalendar = ({
     selectedRoomType,
     checkInDate,
@@ -11,7 +12,8 @@ const DateRangeCalendar = ({
 }) => {
     const { t, language } = useLanguage();
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [selectionMode, setSelectionMode] = useState('checkIn'); // 'checkIn' or 'checkOut'
+    // Режим на избор: 'checkIn' | 'checkOut'
+    const [selectionMode, setSelectionMode] = useState('checkIn');
 
     // Use local date string to avoid UTC timezone shifting (e.g. UTC+2 shifts dates back 1 day)
     const toLocalDateStr = (date) => {

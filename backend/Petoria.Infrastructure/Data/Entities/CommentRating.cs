@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Рейтинг на коментар (харесване/нехаресване).
+/// </summary>
 public class CommentRating
 {
     [Key]
@@ -15,11 +18,11 @@ public class CommentRating
     public string UserId { get; set; } = string.Empty;
 
     [Required]
-    public bool IsLike { get; set; } // true = like, false = dislike
+    public bool IsLike { get; set; } // true = харесване, false = нехаресване
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
+    // Навигационни свойства
     [ForeignKey("CommentId")]
     public Comment Comment { get; set; } = null!;
 

@@ -2,20 +2,23 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { api } from '../utils/api';
 import { useAuth } from './AuthContext';
 
+/** Контекст за количка: зареждане, добавяне, премахване, изчистване, брояч */
 const CartContext = createContext(null);
 
+/** Хук за достъп до контекста на количката */
 export const useCart = () => {
     const context = useContext(CartContext);
     if (!context) throw new Error('useCart must be used within a CartProvider');
     return context;
 };
 
+/** Доставчик на контекста за количката */
 export const CartProvider = ({ children }) => {
     const { user } = useAuth();
     const [cartItems, setCartItems] = useState([]);
     const [cartLoading, setCartLoading] = useState(false);
 
-    // Fetch cart from API when user logs in
+    /** Зарежда количката от API при логване на потребител */
     const fetchCart = useCallback(async () => {
         if (!user) {
             setCartItems([]);
@@ -26,7 +29,7 @@ export const CartProvider = ({ children }) => {
             const data = await api.get('/cart');
             setCartItems(data);
         } catch (err) {
-            console.error('Failed to load cart:', err);
+            console.error('Грешка при зареждане на количката:', err);
             setCartItems([]);
         } finally {
             setCartLoading(false);
@@ -37,7 +40,7 @@ export const CartProvider = ({ children }) => {
         fetchCart();
     }, [fetchCart]);
 
-    // Add item to cart via API
+    /** Добавя артикул в количката чрез API */
     const addToCart = async (item) => {
         if (!user) return null;
         try {
@@ -52,33 +55,34 @@ export const CartProvider = ({ children }) => {
             setCartItems(prev => [newItem, ...prev]);
             return newItem;
         } catch (err) {
-            console.error('Failed to add to cart:', err);
+            console.error('Грешка при добавяне в количката:', err);
             throw err;
         }
     };
 
-    // Remove item from cart via API
+    /** Премахва артикул от количката чрез API */
     const removeFromCart = async (cartId) => {
         try {
             await api.delete(`/cart/${cartId}`);
             setCartItems(prev => prev.filter(item => item.id !== cartId));
         } catch (err) {
-            console.error('Failed to remove from cart:', err);
+            console.error('Грешка при премахване от количката:', err);
             throw err;
         }
     };
 
-    // Clear entire cart via API
+    /** Изчиства цялата количка чрез API */
     const clearCart = async () => {
         try {
             await api.delete('/cart');
             setCartItems([]);
         } catch (err) {
-            console.error('Failed to clear cart:', err);
+            console.error('Грешка при изчистване на количката:', err);
             throw err;
         }
     };
 
+    // Брой артикули в количката
     const cartCount = cartItems.length;
 
     return (

@@ -10,8 +10,13 @@ import PromoCodeManager from '../../components/booking/PromoCodeManager';
 import AvailabilityCalendar from '../../components/hotel/AvailabilityCalendar';
 import './ManageHotel.css';
 
+// Мързеливо зареждане на компонента за избор на локация
 const LocationPicker = React.lazy(() => import('../../components/common/LocationPicker'));
 
+/**
+ * Страница за управление на хотел — редакция на информация, стаи, наличност,
+ * отстъпки, промо кодове, модератори и снимки.
+ */
 const ManageHotel = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -25,12 +30,12 @@ const ManageHotel = () => {
     const [success, setSuccess] = useState('');
     const [activeTab, setActiveTab] = useState('rooms');
 
-    // Moderator management
+    // Управление на модератори
     const [moderators, setModerators] = useState([]);
     const [moderatorEmail, setModeratorEmail] = useState('');
     const [showAddModerator, setShowAddModerator] = useState(false);
 
-    // Edit mode
+    // Режим на редакция
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState({});
     const [images, setImages] = useState([]);
@@ -44,13 +49,13 @@ const ManageHotel = () => {
         try {
             const data = await api.get(`/hotels/${id}`);
 
-            // Check if user owns this hotel or is moderator
+            // Проверка дали потребителят е собственик или модератор
             if (data.createdById !== user?.id && !data.isModerator && !user?.roles?.includes('SuperAdmin')) {
                 navigate('/my-hotels');
                 return;
             }
 
-            // Block access if hotel is suspended by SuperAdmin (only SuperAdmin can still access it)
+            // Блокиране на достъпа ако хотелът е спрян от SuperAdmin
             if (data.isSuspendedBySuperAdmin && !isSuperAdmin()) {
                 navigate('/my-hotels');
                 return;
@@ -88,7 +93,7 @@ const ManageHotel = () => {
             const data = await api.get(`/hotels/${id}/rooms`);
             setRoomTypes(data);
         } catch (err) {
-            console.error('Error fetching room types:', err);
+            console.error('Грешка при зареждане на типове стаи:', err);
         }
     }, [id]);
 
@@ -106,7 +111,7 @@ const ManageHotel = () => {
         }
     }, [hotel, fetchRoomTypes]);
 
-    // Image Handlers (from CreateHotel)
+    // Обработка на снимки — качване на файл
     const uploadFile = async (file, isMain = false) => {
         setUploadingImage(true);
         try {
@@ -118,7 +123,7 @@ const ManageHotel = () => {
             }
             return data.url;
         } catch (err) {
-            console.error('Upload error:', err);
+            console.error('Грешка при качване:', err);
             setError('Грешка при качване на снимка: ' + err.message);
             return null;
         } finally {
@@ -179,7 +184,7 @@ const ManageHotel = () => {
         setUploading(true);
 
         try {
-            // Upload additional images that are files
+            // Качване на допълнителни снимки
             const uploadedImageUrls = [];
             for (let i = 0; i < imageFiles.length; i++) {
                 if (imageFiles[i]) {
@@ -216,7 +221,7 @@ const ManageHotel = () => {
             const data = await api.get(`/hotels/${id}/moderators`);
             setModerators(data);
         } catch (err) {
-            console.error('Error fetching moderators:', err);
+            console.error('Грешка при зареждане на модератори:', err);
         }
     }, [id]);
 
@@ -291,7 +296,7 @@ const ManageHotel = () => {
 
 
             <div className="manage-container">
-                {/* Header */}
+                {/* Заглавна секция */}
                 <div className="manage-header">
                     <div className="header-left">
                         <Link to="/my-hotels" className="btn-back">← {t('back')}</Link>
@@ -303,7 +308,7 @@ const ManageHotel = () => {
                     </Link>
                 </div>
 
-                {/* Inactivity Warning */}
+                {/* Предупреждение за неактивност */}
                 {!hotel.isAvailable && roomTypes.length === 0 && (
                     <div className="message warning">
                         ⚠️ Хотелът е неактивен. Моля, добавете поне един тип стая в таб "Стаи", за да можете да го активирате.
@@ -313,7 +318,7 @@ const ManageHotel = () => {
                 {error && <div className="message error">{error}</div>}
                 {success && <div className="message success">{success}</div>}
 
-                {/* Tabs */}
+                {/* Табове за навигация */}
                 <div className="tabs">
                     <button
                         className={`tab ${activeTab === 'info' ? 'active' : ''}`}
@@ -351,9 +356,9 @@ const ManageHotel = () => {
                     )}
                 </div>
 
-                {/* Tab Content */}
+                {/* Съдържание на табовете */}
                 <div className="tab-content">
-                    {/* Info Tab */}
+                    {/* Таб „Информация" */}
                     {activeTab === 'info' && (
                         <div className="info-section">
                             {!isEditing ? (
@@ -411,7 +416,7 @@ const ManageHotel = () => {
                             ) : (
                                 <div className="info-edit">
                                     <div className="edit-grid">
-                                        {/* Map Location - New */}
+                                        {/* Локация на картата */}
                                         <div className="form-section full-width">
                                             <div className="form-section-title">📍 {t('mapLocation') || 'Локация на картата'}</div>
                                             <React.Suspense fallback={<div className="loading-state"><div className="spinner"></div></div>}>
@@ -485,7 +490,7 @@ const ManageHotel = () => {
                                             />
                                         </div>
 
-                                        {/* Status and Rating Row */}
+                                        {/* Статус и рейтинг */}
                                         <div className="form-group">
                                             <label>{t('status') || 'Статус'}</label>
                                             <select
@@ -525,11 +530,11 @@ const ManageHotel = () => {
                                             />
                                         </div>
 
-                                        {/* Photos Section - New */}
+                                        {/* Секция за снимки */}
                                         <div className="form-section full-width">
                                             <div className="form-section-title">🖼️ {t('photos') || 'Снимки'}</div>
 
-                                            {/* Main Photo */}
+                                            {/* Основна снимка */}
                                             <div className="form-group main-photo-upload">
                                                 <label>{t('mainPhoto') || 'Основна снимка'} *</label>
                                                 <div className="photo-input-group">
@@ -562,7 +567,7 @@ const ManageHotel = () => {
                                                 )}
                                             </div>
 
-                                            {/* Additional Photos */}
+                                            {/* Допълнителни снимки */}
                                             <div className="form-group">
                                                 <label>{t('additionalPhotos') || 'Допълнителни снимки'}</label>
                                                 <div className="additional-photos-grid">
@@ -692,7 +697,7 @@ const ManageHotel = () => {
                         </div>
                     )}
 
-                    {/* Rooms Tab */}
+                    {/* Таб „Стаи" */}
                     {activeTab === 'rooms' && (
                         <RoomTypeManager
                             hotelId={parseInt(id)}
@@ -700,7 +705,7 @@ const ManageHotel = () => {
                         />
                     )}
 
-                    {/* Availability Tab */}
+                    {/* Таб „Наличност" */}
                     {activeTab === 'availability' && (
                         <AvailabilityCalendar
                             hotelId={parseInt(id)}
@@ -708,7 +713,7 @@ const ManageHotel = () => {
                         />
                     )}
 
-                    {/* Moderators Tab */}
+                    {/* Таб „Модератори" */}
                     {activeTab === 'moderators' && (
                         <div className="moderators-section">
                             <div className="moderators-header">
@@ -769,7 +774,7 @@ const ManageHotel = () => {
                         </div>
                     )}
 
-                    {/* Promo Codes Tab */}
+                    {/* Таб „Промо кодове" */}
                     {activeTab === 'promocodes' && (
                         <div className="promocodes-section">
                             <PromoCodeManager hotelId={parseInt(id)} />

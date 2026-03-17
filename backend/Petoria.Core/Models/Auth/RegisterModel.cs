@@ -3,6 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.Models.Auth;
 
+/// <summary>Заявка: данни за регистрация (имена, имейл, парола, hCaptcha)</summary>
 public class RegisterModel
 {
     [Required(ErrorMessage = ValidationConstants.User.FirstNameRequired)]

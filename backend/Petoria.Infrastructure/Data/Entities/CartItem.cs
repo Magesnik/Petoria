@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Артикул в количката: хотел, стая, дати, брой стаи, цена.
+/// </summary>
 public class CartItem
 {
     [Key]
@@ -37,6 +40,9 @@ public class CartItem
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
 
+    /// <summary>
+    /// Първоначална цена преди отстъпки.
+    /// </summary>
     [Column(TypeName = "decimal(18,2)")]
     public decimal OriginalPrice { get; set; }
 

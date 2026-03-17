@@ -1,10 +1,6 @@
 namespace Petoria.Core.DTOs.Hotel;
 
-/// <summary>
-/// DTO за изходящи данни на хотел.
-/// Връща се от Controller-а при GET заявки.
-/// Включва допълнителни изчислени полета като DisplayPrice и HasDiscount.
-/// </summary>
+/// <summary>Отговор: пълна информация за хотел</summary>
 public class HotelResponseDto
 {
     public int Id { get; set; }
@@ -33,6 +29,6 @@ public class HotelResponseDto
     public DateTime UpdatedAt { get; set; }
     public bool IsModerator { get; set; }
     public int ReviewCount { get; set; }
-    public int RecentReviewCount { get; set; } // Last 30 days
+    public int RecentReviewCount { get; set; }
     public int AvailableRoomsTotal { get; set; }
 }

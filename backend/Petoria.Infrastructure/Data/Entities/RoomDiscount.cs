@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Отстъпка за тип стая за период от дати.
+/// </summary>
 public class RoomDiscount
 {
     [Key]
@@ -21,6 +24,9 @@ public class RoomDiscount
     [Required]
     public DateTime EndDate { get; set; }
 
+    /// <summary>
+    /// Процент отстъпка за периода.
+    /// </summary>
     [Required]
     [Range(ValidationConstants.Discount.PercentageMin, ValidationConstants.Discount.PercentageMax)]
     public int DiscountPercentage { get; set; }

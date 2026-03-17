@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Petoria.Constants;
 using Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Хотел: име, описание, локация, координати, рейтинг, звезди, снимки, удобства, типове стаи, политики за анулиране.
+/// </summary>
 public class Hotel
 {
     [Key]
@@ -26,7 +29,7 @@ public class Hotel
     [MaxLength(ValidationConstants.Hotel.CountryMaxLength)]
     public string Country { get; set; } = string.Empty;
 
-    // Geographic coordinates for map display (nullable for existing hotels without coordinates)
+    // Географски координати за показване на карта (nullable за съществуващи хотели без координати)
     [Column(TypeName = "decimal(10,7)")]
     public decimal? Latitude { get; set; }
 
@@ -45,28 +48,28 @@ public class Hotel
     [MaxLength(ValidationConstants.Hotel.ImageUrlMaxLength)]
     public string ImageUrl { get; set; } = string.Empty;
 
-    // JSON array of additional image URLs
+    // JSON масив с допълнителни URL адреси на снимки
     [MaxLength(ValidationConstants.Hotel.ImagesMaxLength)]
     public string Images { get; set; } = "[]";
 
-    // JSON array of amenities
+    // JSON масив с удобства
     [MaxLength(ValidationConstants.Hotel.AmenitiesMaxLength)]
     public string Amenities { get; set; } = "[]";
 
-    // JSON array of room types
+    // JSON масив с типове стаи
     [MaxLength(ValidationConstants.Hotel.RoomTypesMaxLength)]
     public string RoomTypes { get; set; } = "[]";
 
-    // JSON array of cancellation policies (days before -> refund percentage)
+    // JSON масив с политики за анулиране (дни преди -> процент възстановяване)
     [MaxLength(ValidationConstants.Hotel.CancellationPoliciesMaxLength)]
     public string CancellationPolicies { get; set; } = "[]";
 
     public bool IsAvailable { get; set; } = true;
 
-    // Set by SuperAdmin to globally hide and lock the hotel
+    // Задава се от SuperAdmin за глобално скриване и заключване на хотела
     public bool IsSuspendedBySuperAdmin { get; set; } = false;
 
-    // Track who created the hotel - set by controller, not required from client
+    // Кой е създал хотела - задава се от контролера, не се изисква от клиента
     public string CreatedById { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

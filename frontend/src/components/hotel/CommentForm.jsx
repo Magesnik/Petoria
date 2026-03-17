@@ -3,6 +3,7 @@ import { api } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import './Comment.css';
 
+/** Форма за публикуване на коментар или реплика към хотел. */
 const CommentForm = ({ hotelId, parentCommentId = null, onCommentSubmitted, onCancel }) => {
     const [text, setText] = useState('');
     const [submitting, setSubmitting] = useState(false);

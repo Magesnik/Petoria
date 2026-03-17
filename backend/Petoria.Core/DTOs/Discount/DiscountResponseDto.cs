@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Discount;
 
-/// <summary>
-/// DTO за изходящи данни на отстъпка.
-/// Включва допълнителни изчислени полета за активност.
-/// </summary>
+/// <summary>Отговор: данни за отстъпка (период, процент)</summary>
 public class DiscountResponseDto
 {
     public int Id { get; set; }

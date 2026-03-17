@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import './Cookies.css';
 
+/** Страница с политика за бисквитки — видове бисквитки и управление на предпочитания. */
 const Cookies = () => {
     const { t } = useLanguage();
+    // Индекс на отворената accordion секция
     const [activeSection, setActiveSection] = useState(null);
 
     const cookieTypes = [

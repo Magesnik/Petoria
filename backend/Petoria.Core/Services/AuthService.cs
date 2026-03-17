@@ -11,6 +11,10 @@ using Google.Apis.Auth;
 
 namespace Petoria.Core.Services;
 
+/// <summary>
+/// Услуга за автентикация — регистрация, логин, Google OAuth, потвърждение на имейл и инициализация на роли.
+/// Генерира JWT токени с 7-дневна валидност.
+/// </summary>
 public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -33,6 +37,7 @@ public class AuthService : IAuthService
         _emailService = emailService;
     }
 
+    /// <summary>Влизане с имейл и парола. Проверява потвърждение на имейл и блокиране на акаунта.</summary>
     public async Task<AuthResponse> LoginAsync(LoginModel model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
@@ -61,11 +66,12 @@ public class AuthService : IAuthService
         return await GenerateJwtToken(user, roles.ToList());
     }
 
+    /// <summary>Логин чрез Google OAuth. Създава нов потребител ако не съществува. Дава SuperAdmin роля на конфигурирани имейли.</summary>
     public async Task<AuthResponse?> GoogleLoginAsync(string googleToken)
     {
         try
         {
-            // Verify the Google token
+            // Валидиране на Google токена
             var payload = await GoogleJsonWebSignature.ValidateAsync(googleToken);
 
             if (payload == null)
@@ -73,19 +79,19 @@ public class AuthService : IAuthService
                 return null;
             }
 
-            // Check if user exists
+            // Проверка дали потребителят вече съществува
             var user = await _userManager.FindByEmailAsync(payload.Email);
 
             if (user == null)
             {
-                // Create new user from Google data
+                // Създаване на нов потребител от Google данните
                 user = new ApplicationUser
                 {
                     UserName = payload.Email,
                     Email = payload.Email,
                     FirstName = payload.GivenName ?? "",
                     LastName = payload.FamilyName ?? "",
-                    EmailConfirmed = true // Google emails are verified
+                    EmailConfirmed = true // Google имейлите са вече верифицирани
                 };
 
                 var result = await _userManager.CreateAsync(user);
@@ -95,7 +101,7 @@ public class AuthService : IAuthService
                     return null;
                 }
 
-                        // Assign SuperAdmin role if email is in configured list
+                // Даване на SuperAdmin роля ако имейлът е в конфигурирания списък
                 if (IsSuperAdminEmail(payload.Email))
                 {
                     await _userManager.AddToRoleAsync(user, Petoria.Constants.Roles.SuperAdmin);
@@ -104,7 +110,7 @@ public class AuthService : IAuthService
             }
             else
             {
-                // Ensure configured SuperAdmin emails have proper roles
+                // Осигуряване на SuperAdmin роля за конфигурирани имейли при съществуващ потребител
                 if (IsSuperAdminEmail(payload.Email))
                 {
                     if (!await _userManager.IsInRoleAsync(user, Petoria.Constants.Roles.SuperAdmin))
@@ -133,6 +139,7 @@ public class AuthService : IAuthService
     }
 
 
+    /// <summary>Регистрация на нов потребител. Изпраща имейл за потвърждение. Не дава JWT докато имейлът не е потвърден.</summary>
     public async Task<AuthResponse> RegisterAsync(RegisterModel model)
     {
         var user = new ApplicationUser
@@ -148,24 +155,22 @@ public class AuthService : IAuthService
 
         if (!result.Succeeded)
         {
-            // For simplicity, returning null or throwing exception could be handled better
-            // In a real app, return the errors
+                // Събиране на грешките от Identity
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             throw new Exception($"Registration failed: {errors}");
         }
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        // Generate email confirmation token
+        // Генериране на токен за потвърждение на имейл
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         
-        // Construct the confirmation link
-        // Hardcoding the frontend URL for now, could be moved to configuration
+        // Изграждане на линк за потвърждение към frontend-а
         var frontendUrl = _configuration["FrontendUrl"] ?? "http://localhost:5174";
         var encodedToken = Uri.EscapeDataString(token);
         var confirmationLink = $"{frontendUrl}/confirm-email?uid={user.Id}&token={encodedToken}";
 
-        // Send confirmation email
+        // Изпращане на имейл за потвърждение
         var emailBody = $@"
             <h2>Добре дошли в Petoria!</h2>
             <p>Здравейте {user.FirstName},</p>
@@ -176,7 +181,7 @@ public class AuthService : IAuthService
         ";
         await _emailService.SendEmailAsync(user.Email, "Потвърждение на акаунт - Petoria", emailBody);
 
-        // Return AuthResponse without a token since they need to confirm their email first
+        // Връщане на отговор без токен — потребителят трябва първо да потвърди имейла си
         return new AuthResponse
         {
             Id = user.Id,
@@ -189,6 +194,7 @@ public class AuthService : IAuthService
         };
     }
 
+    /// <summary>Потвърждава имейл адреса чрез токен от линка за потвърждение.</summary>
     public async Task<bool> ConfirmEmailAsync(string userId, string token)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
@@ -206,28 +212,29 @@ public class AuthService : IAuthService
         return result.Succeeded;
     }
 
+    /// <summary>Създава ролите (Admin, SuperAdmin) и админ акаунта при стартиране на приложението.</summary>
     public async Task InitializeRolesAndAdminAsync()
     {
-        // Create Admin role if it doesn't exist
+        // Създаване на Admin роля ако не съществува
         if (!await _roleManager.RoleExistsAsync(Petoria.Constants.Roles.Admin))
         {
             await _roleManager.CreateAsync(new IdentityRole(Petoria.Constants.Roles.Admin));
         }
 
-        // Create SuperAdmin role if it doesn't exist
+        // Създаване на SuperAdmin роля ако не съществува
         if (!await _roleManager.RoleExistsAsync(Petoria.Constants.Roles.SuperAdmin))
         {
             await _roleManager.CreateAsync(new IdentityRole(Petoria.Constants.Roles.SuperAdmin));
         }
 
-        // Check if admin user exists
+        // Проверка дали админ потребителят вече съществува
         var adminEmail = _configuration["AdminSettings:DefaultAdminEmail"] ?? "admin@admin.com";
         var adminPassword = _configuration["AdminSettings:DefaultAdminPassword"];
         var adminUser = await _userManager.FindByEmailAsync(adminEmail);
 
         if (adminUser == null && !string.IsNullOrEmpty(adminPassword))
         {
-            // Create admin user only if password is configured
+            // Създаване на админ потребител само ако паролата е конфигурирана
             adminUser = new ApplicationUser
             {
                 UserName = adminEmail,
@@ -245,14 +252,14 @@ public class AuthService : IAuthService
         }
         else if (adminUser != null)
         {
-            // Ensure existing admin user has Admin role
+            // Осигуряване на Admin роля за съществуващия админ
             if (!await _userManager.IsInRoleAsync(adminUser, Petoria.Constants.Roles.Admin))
             {
                 await _userManager.AddToRoleAsync(adminUser, Petoria.Constants.Roles.Admin);
             }
         }
 
-        // Ensure configured SuperAdmin emails have proper roles
+        // Осигуряване на SuperAdmin роля за конфигурирани имейли
         var superAdminEmails = _configuration["AdminSettings:SuperAdminEmails"]
             ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             ?? Array.Empty<string>();
@@ -274,6 +281,7 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <summary>Проверява дали имейлът е в конфигурирания списък на SuperAdmin имейли.</summary>
     private bool IsSuperAdminEmail(string email)
     {
         var superAdminEmails = _configuration["AdminSettings:SuperAdminEmails"]
@@ -283,6 +291,7 @@ public class AuthService : IAuthService
         return superAdminEmails.Any(e => e.Equals(email, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>Генерира JWT токен с claims за потребителя (ID, имейл, име, роли). Валидност: 7 дни.</summary>
     private async Task<AuthResponse> GenerateJwtToken(ApplicationUser user, List<string> roles)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
@@ -297,7 +306,7 @@ public class AuthService : IAuthService
             new Claim("LastName", user.LastName ?? "")
         };
 
-        // Add role claims
+        // Добавяне на роли като claims
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));

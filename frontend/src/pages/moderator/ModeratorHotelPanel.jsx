@@ -5,6 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import AvailabilityCalendar from '../../components/hotel/AvailabilityCalendar';
 import './ModeratorHotelPanel.css'; // We'll create this
 
+/** Панел на модератора за конкретен хотел — календар с наличност и резервации. */
 const ModeratorHotelPanel = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -12,9 +13,10 @@ const ModeratorHotelPanel = () => {
     const [hotel, setHotel] = useState(null);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('calendar'); // 'calendar' or 'reservations'
+    // Активен таб: 'calendar' | 'reservations'
+    const [activeTab, setActiveTab] = useState('calendar');
 
-    // Logic for Booking Modal from Calendar
+    // Данни за избрани дати от календара при ново резервиране
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [selectedDates, setSelectedDates] = useState(null);
     const [selectedRoomType, setSelectedRoomType] = useState(null);

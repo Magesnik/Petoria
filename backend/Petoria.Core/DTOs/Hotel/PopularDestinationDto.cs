@@ -1,5 +1,6 @@
 namespace Petoria.Core.DTOs.Hotel;
 
+/// <summary>Отговор: популярна дестинация (град, държава, брой резервации)</summary>
 public class PopularDestinationDto
 {
     public int HotelId { get; set; }

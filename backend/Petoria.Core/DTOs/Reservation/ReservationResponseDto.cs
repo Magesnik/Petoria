@@ -1,10 +1,6 @@
 namespace Petoria.Core.DTOs.Reservation;
 
-/// <summary>
-/// DTO за изходящи данни на резервация.
-/// Включва допълнителни полета от свързани Entity-та (име на хотел, тип стая и т.н.).
-/// НЕ връща вътрешни системни полета като UserId.
-/// </summary>
+/// <summary>Отговор: пълни данни за резервация</summary>
 public class ReservationResponseDto
 {
     public int Id { get; set; }

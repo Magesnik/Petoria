@@ -1,3 +1,4 @@
+/** Главна входна точка на приложението – монтира React дървото в DOM */
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

@@ -2,8 +2,8 @@ export const getBaseUrl = () => import.meta.env.VITE_API_URL || 'http://localhos
 const API_BASE_URL = getBaseUrl() + '/api';
 
 /**
- * Returns a full URL for a static asset (e.g. uploaded avatar image).
- * Handles both absolute URLs (from Cloudinary etc.) and relative paths from the backend.
+ * Връща пълен URL за статичен ресурс (напр. качена аватарна снимка).
+ * Обработва абсолютни URL-и (от Cloudinary и др.) и относителни пътища от бекенда.
  */
 export const getAssetUrl = (path) => {
     if (!path) return '';
@@ -12,40 +12,40 @@ export const getAssetUrl = (path) => {
 };
 
 /**
- * Custom fetch wrapper that automatically includes credentials (cookies)
- * and handles common errors.
+ * Обвивка около fetch, която автоматично включва credentials (бисквитки)
+ * и обработва често срещани грешки.
  */
 export const api = {
     get: (endpoint, options = {}) => request(endpoint, { ...options, method: 'GET' }),
     post: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'POST', body }),
     put: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'PUT', body }),
     delete: (endpoint, options = {}) => request(endpoint, { ...options, method: 'DELETE' }),
-    // Helper to get full URL if needed
+    // Връща пълния базов URL при нужда
     BASE_URL: API_BASE_URL
 };
 
 async function request(endpoint, options = {}) {
-    // Ensure endpoint starts with / if not absolute
+    // Проверява дали endpoint-ът е абсолютен или относителен
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
 
-    // Merge headers
+    // Обединява хедърите
     const headers = {
         ...defaultHeaders,
         ...options.headers,
     };
 
-    // If body is an object (and not FormData), stringify it
+    // Ако тялото е обект (и не е FormData), сериализира го в JSON
     let body = options.body;
     if (body && typeof body === 'object' && !(body instanceof FormData)) {
         body = JSON.stringify(body);
-        // Ensure content-type is json
+        // Задава content-type като JSON
         headers['Content-Type'] = 'application/json';
     } else if (body instanceof FormData) {
-        // Let browser set content-type for FormData (multipart/form-data)
+        // Оставя браузъра да зададе content-type за FormData (multipart/form-data)
         delete headers['Content-Type'];
     }
 
@@ -53,17 +53,16 @@ async function request(endpoint, options = {}) {
         ...options,
         headers,
         body,
-        credentials: 'include', // THIS IS KEY: Send cookies!
+        credentials: 'include', // Изпраща бисквитките с всяка заявка
     };
 
     try {
         const response = await fetch(url, config);
 
-        // Handle 401 Unauthorized globally if needed (e.g., redirect to login)
-        // Note: We can't use useNavigate here directly as it's not a component.
-        // AuthContext handles the 401 on initial load.
+        // Обработва 401 Unauthorized глобално (напр. пренасочване към логин)
+        // AuthContext се грижи за 401 при първоначално зареждане.
 
-        // Parse JSON if possible
+        // Проверява и парсва JSON отговора
         let data;
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -73,12 +72,12 @@ async function request(endpoint, options = {}) {
         }
 
         if (!response.ok) {
-            // Handle 401 Unauthorized globally by dispatching a custom event
+            // Обработва 401 чрез изпращане на custom event
             if (response.status === 401) {
                 window.dispatchEvent(new CustomEvent('auth-unauthorized'));
             }
 
-            // Create error object with status
+            // Създава обект за грешка със статус код
             const error = new Error(data.message || data || response.statusText || 'API request failed');
             error.status = response.status;
             throw error;
@@ -86,7 +85,7 @@ async function request(endpoint, options = {}) {
 
         return data;
     } catch (error) {
-        // Only log error if it's NOT a 401 (Unauthorized)
+        // Логва грешката само ако НЕ е 401 (Unauthorized)
         if (error.status !== 401) {
             console.error(`API Error (${options.method || 'GET'} ${endpoint}):`, error);
         }

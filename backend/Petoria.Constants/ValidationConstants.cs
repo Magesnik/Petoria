@@ -1,7 +1,12 @@
 namespace Petoria.Constants;
 
+/// <summary>
+/// Централизирани константи за валидация на всички модели в системата.
+/// Съдържа максимални дължини, допустими стойности и съобщения за грешки на български.
+/// </summary>
 public static class ValidationConstants
 {
+    /// <summary>Валидация за хотел — име, описание, локация, рейтинг</summary>
     public static class Hotel
     {
         public const int NameMaxLength = 100;
@@ -29,6 +34,7 @@ public static class ValidationConstants
         public const string StarRatingRangeError = "Звездният рейтинг трябва да бъде между {1} и {2}";
     }
 
+    /// <summary>Валидация за тип стая — име, цена, капацитет, брой стаи</summary>
     public static class RoomType
     {
         public const int NameMaxLength = 100;
@@ -52,6 +58,7 @@ public static class ValidationConstants
         public const string TotalRoomsRangeError = "Броят стаи трябва да бъде между {1} и {2}";
     }
 
+    /// <summary>Валидация за резервация — дати, брой стаи, бележки</summary>
     public static class Reservation
     {
         public const int StatusMaxLength = 50;
@@ -67,6 +74,7 @@ public static class ValidationConstants
         public const string NotesMaxLengthError = "Бележките не могат да надвишават {1} символа";
     }
 
+    /// <summary>Валидация за ревю — рейтинг (1-5) и текст на коментара</summary>
     public static class HotelReview
     {
         public const int CommentMaxLength = 500;
@@ -78,6 +86,7 @@ public static class ValidationConstants
         public const string CommentMaxLengthError = "Ревюто не може да надвишава {1} символа";
     }
 
+    /// <summary>Валидация за коментар — минимална и максимална дължина на текста</summary>
     public static class Comment
     {
         public const int ContentMaxLength = 500;
@@ -88,6 +97,7 @@ public static class ValidationConstants
         public const string ContentMinLengthError = "Коментарът не може да бъде празен";
     }
 
+    /// <summary>Валидация за съобщение до хотел — тема, текст и отговор</summary>
     public static class HotelMessage
     {
         public const int SubjectMaxLength = 200;
@@ -97,6 +107,7 @@ public static class ValidationConstants
         public const int AnswerMinLength = 10;
     }
 
+    /// <summary>Валидация за тикет за поддръжка — тема и съобщение</summary>
     public static class SupportMessage
     {
         public const int SubjectMaxLength = 200;
@@ -108,6 +119,7 @@ public static class ValidationConstants
         public const string MessageMinLengthError = "Съобщението трябва да бъде поне {1} символа";
     }
 
+    /// <summary>Валидация за потребител — имена, имейл, парола (regex)</summary>
     public static class User
     {
         public const int FirstNameMinLength = 2;
@@ -133,6 +145,7 @@ public static class ValidationConstants
         public const string LastNameRegexError = "Фамилията може да съдържа само букви (без интервали, тирета или специални символи)";
     }
 
+    /// <summary>Валидация за наличност на стаи — дати и брой свободни стаи</summary>
     public static class Availability
     {
         public const int AvailableCountMin = 0;
@@ -145,6 +158,7 @@ public static class ValidationConstants
         public const string AvailableCountRangeError = "Броят стаи трябва да бъде между {1} и {2}";
     }
 
+    /// <summary>Валидация за промо код — процент отстъпка, брой активации, валидност</summary>
     public static class PromoCode
     {
         public const int DiscountPercentageMin = 0;
@@ -154,6 +168,7 @@ public static class ValidationConstants
         public const int ValidDaysMax = 3650;
     }
 
+    /// <summary>Валидация за отстъпка на стая — процент и период</summary>
     public static class Discount
     {
         public const int PercentageMin = 1;

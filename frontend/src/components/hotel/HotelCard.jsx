@@ -6,15 +6,18 @@ import { useLanguage } from '../../context/LanguageContext';
 import './HotelCard.css';
 
 
+/** Карта на хотел с изображение, удобства, рейтинг и бутон за детайли. */
 const HotelCard = ({ hotel }) => {
     const navigate = useNavigate();
     const { isFavorite, toggleFavorite } = useFavorites();
     const { convertAndFormat } = useCurrency();
     const { t } = useLanguage();
+    // Показва до 4 удобства при свит изглед
     const [showAllAmenities, setShowAllAmenities] = useState(false);
     const amenities = hotel.amenities ? JSON.parse(hotel.amenities) : [];
     const displayAmenities = showAllAmenities ? amenities : amenities.slice(0, 4);
 
+    // Навигира към страницата с детайли на хотела
     const handleViewDetails = () => {
         navigate(`/hotels/${hotel.id}`);
     };

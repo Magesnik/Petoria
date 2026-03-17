@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import './Terms.css';
 
+/** Страница с общи условия за ползване — accordion секции с правна информация. */
 const Terms = () => {
     const { t } = useLanguage();
+    // Индекс на отворената accordion секция
     const [activeSection, setActiveSection] = useState(null);
 
     const sections = [

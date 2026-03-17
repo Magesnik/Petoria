@@ -8,6 +8,9 @@ using Petoria.Core.Models.Auth;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за автентикация: регистрация, логин, Google OAuth, потвърждение на имейл, logout
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
@@ -23,11 +26,14 @@ public class AuthController : ControllerBase
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Регистрира нов потребител с hCaptcha верификация
+    /// </summary>
     [HttpPost("register")]
-    [EnableRateLimiting("register")] // 10 reg/min per IP — prevents spam & email bombing
+    [EnableRateLimiting("register")] // 10 рег./мин. на IP — предотвратява спам и бомбардиране с имейли
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
-        // hCaptcha verification
+        // Верификация на hCaptcha
         var secretKey = _configuration["HcaptchaSettings:SecretKey"];
         if (!string.IsNullOrEmpty(secretKey))
         {
@@ -77,6 +83,9 @@ public class AuthController : ControllerBase
         public string Token { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Потвърждава имейл адрес чрез токен
+    /// </summary>
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
@@ -93,11 +102,14 @@ public class AuthController : ControllerBase
         return BadRequest("Email confirmation failed");
     }
 
+    /// <summary>
+    /// Влизане в системата с имейл и парола
+    /// </summary>
     [HttpPost("login")]
-    [EnableRateLimiting("auth")] // 10 attempts/min per IP — brute force protection
+    [EnableRateLimiting("auth")] // 10 опита/мин. на IP — защита срещу brute force
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        try 
+        try
         {
             var result = await _authService.LoginAsync(model);
             if (result == null)
@@ -107,7 +119,7 @@ public class AuthController : ControllerBase
 
             SetTokenCookie(result.Token);
             return Ok(result);
-        } 
+        }
         catch (Exception ex)
         {
             if (ex.Message == "EmailNotConfirmed")
@@ -122,8 +134,11 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Влизане чрез Google OAuth токен
+    /// </summary>
     [HttpPost("google-login")]
-    [EnableRateLimiting("auth")] // 10 attempts/min per IP
+    [EnableRateLimiting("auth")] // 10 опита/мин. на IP
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginModel model)
     {
         try
@@ -147,21 +162,24 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Излизане от системата и изтриване на JWT бисквитката
+    /// </summary>
     [HttpPost("logout")]
     public IActionResult Logout()
     {
         var isLocalhost = Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
-        
+
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Secure = !isLocalhost, 
+            Secure = !isLocalhost,
             SameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.None
         };
-        
+
         Response.Cookies.Delete("jwt", cookieOptions);
-        
-        // Also try setting it to expired to be sure
+
+        // Допълнително задаване на изтекла бисквитка за сигурност
         var expiredOptions = new CookieOptions
         {
             HttpOnly = true,
@@ -174,10 +192,13 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Logged out successfully" });
     }
 
+    /// <summary>
+    /// Задава JWT токен като HttpOnly бисквитка
+    /// </summary>
     private void SetTokenCookie(string token)
     {
         var isLocalhost = Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
-        
+
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,

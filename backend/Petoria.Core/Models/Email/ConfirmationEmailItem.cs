@@ -2,6 +2,7 @@ using System;
 
 namespace Petoria.Core.Models.Email
 {
+    /// <summary>Елемент от потвърдителен имейл (стая, дати, цена)</summary>
     public class ConfirmationEmailItem
     {
         public string HotelName { get; set; } = string.Empty;

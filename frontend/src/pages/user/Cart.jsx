@@ -7,14 +7,17 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../utils/api';
 import './Cart.css';
 
+/** Страница на количката с резервации, промо кодове и checkout към Stripe. */
 const Cart = () => {
     const { cartItems, removeFromCart, cartLoading } = useCart();
     const { t } = useLanguage();
     const { convertAndFormat } = useCurrency();
     const { user } = useAuth();
     const navigate = useNavigate();
+    // Статус и грешки при checkout
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [checkoutError, setCheckoutError] = useState('');
+    // Промо код и резултат от прилагането му
     const [promoCode, setPromoCode] = useState('');
     const [promoApplied, setPromoApplied] = useState(false);
     const [promoError, setPromoError] = useState('');

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за качване на файлове: снимки за хотели и аватари
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class UploadController : ControllerBase
@@ -16,6 +19,9 @@ public class UploadController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Качва изображение в облачното хранилище
+    /// </summary>
     [HttpPost("image")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<IActionResult> UploadImage(IFormFile file)
@@ -27,16 +33,16 @@ public class UploadController : ControllerBase
                 return BadRequest(new { message = "No file uploaded" });
             }
 
-            // Validate file type
+            // Валидиране на типа на файла
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif" };
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            
+
             if (!allowedExtensions.Contains(extension))
             {
                 return BadRequest(new { message = $"Invalid file type: '{extension}'. Allowed types: jpg, jpeg, png, gif, webp" });
             }
 
-            // Validate file size (max 25MB)
+            // Валидиране на размера на файла (макс. 10MB)
             if (file.Length > 10 * 1024 * 1024)
             {
                 return BadRequest(new { message = "File size exceeds 10MB limit" });
@@ -58,6 +64,9 @@ public class UploadController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Изтрива изображение от облачното хранилище по публичен идентификатор
+    /// </summary>
     [HttpDelete("image/{publicId}")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<IActionResult> DeleteImage(string publicId)

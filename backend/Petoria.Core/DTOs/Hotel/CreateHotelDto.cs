@@ -3,11 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Hotel;
 
-/// <summary>
-/// DTO за създаване на нов хотел.
-/// Използва се от Controller-а при POST заявка.
-/// НЕ съдържа: Id, CreatedById, CreatedAt, UpdatedAt, Rating (изчислява се от системата).
-/// </summary>
+/// <summary>Заявка: създаване на нов хотел</summary>
 public class CreateHotelDto
 {
     [Required(ErrorMessage = ValidationConstants.Hotel.NameRequired)]

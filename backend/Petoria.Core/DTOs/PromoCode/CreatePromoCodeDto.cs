@@ -3,6 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.PromoCode;
 
+/// <summary>Заявка: създаване на промо код</summary>
 public class CreatePromoCodeDto
 {
     [Required]

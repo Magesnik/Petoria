@@ -4,13 +4,16 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import './ReviewSection.css';
 
+/** Секция с отзиви — среден рейтинг, форма за оценка и списък с рецензии. */
 const ReviewSection = ({ hotelId }) => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    // Данни за потребителския отзив (рейтинг и текст)
     const [userReview, setUserReview] = useState({ rating: 5, reviewText: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { user, isAdmin, isSuperAdmin } = useAuth();
     const { t, language } = useLanguage();
+    // Изчислен среден рейтинг от всички отзиви
     const [averageRating, setAverageRating] = useState(0);
 
     const fetchReviews = React.useCallback(async () => {

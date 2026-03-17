@@ -16,7 +16,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel and Form options for larger file uploads (30MB)
+// Конфигурация на Kestrel и FormOptions за качване на файлове до 30MB
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 30 * 1024 * 1024;
@@ -27,7 +27,7 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 30 * 1024 * 1024;
 });
 
-// Add services to the container.
+// Регистрация на услуги в DI контейнера
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -48,10 +48,10 @@ builder.Services.AddControllers()
             });
         };
     });
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Конфигурация на OpenAPI документация
 builder.Services.AddOpenApi();
 
-// Services
+// Регистрация на бизнес услуги (Auth, Photo, Email, Pricing, Cleanup)
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<Petoria.Core.Contracts.IAuthService, Petoria.Core.Services.AuthService>();
@@ -60,13 +60,13 @@ builder.Services.AddScoped<Petoria.Core.Contracts.IEmailService, Petoria.Core.Se
 builder.Services.AddScoped<Petoria.Core.Contracts.IPricingService, Petoria.Core.Services.PricingService>();
 builder.Services.AddHostedService<Petoria.Services.UnconfirmedUserCleanupService>();
 
-// SignalR
+// SignalR за реално време комуникация
 builder.Services.AddSignalR();
 
-// Configure strong-typed settings objects
+// Зарежда SMTP настройки от конфигурацията
 builder.Services.Configure<Petoria.Core.Models.Email.SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 
-// Response Compression (Gzip + Brotli)
+// Компресия на отговори (Brotli + Gzip)
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -84,10 +84,11 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.Configure<BrotliCompressionProviderOptions>(options => options.Level = CompressionLevel.Fastest);
 builder.Services.Configure<GzipCompressionProviderOptions>(options => options.Level = CompressionLevel.SmallestSize);
 
-// Rate Limiting
+// Ограничаване на заявки (Rate Limiting)
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    // Глобален лимит: 1000 заявки/мин на IP адрес
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -98,17 +99,16 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1)
             }));
 
-    // Stricter rate limit for login/google-login (brute force protection)
-    // SlidingWindow: no burst attacks possible (unlike FixedWindow where 2x requests hit at window boundary)
+    // Защита от brute-force атаки при вход (10 заявки/мин, плъзгащ прозорец)
     options.AddSlidingWindowLimiter("auth", limiterOptions =>
     {
         limiterOptions.AutoReplenishment = true;
         limiterOptions.PermitLimit = 10;
         limiterOptions.Window = TimeSpan.FromMinutes(1);
-        limiterOptions.SegmentsPerWindow = 6; // 6 segments of 10s → smooth enforcement
+        limiterOptions.SegmentsPerWindow = 6; // 6 сегмента по 10 сек
     });
 
-    // Limit for registration — prevents account creation spam & email bombing
+    // Защита от спам регистрации и масово изпращане на имейли
     options.AddSlidingWindowLimiter("register", limiterOptions =>
     {
         limiterOptions.AutoReplenishment = true;
@@ -120,7 +120,7 @@ builder.Services.AddRateLimiter(options =>
 
 
 
-// CORS Configuration
+// CORS конфигурация за React приложението
 var allowedOrigins = builder.Configuration["AllowedOrigins"]
     ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
     ?? new[] { "http://localhost:5174" };
@@ -132,22 +132,22 @@ builder.Services.AddCors(options =>
             .WithOrigins(allowedOrigins)
             .WithMethods("GET", "POST", "PUT", "DELETE")
             .WithHeaders("Content-Type", "Authorization", "x-requested-with", "x-signalr-user-agent")
-            .AllowCredentials()); // Allow cookies
+            .AllowCredentials()); // Разрешава бисквитки
 });
 
-// Database Configuration
+// Конфигурация на MySQL база данни
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 0))
     ));
 
-// Identity Configuration
+// Конфигурация на Identity (потребители и роли)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// JWT Authentication Configuration
+// JWT автентикация с четене на токен от бисквитка
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 
@@ -169,7 +169,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
     
-    // Read token from cookie
+    // Зарежда JWT токена от бисквитката
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -203,22 +203,22 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Apply pending migrations automatically on startup
+// Прилага чакащи миграции автоматично при стартиране
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 }
 
-// Initialize roles and admin user
+// Създава роли и администраторски акаунт
 using (var scope = app.Services.CreateScope())
 {
     var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
     await authService.InitializeRolesAndAdminAsync();
 }
 
-// One-time startup: purge ALL existing unconfirmed users (EmailConfirmed = false).
-// Google OAuth users always have EmailConfirmed = true, so they are never affected.
+// Изтрива всички непотвърдени потребители при стартиране
+// Google OAuth потребителите винаги имат EmailConfirmed = true
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider
@@ -242,14 +242,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Seed demo data (only runs in Development when the database is empty)
+// Зарежда демо данни (само в Development, ако базата е празна)
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     await Petoria.Infrastructure.Data.DatabaseSeeder.SeedAsync(scope.ServiceProvider);
 }
 
-// Configure the HTTP request pipeline.
+// Конфигурация на HTTP middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -260,10 +260,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-// Response Compression
+// Компресия на отговори
 app.UseResponseCompression();
 
-// Security Headers
+// Сигурностни HTTP хедъри
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
@@ -284,10 +284,10 @@ app.Use(async (context, next) =>
 
 app.UseCors("AllowReactApp");
 
-// Rate Limiting
+// Ограничаване на заявки
 app.UseRateLimiter();
 
-// Enable serving static files from wwwroot
+// Обслужване на статични файлове от wwwroot
 app.UseStaticFiles();
 
 app.UseAuthentication();

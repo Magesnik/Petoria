@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Admin;
 
-/// <summary>
-/// DTO за детайлна информация на потребител (за SuperAdmin).
-/// Включва списъци с любими, резервации, хотели и коментари.
-/// </summary>
+/// <summary>Отговор: детайлна информация за потребител (роли, резервации, хотели)</summary>
 public class UserDetailsResponseDto
 {
     public string Id { get; set; } = string.Empty;
@@ -21,9 +18,7 @@ public class UserDetailsResponseDto
     public List<UserReviewDto> Reviews { get; set; } = new();
 }
 
-/// <summary>
-/// Вложен DTO за любими хотели в детайлния потребителски профил.
-/// </summary>
+/// <summary>Вложен DTO: любими хотели в детайлния потребителски профил</summary>
 public class UserFavoriteDto
 {
     public int Id { get; set; }
@@ -35,9 +30,7 @@ public class UserFavoriteDto
     public DateTime CreatedAt { get; set; }
 }
 
-/// <summary>
-/// Вложен DTO за резервации в детайлния потребителски профил.
-/// </summary>
+/// <summary>Вложен DTO: резервации в детайлния потребителски профил</summary>
 public class UserReservationDto
 {
     public int Id { get; set; }
@@ -52,9 +45,7 @@ public class UserReservationDto
     public DateTime CreatedAt { get; set; }
 }
 
-/// <summary>
-/// Вложен DTO за хотели създадени от потребителя.
-/// </summary>
+/// <summary>Вложен DTO: хотели създадени от потребителя</summary>
 public class UserHotelDto
 {
     public int Id { get; set; }
@@ -65,9 +56,7 @@ public class UserHotelDto
     public DateTime CreatedAt { get; set; }
 }
 
-/// <summary>
-/// Вложен DTO за коментари на потребителя.
-/// </summary>
+/// <summary>Вложен DTO: коментари на потребителя</summary>
 public class UserCommentDto
 {
     public int Id { get; set; }
@@ -81,9 +70,7 @@ public class UserCommentDto
     public int RepliesCount { get; set; }
 }
 
-/// <summary>
-/// Вложен DTO за ревюта на потребителя.
-/// </summary>
+/// <summary>Вложен DTO: ревюта на потребителя</summary>
 public class UserReviewDto
 {
     public int Id { get; set; }

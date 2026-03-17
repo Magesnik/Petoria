@@ -3,10 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Comment;
 
-/// <summary>
-/// DTO за обновяване на коментар.
-/// Потребителят може да промени само текста.
-/// </summary>
+/// <summary>Заявка: редакция на текста на коментар</summary>
 public class UpdateCommentDto
 {
     [Required(ErrorMessage = ValidationConstants.Comment.ContentRequired)]

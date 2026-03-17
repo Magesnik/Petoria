@@ -1,5 +1,6 @@
 namespace Petoria.Core.Models.Auth;
 
+/// <summary>Отговор: резултат от автентикация (токен, потребителски данни)</summary>
 public class AuthResponse
 {
     public string Id { get; set; } = string.Empty;

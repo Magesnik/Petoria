@@ -5,6 +5,10 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Infrastructure.Data;
 
+/// <summary>
+/// Контекст на базата данни за приложението Petoria.
+/// Зарежда Identity таблици и всички бизнес обекти (хотели, резервации, отзиви и др.).
+/// </summary>
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -31,7 +35,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
         
-        // Fix for MySQL key length issue with ASP.NET Core Identity (utf8mb4 limit 767 bytes -> 191 chars)
+        // Ограничава дължината на ключовете до 191 символа за MySQL utf8mb4 съвместимост
         builder.Entity<ApplicationUser>(entity => entity.Property(m => m.Id).HasMaxLength(191));
         builder.Entity<ApplicationUser>(entity => entity.Property(m => m.NormalizedEmail).HasMaxLength(191));
         builder.Entity<ApplicationUser>(entity => entity.Property(m => m.NormalizedUserName).HasMaxLength(191));
@@ -53,38 +57,38 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<IdentityUserClaim<string>>(entity => entity.Property(m => m.UserId).HasMaxLength(191));
         builder.Entity<IdentityRoleClaim<string>>(entity => entity.Property(m => m.RoleId).HasMaxLength(191));
         
-        // Unique index for room availability (one record per room type per date)
+        // Уникален индекс за наличност на стаи (един запис на тип стая на дата)
         builder.Entity<RoomAvailability>()
             .HasIndex(ra => new { ra.RoomTypeId, ra.Date })
             .IsUnique();
         
-        // Configure Hotel -> RoomTypes relationship
+        // Връзка Хотел -> Типове стаи с каскадно изтриване
         builder.Entity<RoomType>()
             .HasOne(rt => rt.Hotel)
             .WithMany()
             .HasForeignKey(rt => rt.HotelId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        // Configure RoomType -> RoomDiscounts relationship
+        // Връзка Тип стая -> Отстъпки с каскадно изтриване
         builder.Entity<RoomDiscount>()
             .HasOne(rd => rd.RoomType)
             .WithMany(rt => rt.Discounts)
             .HasForeignKey(rd => rd.RoomTypeId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        // Add index for efficient discount queries
+        // Индекс за бързи заявки по отстъпки
         builder.Entity<RoomDiscount>()
             .HasIndex(rd => new { rd.RoomTypeId, rd.StartDate, rd.EndDate });
 
-        // Ensure unique moderator per hotel
+        // Уникален модератор на хотел
         builder.Entity<HotelModerator>()
             .HasIndex(hm => new { hm.HotelId, hm.UserId })
             .IsUnique();
 
-        // Configure PromoCode
+        // Уникален промо код за всеки хотел
         builder.Entity<PromoCode>()
             .HasIndex(p => new { p.HotelId, p.Code })
-            .IsUnique(); // Unique code per hotel
+            .IsUnique();
 
         builder.Entity<PromoCode>()
             .Property(p => p.DiscountPercentage)

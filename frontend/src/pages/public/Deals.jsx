@@ -7,15 +7,19 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './Deals.css';
 
+/** Страница с актуални оферти — намаления и last-minute предложения с табове. */
 const Deals = () => {
     const navigate = useNavigate();
     const { convertAndFormat } = useCurrency();
     const { t, language } = useLanguage();
+    // Активен таб: 'discounted' | 'last-minute'
     const [activeTab, setActiveTab] = useState('discounted');
+    // Оферти заредени от API
     const [deals, setDeals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Зарежда офертите за избрания тип
     const fetchDeals = async (type) => {
         setLoading(true);
         setError(null);

@@ -2,10 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Petoria.Constants;
 namespace Petoria.Core.DTOs.Profile;
 
-/// <summary>
-/// DTO за обновяване на потребителски профил.
-/// Email и парола НЕ се обновяват тук — за тях има други endpoint-и.
-/// </summary>
+/// <summary>Заявка: обновяване на профила (име, фамилия, настройки)</summary>
 public class UpdateProfileDto
 {
     [MaxLength(ValidationConstants.User.FirstNameMaxLength, ErrorMessage = ValidationConstants.User.FirstNameMaxLengthError)]

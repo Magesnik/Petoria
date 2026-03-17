@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Petoria.Constants;
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Коментар в хотел: текст, автор, дата, parent за нишки, рейтинги, отговори.
+/// </summary>
 public class Comment
 {
     [Key]
@@ -19,14 +22,14 @@ public class Comment
     [MaxLength(ValidationConstants.Comment.ContentMaxLength)]
     public string Text { get; set; } = string.Empty;
 
-    // For nested replies - null if top-level comment
+    // За вложени отговори - null ако е коментар от най-високо ниво
     public int? ParentCommentId { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
+    // Навигационни свойства
     [ForeignKey("HotelId")]
     public Hotel Hotel { get; set; } = null!;
 

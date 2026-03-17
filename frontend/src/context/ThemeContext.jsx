@@ -2,22 +2,25 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from './AuthContext';
 import { api } from '../utils/api';
 
+/** Контекст за тема: светла/тъмна, toggle, data-theme атрибут */
 const ThemeContext = createContext();
 
+/** Хук за достъп до контекста за тема */
 export const useTheme = () => useContext(ThemeContext);
 
+/** Доставчик на контекста за тема */
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const { user } = useAuth();
 
-    // Sync from user profile when user logs in
+    // Синхронизация от потребителския профил при логване
     useEffect(() => {
         if (user?.theme) {
             setTheme(user.theme);
         }
     }, [user]);
 
-    // Apply theme to DOM
+    // Прилагане на темата към DOM елемента
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
@@ -31,14 +34,15 @@ export const ThemeProvider = ({ children }) => {
         }
     }, [theme]);
 
+    /** Превключва между светла и тъмна тема */
     const toggleTheme = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
         setTheme(newTheme);
 
-        // Sync to backend if logged in
+        // Синхронизация с бекенда ако е логнат
         if (user) {
             api.put('/profile', { theme: newTheme })
-                .catch(err => console.error("Failed to save theme preference", err));
+                .catch(err => console.error("Грешка при запис на предпочитание за тема", err));
         }
     };
 

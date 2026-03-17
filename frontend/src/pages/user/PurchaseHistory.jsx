@@ -7,6 +7,7 @@ import { useCurrency } from '../../context/CurrencyContext';
 
 import './PurchaseHistory.css';
 
+/** Страница с история на резервациите — активни, минали и отменени. */
 const PurchaseHistory = () => {
     const { t, language } = useLanguage();
     const { user } = useAuth();
@@ -16,7 +17,8 @@ const PurchaseHistory = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const [activeTab, setActiveTab] = useState('active'); // 'active', 'past', 'cancelled'
+    // Активен таб: 'active' | 'past' | 'cancelled'
+    const [activeTab, setActiveTab] = useState('active');
 
     const fetchReservations = React.useCallback(async () => {
         try {

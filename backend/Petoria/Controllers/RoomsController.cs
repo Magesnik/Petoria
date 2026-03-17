@@ -7,6 +7,9 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за типове стаи: CRUD в рамките на хотел
+/// </summary>
 [Route("api/hotels/{hotelId}/rooms")]
 [ApiController]
 public class RoomsController : ControllerBase
@@ -18,7 +21,9 @@ public class RoomsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/hotels/5/rooms
+    /// <summary>
+    /// Връща всички типове стаи за даден хотел
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RoomTypeResponseDto>>> GetRoomTypes(int hotelId)
     {
@@ -49,7 +54,9 @@ public class RoomsController : ControllerBase
         return Ok(roomTypes);
     }
 
-    // GET: api/hotels/5/rooms/1
+    /// <summary>
+    /// Връща конкретен тип стая по идентификатор в рамките на хотел
+    /// </summary>
     [HttpGet("{id}")]
     public async Task<ActionResult<RoomTypeResponseDto>> GetRoomType(int hotelId, int id)
     {
@@ -76,7 +83,9 @@ public class RoomsController : ControllerBase
         });
     }
 
-    // POST: api/hotels/5/rooms
+    /// <summary>
+    /// Създава нов тип стая в хотел
+    /// </summary>
     [HttpPost]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<ActionResult<RoomTypeResponseDto>> CreateRoomType(int hotelId, CreateRoomTypeDto dto)
@@ -87,7 +96,7 @@ public class RoomsController : ControllerBase
             return NotFound(new { message = "Hotel not found" });
         }
 
-        // Check if user owns this hotel or is SuperAdmin
+        // Проверка дали потребителят е собственик на хотела или SuperAdmin
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
@@ -97,7 +106,7 @@ public class RoomsController : ControllerBase
             return Forbid("You can only add rooms to hotels that you created or moderate");
         }
 
-        // Map DTO → Entity
+        // Преобразуване на DTO → Entity
         var roomType = new RoomType
         {
             HotelId = hotelId,
@@ -114,7 +123,7 @@ public class RoomsController : ControllerBase
         _context.RoomTypes.Add(roomType);
         await _context.SaveChangesAsync();
 
-        // Map Entity → Response DTO
+        // Преобразуване на Entity → Response DTO
         var response = new RoomTypeResponseDto
         {
             Id = roomType.Id,
@@ -132,7 +141,9 @@ public class RoomsController : ControllerBase
         return CreatedAtAction(nameof(GetRoomType), new { hotelId, id = roomType.Id }, response);
     }
 
-    // PUT: api/hotels/5/rooms/1
+    /// <summary>
+    /// Обновява съществуващ тип стая по идентификатор
+    /// </summary>
     [HttpPut("{id}")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> UpdateRoomType(int hotelId, int id, UpdateRoomTypeDto dto)
@@ -146,7 +157,7 @@ public class RoomsController : ControllerBase
             return NotFound();
         }
 
-        // Check authorization
+        // Проверка на оторизацията
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 
@@ -157,7 +168,7 @@ public class RoomsController : ControllerBase
             return Forbid("You can only edit rooms in hotels that you created or moderate");
         }
 
-        // Map DTO → Entity (update)
+        // Преобразуване на DTO → Entity (обновяване)
         existingRoom.Name = dto.Name;
         existingRoom.Description = dto.Description;
         existingRoom.PricePerNight = dto.PricePerNight;
@@ -171,7 +182,9 @@ public class RoomsController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/hotels/5/rooms/1
+    /// <summary>
+    /// Изтрива тип стая по идентификатор
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> DeleteRoomType(int hotelId, int id)
@@ -185,7 +198,7 @@ public class RoomsController : ControllerBase
             return NotFound();
         }
 
-        // Check authorization
+        // Проверка на оторизацията
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
 

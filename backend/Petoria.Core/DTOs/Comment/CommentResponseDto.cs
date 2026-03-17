@@ -1,10 +1,6 @@
 namespace Petoria.Core.DTOs.Comment;
 
-/// <summary>
-/// DTO за изходящи данни на коментар.
-/// Включва информация за потребителя, рейтинг и брой отговори.
-/// НЕ връща вътрешни навигационни свойства на Entity-то.
-/// </summary>
+/// <summary>Отговор: коментар с автор, лайкове, отговори</summary>
 public class CommentResponseDto
 {
     public int Id { get; set; }

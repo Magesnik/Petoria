@@ -3,9 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.HotelMessage;
 
-/// <summary>
-/// DTO за създаване на ново съобщение към хотел
-/// </summary>
+/// <summary>Заявка: ново съобщение до хотел от гост</summary>
 public class CreateHotelMessageDto
 {
     [Required(ErrorMessage = "Темата е задължителна")]

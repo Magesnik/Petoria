@@ -2,23 +2,27 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { api } from '../utils/api';
 
+/** Контекст за валута: BGN/EUR/USD конверсия, форматиране, синхронизация с профила */
 const CurrencyContext = createContext();
 
+/** Хук за достъп до контекста за валута */
 export const useCurrency = () => useContext(CurrencyContext);
 
-// Exchange rates relative to BGN (base currency)
+// Обменни курсове спрямо BGN (базова валута)
 const EXCHANGE_RATES = {
     BGN: 1,
     EUR: 0.5113, // 1 BGN = 0.5113 EUR
     USD: 0.5556  // 1 BGN = 0.5556 USD
 };
 
+// Символи на валутите
 const CURRENCY_SYMBOLS = {
     BGN: 'лв',
     EUR: '€',
     USD: '$'
 };
 
+/** Доставчик на контекста за валута */
 export const CurrencyProvider = ({ children }) => {
     const [currency, setCurrency] = useState(() => {
         const saved = localStorage.getItem('currency');
@@ -26,7 +30,7 @@ export const CurrencyProvider = ({ children }) => {
     });
     const { user } = useAuth();
 
-    // Sync from user profile when user logs in
+    // Синхронизация от потребителския профил при логване
     useEffect(() => {
         if (user?.currency && EXCHANGE_RATES[user.currency]) {
             setCurrency(user.currency);
@@ -38,19 +42,19 @@ export const CurrencyProvider = ({ children }) => {
         localStorage.setItem('currency', currency);
     }, [currency]);
 
-    // Convert price from BGN to selected currency
+    /** Конвертира цена от BGN към избраната валута */
     const convertPrice = (priceInBGN) => {
         if (!priceInBGN || isNaN(priceInBGN)) return 0;
         return priceInBGN * EXCHANGE_RATES[currency];
     };
 
-    // Convert price back to BGN from selected currency
+    /** Конвертира цена обратно към BGN от избраната валута */
     const convertToBase = (priceInCurrentCurrency) => {
         if (!priceInCurrentCurrency || isNaN(priceInCurrentCurrency)) return 0;
         return priceInCurrentCurrency / EXCHANGE_RATES[currency];
     };
 
-    // Format price with currency symbol
+    /** Форматира цена със символ на валутата */
     const formatPrice = (price, showCurrency = true) => {
         if (!price || isNaN(price)) return '0';
 
@@ -58,30 +62,31 @@ export const CurrencyProvider = ({ children }) => {
 
         if (!showCurrency) return formatted;
 
-        // For BGN, symbol goes after the number
+        // За BGN символът е след числото
         if (currency === 'BGN') {
             return `${formatted} ${CURRENCY_SYMBOLS[currency]}`;
         }
 
-        // For EUR and USD, symbol goes before the number
+        // За EUR и USD символът е преди числото
         return `${CURRENCY_SYMBOLS[currency]}${formatted}`;
     };
 
-    // Convenience function to convert and format in one go
+    /** Конвертира и форматира цена наведнъж */
     const convertAndFormat = (priceInBGN, showCurrency = true) => {
         const converted = convertPrice(priceInBGN);
         return formatPrice(converted, showCurrency);
     };
 
+    /** Сменя валутата и синхронизира с бекенда ако е логнат */
     const changeCurrency = (newCurrency) => {
         if (EXCHANGE_RATES[newCurrency]) {
             setCurrency(newCurrency);
             localStorage.setItem('currency', newCurrency);
 
-            // Sync to backend if logged in
+            // Синхронизация с бекенда ако е логнат
             if (user) {
                 api.put('/profile', { currency: newCurrency })
-                    .catch(err => console.error("Failed to save currency preference", err));
+                    .catch(err => console.error("Грешка при запис на предпочитание за валута", err));
             }
         }
     };

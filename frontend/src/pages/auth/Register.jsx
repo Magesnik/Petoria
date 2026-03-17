@@ -10,12 +10,15 @@ import './Auth.css';
 
 const HCAPTCHA_SITE_KEY = '60f0dc46-e892-4c72-8d14-21ae3fe492a6';
 
+/** Страница за регистрация с формуляр, hCaptcha валидация и Google OAuth. */
 const Register = () => {
     const { t } = useLanguage();
     const { login } = useAuth();
     const navigate = useNavigate();
     const captchaRef = useRef(null);
+    // Token от hCaptcha валидацията
     const [captchaToken, setCaptchaToken] = useState(null);
+    // Данни от формуляра за регистрация
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -29,6 +32,7 @@ const Register = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Валидира имена, имейл и парола преди изпращане
     const validateForm = () => {
         const nameRegex = /^[a-zA-Zа-яА-Я]+$/;
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
@@ -87,6 +91,7 @@ const Register = () => {
         }
     };
 
+    // Обработва успешна Google автентикация и влиза автоматично
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             const data = await api.post('/auth/google-login', { googleToken: credentialResponse.credential });

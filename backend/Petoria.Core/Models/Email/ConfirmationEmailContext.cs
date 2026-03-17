@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace Petoria.Core.Models.Email
 {
+    /// <summary>Контекст за имейл шаблон при потвърждение на резервация</summary>
     public class ConfirmationEmailContext
     {
         public string UserLanguage { get; set; } = "bg";

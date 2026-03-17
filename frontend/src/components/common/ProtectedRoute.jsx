@@ -2,10 +2,12 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+/** Проверява автентикация и роли преди да покаже защитено съдържание. */
 const ProtectedRoute = ({ children, requireAdmin, requireModerator }) => {
     const { user, loading, isAdmin } = useAuth();
     const location = useLocation();
 
+    // Показва спинър докато се зарежда автентикацията
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">

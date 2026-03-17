@@ -9,6 +9,9 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за хотели: CRUD операции, търсене с филтри, карта, градове, държави, удобства, ценови диапазон, геокодиране, модератори.
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class HotelsController : ControllerBase
@@ -26,7 +29,9 @@ public class HotelsController : ControllerBase
         _cache = cache;
     }
 
-    // GET: api/hotels
+    /// <summary>
+    /// Връща списък с хотели, филтрирани по име, цена, град, държава, удобства, рейтинг, звезди, дати и гости.
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetHotels(
         [FromQuery] string? search,
@@ -43,28 +48,28 @@ public class HotelsController : ControllerBase
     {
         var query = _context.Hotels.AsQueryable();
 
-        // Search by name or location
+        // Търсене по име или локация
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(h => h.Name.Contains(search) || 
-                                    h.Location.Contains(search) || 
+            query = query.Where(h => h.Name.Contains(search) ||
+                                    h.Location.Contains(search) ||
                                     h.City.Contains(search) ||
                                     h.Country.Contains(search));
         }
 
-        // Filter by city
+        // Филтриране по град
         if (!string.IsNullOrWhiteSpace(city))
         {
             query = query.Where(h => h.City == city);
         }
 
-        // Filter by country
+        // Филтриране по държава
         if (!string.IsNullOrWhiteSpace(country))
         {
             query = query.Where(h => h.Country == country);
         }
 
-        // Filter by amenities
+        // Филтриране по удобства
         if (!string.IsNullOrWhiteSpace(amenities))
         {
             var amenityList = amenities.Split(',');
@@ -74,13 +79,13 @@ public class HotelsController : ControllerBase
             }
         }
 
-        // Filter by rating
+        // Филтриране по рейтинг
         if (minRating.HasValue)
         {
             query = query.Where(h => h.Rating >= minRating.Value);
         }
 
-        // Filter by star rating
+        // Филтриране по брой звезди
         if (!string.IsNullOrWhiteSpace(starRating))
         {
             var stars = starRating.Split(',')
@@ -94,31 +99,31 @@ public class HotelsController : ControllerBase
             }
         }
 
-        // Filter by capacity and availability
+        // Филтриране по капацитет и наличност
         if (guests.HasValue || (checkInDate.HasValue && nights.HasValue && nights.Value > 0))
         {
-            query = query.Where(h => _context.RoomTypes.Any(rt => 
+            query = query.Where(h => _context.RoomTypes.Any(rt =>
                 rt.HotelId == h.Id &&
                 (!guests.HasValue || rt.Capacity >= guests.Value) &&
                 (!checkInDate.HasValue || !nights.HasValue || nights.Value <= 0 ||
-                    !rt.Availabilities.Any(a => 
-                        a.Date >= checkInDate.Value.Date && 
-                        a.Date < checkInDate.Value.Date.AddDays(nights.Value) && 
+                    !rt.Availabilities.Any(a =>
+                        a.Date >= checkInDate.Value.Date &&
+                        a.Date < checkInDate.Value.Date.AddDays(nights.Value) &&
                         (a.AvailableCount <= 0 || a.IsBlocked)))
             ));
         }
 
-        // Only show available hotels that are not suspended by SuperAdmin
+        // Показваме само налични хотели, които не са суспендирани от SuperAdmin
         query = query.Where(h => h.IsAvailable && !h.IsSuspendedBySuperAdmin);
 
         var today = DateTime.UtcNow;
         var thirtyDaysAgo = today.AddDays(-30);
-        
+
         var hotelsWithDiscounts = await query
             .Select(h => new
             {
                 Hotel = h,
-                // Get the cheapest room for this hotel
+                // Вземаме най-евтината стая за този хотел
                 MinRoomPrice = _context.RoomTypes
                     .Where(rt => rt.HotelId == h.Id)
                     .Select(rt => new {
@@ -142,7 +147,7 @@ public class HotelsController : ControllerBase
             .OrderByDescending(h => h.Hotel.Rating)
             .ToListAsync();
 
-        // Transform results and apply price filters in memory (since we need calculated prices)
+        // Трансформиране на резултатите и прилагане на ценови филтри в паметта (след изчисляване)
         var result = hotelsWithDiscounts
             .Select(h =>
             {
@@ -169,8 +174,8 @@ public class HotelsController : ControllerBase
                     Country = hotel.Country,
                     Latitude = hotel.Latitude,
                     Longitude = hotel.Longitude,
-                    OriginalPrice = originalPrice, // Calculated from RoomTypes
-                    DisplayPrice = displayPrice,   // Calculated from RoomTypes
+                    OriginalPrice = originalPrice, // Изчислено от типовете стаи
+                    DisplayPrice = displayPrice,   // Изчислено от типовете стаи
                     HasDiscount = hasDiscount,
                     DiscountPercentage = discountPercentage,
                     Rating = hotel.Rating,
@@ -191,10 +196,10 @@ public class HotelsController : ControllerBase
                 };
             });
 
-        // Only show hotels that have a valid price (meaning they have rooms)
+        // Показваме само хотели с валидна цена (т.е. имат стаи)
         result = result.Where(h => h.DisplayPrice > 0);
 
-        // Apply price filters after calculation
+        // Прилагане на ценовите филтри след изчислението
         if (minPrice.HasValue)
         {
             result = result.Where(h => h.DisplayPrice >= minPrice.Value);
@@ -208,19 +213,21 @@ public class HotelsController : ControllerBase
         return Ok(result.ToList());
     }
 
-    // GET: api/hotels/popular-destinations
+    /// <summary>
+    /// Връща топ 3 популярни дестинации на база брой резервации или рейтинг.
+    /// </summary>
     [HttpGet("popular-destinations")]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<PopularDestinationDto>>> GetPopularDestinations()
     {
         var destinations = new List<PopularDestinationDto>();
-        
-        // 1. Group reservations by Hotel City & Country to find top 3
+
+        // 1. Групиране на резервации по Град и Държава за топ 3
         var popularCities = await _context.Reservations
             .Include(r => r.Hotel)
             .Where(r => r.Hotel != null && r.Status == "Confirmed" && !r.Hotel.IsSuspendedBySuperAdmin && r.Hotel.IsAvailable)
             .GroupBy(r => new { r.Hotel!.City, r.Hotel.Country })
-            .Select(g => new 
+            .Select(g => new
             {
                 g.Key.City,
                 g.Key.Country,
@@ -257,9 +264,9 @@ public class HotelsController : ControllerBase
                 });
             }
         }
-        else 
+        else
         {
-            // Fallback: Pick top 3 highest-rated cities if no reservations exist
+            // Резервен вариант: топ 3 града с най-висок рейтинг, ако няма резервации
             var topRatedCities = await _context.Hotels
                 .Where(h => !h.IsSuspendedBySuperAdmin && h.IsAvailable && !string.IsNullOrEmpty(h.ImageUrl))
                 .GroupBy(h => new { h.City, h.Country })
@@ -280,7 +287,7 @@ public class HotelsController : ControllerBase
                     .OrderByDescending(h => h.Rating)
                     .FirstOrDefaultAsync();
 
-                if (repHotel == null) continue; 
+                if (repHotel == null) continue;
 
                 var minPrice = await _context.RoomTypes
                     .Include(rt => rt.Hotel)
@@ -302,35 +309,37 @@ public class HotelsController : ControllerBase
         return Ok(destinations);
     }
 
-    // GET: api/hotels/5
+    /// <summary>
+    /// Връща детайли за конкретен хотел по ID.
+    /// </summary>
     [HttpGet("{id}")]
     public async Task<ActionResult<HotelResponseDto>> GetHotel(int id)
     {
         var hotel = await _context.Hotels
             .FirstOrDefaultAsync(h => h.Id == id);
-            
+
         if (hotel == null)
         {
             return NotFound();
         }
 
-        // Block access to suspended hotels for non-SuperAdmin users
+        // Блокиране на достъпа до суспендирани хотели за не-SuperAdmin потребители
         if (hotel.IsSuspendedBySuperAdmin && !User.IsInRole("SuperAdmin"))
         {
             return StatusCode(403, new { message = "Този хотел е временно спрян от администрацията." });
         }
 
-        // Calculate price from room types
+        // Изчисляване на цената от типовете стаи
         var minRoomPrice = await _context.RoomTypes
             .Where(rt => rt.HotelId == id)
             .OrderBy(rt => rt.PricePerNight)
             .Select(rt => rt.PricePerNight)
-            .FirstOrDefaultAsync(); // Returns 0 if no rooms
+            .FirstOrDefaultAsync(); // Връща 0, ако няма стаи
 
-        // Check if user is moderator
+        // Проверка дали потребителят е модератор
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isModerator = false;
-        
+
         if (!string.IsNullOrEmpty(userId))
         {
             isModerator = await _context.HotelModerators
@@ -366,24 +375,25 @@ public class HotelsController : ControllerBase
         });
     }
 
-    // GET: api/hotels/my - Get hotels created by current user
+    /// <summary>
+    /// Връща хотелите, създадени от текущия потребител.
+    /// </summary>
     [HttpGet("my")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetMyHotels()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        // We need to fetch hotels and then lookup their prices, or do a join
-        // For simplicity with EF Core, let's fetch hotel items and a subquery for price
+        // Зареждаме хотелите и извличаме минималната цена чрез подзаявка
         var hotelsData = await _context.Hotels
             .Where(h => h.CreatedById == userId)
             .OrderByDescending(h => h.CreatedAt)
-            .Select(h => new 
+            .Select(h => new
             {
                 Hotel = h,
                 MinPrice = _context.RoomTypes
@@ -425,13 +435,15 @@ public class HotelsController : ControllerBase
         return Ok(hotels);
     }
 
-    // GET: api/hotels/moderated
+    /// <summary>
+    /// Връща хотелите, които текущият потребител модерира.
+    /// </summary>
     [HttpGet("moderated")]
     [Authorize]
     public async Task<ActionResult<IEnumerable<HotelResponseDto>>> GetModeratedHotels()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         var hotels = await _context.HotelModerators
             .Where(hm => hm.UserId == userId)
             .Include(hm => hm.Hotel)
@@ -455,7 +467,9 @@ public class HotelsController : ControllerBase
         return Ok(hotels);
     }
 
-    // GET: api/hotels/cities?country=Spain
+    /// <summary>
+    /// Връща списък с уникални градове, филтрирани по държава (незадължително).
+    /// </summary>
     [HttpGet("cities")]
     public async Task<ActionResult<IEnumerable<string>>> GetCities([FromQuery] string? country = null)
     {
@@ -477,13 +491,15 @@ public class HotelsController : ControllerBase
         return Ok(cities);
     }
 
-    // GET: api/hotels/countries
+    /// <summary>
+    /// Връща списък с уникални държави.
+    /// </summary>
     [HttpGet("countries")]
     public async Task<ActionResult<IEnumerable<string>>> GetCountries()
     {
         var countries = await _context.Hotels
-            .Where(h => !string.IsNullOrEmpty(h.Country) && 
-                        h.IsAvailable && 
+            .Where(h => !string.IsNullOrEmpty(h.Country) &&
+                        h.IsAvailable &&
                         !h.IsSuspendedBySuperAdmin &&
                         _context.RoomTypes.Any(rt => rt.HotelId == h.Id))
             .Select(h => h.Country)
@@ -494,19 +510,21 @@ public class HotelsController : ControllerBase
         return Ok(countries);
     }
 
-    // GET: api/hotels/amenities
+    /// <summary>
+    /// Връща списък с всички уникални удобства от наличните хотели.
+    /// </summary>
     [HttpGet("amenities")]
     public async Task<ActionResult<IEnumerable<string>>> GetAllAmenities()
     {
         var hotels = await _context.Hotels
-            .Where(h => !string.IsNullOrEmpty(h.Amenities) && 
-                        h.IsAvailable && 
+            .Where(h => !string.IsNullOrEmpty(h.Amenities) &&
+                        h.IsAvailable &&
                         !h.IsSuspendedBySuperAdmin &&
                         _context.RoomTypes.Any(rt => rt.HotelId == h.Id))
             .Select(h => h.Amenities)
             .ToListAsync();
 
-        // Parse JSON arrays and get unique amenities
+        // Парсване на JSON масиви и извличане на уникални удобства
         var allAmenities = new HashSet<string>();
         foreach (var amenitiesJson in hotels)
         {
@@ -526,7 +544,7 @@ public class HotelsController : ControllerBase
             }
             catch
             {
-                // If JSON parsing fails, try to extract amenities as simple string
+                // Ако JSON парсването се провали, опитваме да извлечем удобствата като прост низ
                 if (!string.IsNullOrWhiteSpace(amenitiesJson))
                 {
                     allAmenities.Add(amenitiesJson.Trim());
@@ -537,31 +555,35 @@ public class HotelsController : ControllerBase
         return Ok(allAmenities.OrderBy(a => a).ToList());
     }
 
-    // GET: api/hotels/price-range
+    /// <summary>
+    /// Връща минималната и максималната цена за нощувка сред видимите хотели.
+    /// </summary>
     [HttpGet("price-range")]
     public async Task<ActionResult<object>> GetPriceRange()
     {
-        // Calculate range based on RoomTypes for visible hotels only
+        // Изчисляване на диапазона на база типове стаи за видими хотели
         var query = _context.RoomTypes
             .Include(rt => rt.Hotel)
             .Where(rt => rt.Hotel.IsAvailable && !rt.Hotel.IsSuspendedBySuperAdmin);
 
         if (!await query.AnyAsync())
         {
-             return Ok(new { minPrice = 0, maxPrice = 1000 }); // Default fallback
+             return Ok(new { minPrice = 0, maxPrice = 1000 }); // Стойност по подразбиране
         }
 
         var minPrice = await query.MinAsync(rt => rt.PricePerNight);
         var maxPrice = await query.MaxAsync(rt => rt.PricePerNight);
 
-        return Ok(new 
-        { 
-            minPrice = Math.Floor(minPrice), 
-            maxPrice = Math.Ceiling(maxPrice) 
+        return Ok(new
+        {
+            minPrice = Math.Floor(minPrice),
+            maxPrice = Math.Ceiling(maxPrice)
         });
     }
 
-    // GET: api/hotels/map
+    /// <summary>
+    /// Връща хотели за визуализация на картата с приложени филтри.
+    /// </summary>
     [HttpGet("map")]
     public async Task<ActionResult<IEnumerable<HotelMapResponseDto>>> GetHotelsForMap(
         [FromQuery] string? search,
@@ -578,11 +600,11 @@ public class HotelsController : ControllerBase
     {
         var query = _context.Hotels.AsQueryable();
 
-        // Apply same filters as GetHotels
+        // Прилагане на същите филтри като GetHotels
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(h => h.Name.Contains(search) || 
-                                    h.Location.Contains(search) || 
+            query = query.Where(h => h.Name.Contains(search) ||
+                                    h.Location.Contains(search) ||
                                     h.City.Contains(search) ||
                                     h.Country.Contains(search));
         }
@@ -611,7 +633,7 @@ public class HotelsController : ControllerBase
             query = query.Where(h => h.Rating >= minRating.Value);
         }
 
-        // Filter by star rating
+        // Филтриране по брой звезди
         if (!string.IsNullOrWhiteSpace(starRating))
         {
             var stars = starRating.Split(',')
@@ -625,26 +647,26 @@ public class HotelsController : ControllerBase
             }
         }
 
-        // Filter by capacity and availability
+        // Филтриране по капацитет и наличност
         if (guests.HasValue || (checkInDate.HasValue && nights.HasValue && nights.Value > 0))
         {
-            query = query.Where(h => _context.RoomTypes.Any(rt => 
+            query = query.Where(h => _context.RoomTypes.Any(rt =>
                 rt.HotelId == h.Id &&
                 (!guests.HasValue || rt.Capacity >= guests.Value) &&
                 (!checkInDate.HasValue || !nights.HasValue || nights.Value <= 0 ||
-                    !rt.Availabilities.Any(a => 
-                        a.Date >= checkInDate.Value.Date && 
-                        a.Date < checkInDate.Value.Date.AddDays(nights.Value) && 
+                    !rt.Availabilities.Any(a =>
+                        a.Date >= checkInDate.Value.Date &&
+                        a.Date < checkInDate.Value.Date.AddDays(nights.Value) &&
                         (a.AvailableCount <= 0 || a.IsBlocked)))
             ));
         }
 
-        // Only show available hotels that are not suspended by SuperAdmin
+        // Показваме само налични хотели, които не са суспендирани от SuperAdmin
         query = query.Where(h => h.IsAvailable && !h.IsSuspendedBySuperAdmin);
 
-        // Fetch hotels with their min room price
+        // Зареждане на хотелите с минимална цена на стая
         var hotelsData = await query
-            .Select(h => new 
+            .Select(h => new
             {
                 Hotel = h,
                 MinPrice = _context.RoomTypes
@@ -669,7 +691,7 @@ public class HotelsController : ControllerBase
             ImageUrl = h.Hotel.ImageUrl
         });
 
-        // Apply price filters in memory
+        // Прилагане на ценови филтри в паметта
         if (minPrice.HasValue)
         {
             hotels = hotels.Where(h => h.PricePerNight >= minPrice.Value);
@@ -680,17 +702,19 @@ public class HotelsController : ControllerBase
             hotels = hotels.Where(h => h.PricePerNight <= maxPrice.Value);
         }
 
-        // Only show hotels that have a valid price
+        // Показваме само хотели с валидна цена
         hotels = hotels.Where(h => h.PricePerNight > 0);
 
         return Ok(hotels.ToList());
     }
 
-    // GET: api/hotels/geocode
+    /// <summary>
+    /// Извършва обратно геокодиране по координати (lat/lon) чрез Nominatim API.
+    /// </summary>
     [HttpGet("geocode")]
     public async Task<IActionResult> GetAddress([FromQuery] double lat, [FromQuery] double lon)
     {
-        // Round to 4 decimal places (~11m precision) to maximise cache hits
+        // Закръгляне до 4 знака след десетичната (~11м точност) за по-добро кеширане
         var cacheKey = $"geocode_{lat:F4}_{lon:F4}";
 
         if (_cache.TryGetValue(cacheKey, out string? cached))
@@ -708,7 +732,7 @@ public class HotelsController : ControllerBase
 
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                // Cache a negative result briefly to avoid retry storms
+                // Кешираме отрицателен резултат за кратко, за да избегнем повторни заявки
                 _cache.Set(cacheKey, "{}", TimeSpan.FromSeconds(30));
                 return StatusCode(429, "Error from geocoding service");
             }
@@ -726,22 +750,24 @@ public class HotelsController : ControllerBase
         }
     }
 
-    // POST: api/hotels
+    /// <summary>
+    /// Създава нов хотел (само за Admin/SuperAdmin).
+    /// </summary>
     [HttpPost]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<ActionResult<HotelResponseDto>> CreateHotel(CreateHotelDto dto)
     {
         try
         {
-            // Get the current user's ID from claims
+            // Вземаме ID на текущия потребител от claims
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            
+
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new { message = "User ID not found in token" });
             }
 
-            // Map DTO → Entity
+            // Преобразуване на DTO → Entity
             var hotel = new Hotel
             {
                 Name = dto.Name,
@@ -751,14 +777,14 @@ public class HotelsController : ControllerBase
                 Country = dto.Country,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
-                // PricePerNight removed
+                // PricePerNight е премахнато
                 StarRating = dto.StarRating,
                 ImageUrl = dto.ImageUrl,
                 Images = dto.Images,
                 Amenities = dto.Amenities,
                 RoomTypes = dto.RoomTypes,
                 CancellationPolicies = dto.CancellationPolicies,
-                // Force inactive by default until rooms/prices are added
+                // По подразбиране е неактивен, докато не се добавят стаи/цени
                 IsAvailable = false,
                 CreatedById = userId,
                 CreatedAt = DateTime.UtcNow,
@@ -768,7 +794,7 @@ public class HotelsController : ControllerBase
             _context.Hotels.Add(hotel);
             await _context.SaveChangesAsync();
 
-            // Map Entity → Response DTO
+            // Преобразуване на Entity → Response DTO
             var response = new HotelResponseDto
             {
                 Id = hotel.Id,
@@ -779,7 +805,7 @@ public class HotelsController : ControllerBase
                 Country = hotel.Country,
                 Latitude = hotel.Latitude,
                 Longitude = hotel.Longitude,
-                OriginalPrice = 0, // No rooms yet
+                OriginalPrice = 0, // Все още няма стаи
                 DisplayPrice = 0,
                 HasDiscount = false,
                 DiscountPercentage = null,
@@ -802,7 +828,10 @@ public class HotelsController : ControllerBase
             return StatusCode(500, new { message = "An unexpected error occurred while creating the hotel." });
         }
     }
-    // PUT: api/hotels/5
+
+    /// <summary>
+    /// Редактира съществуващ хотел по ID (Admin/SuperAdmin/Модератор).
+    /// </summary>
     [HttpPut("{id}")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin + "," + Petoria.Constants.Roles.HotelModerator)]
     public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto)
@@ -813,20 +842,20 @@ public class HotelsController : ControllerBase
             return NotFound();
         }
 
-        // Check authorization: SuperAdmin can edit any, Admin can only edit own hotels
+        // Проверка на оторизацията: SuperAdmin може да редактира всички, Admin — само собствените си хотели
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
         var isModerator = await _context.HotelModerators.AnyAsync(hm => hm.HotelId == id && hm.UserId == userId);
-        
+
         if (!isSuperAdmin && existingHotel.CreatedById != userId && !isModerator)
         {
             return Forbid("You can only edit hotels that you created or moderate");
         }
 
-        // Validate activation rule: Cannot activate if no rooms
+        // Валидация на правилото за активиране: не може да се активира без стаи
         if (dto.IsAvailable && !existingHotel.IsAvailable)
         {
-            // Check if hotel has any room types
+            // Проверка дали хотелът има типове стаи
             var hasRooms = await _context.RoomTypes.AnyAsync(rt => rt.HotelId == id);
             if (!hasRooms)
             {
@@ -834,7 +863,7 @@ public class HotelsController : ControllerBase
             }
         }
 
-        // Map DTO → Entity (update)
+        // Преобразуване на DTO → Entity (обновяване)
         existingHotel.Name = dto.Name;
         existingHotel.Description = dto.Description;
         existingHotel.Location = dto.Location;
@@ -846,10 +875,9 @@ public class HotelsController : ControllerBase
         existingHotel.Images = dto.Images;
         existingHotel.Amenities = dto.Amenities;
         existingHotel.CancellationPolicies = dto.CancellationPolicies;
-        // RoomTypes are managed via separate controller usually, but if passed here, ignore or handle carefully. 
-        // We generally don't update connection via UpdateHotelDto for RoomTypes as it's complex.
-        // exisingHotel.RoomTypes = dto.RoomTypes; // Avoid updating detailed navigation property here if not needed
-        
+        // Типовете стаи се управляват чрез отделен контролер.
+        // Не обновяваме навигационното свойство RoomTypes чрез UpdateHotelDto, тъй като е сложно.
+
         existingHotel.IsAvailable = dto.IsAvailable;
         existingHotel.UpdatedAt = DateTime.UtcNow;
 
@@ -872,7 +900,9 @@ public class HotelsController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: api/hotels/5
+    /// <summary>
+    /// Изтрива хотел по ID (Admin/SuperAdmin).
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = Petoria.Constants.Roles.Admin + "," + Petoria.Constants.Roles.SuperAdmin)]
     public async Task<IActionResult> DeleteHotel(int id)
@@ -883,10 +913,10 @@ public class HotelsController : ControllerBase
             return NotFound();
         }
 
-        // Check authorization: SuperAdmin can delete any, Admin can only delete own hotels
+        // Проверка на оторизацията: SuperAdmin може да изтрива всички, Admin — само собствените си хотели
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isSuperAdmin = User.IsInRole("SuperAdmin");
-        
+
         if (!isSuperAdmin && hotel.CreatedById != userId)
         {
             return Forbid("You can only delete hotels that you created");
@@ -903,7 +933,9 @@ public class HotelsController : ControllerBase
         return _context.Hotels.Any(e => e.Id == id);
     }
 
-    // POST: api/hotels/5/moderators
+    /// <summary>
+    /// Добавя модератор към хотел по имейл (само собственик или SuperAdmin).
+    /// </summary>
     [HttpPost("{id}/moderators")]
     [Authorize]
     public async Task<IActionResult> AddModerator(int id, [FromBody] AddModeratorDto dto)
@@ -913,7 +945,7 @@ public class HotelsController : ControllerBase
 
         if (hotel == null) return NotFound("Hotel not found");
 
-        // Only owner or super admin can add moderators
+        // Само собственикът или SuperAdmin може да добавя модератори
         if (hotel.CreatedById != userId && !User.IsInRole("SuperAdmin"))
         {
             return Forbid();
@@ -950,7 +982,9 @@ public class HotelsController : ControllerBase
         return Ok(new { message = "Moderator added successfully" });
     }
 
-    // GET: api/hotels/5/moderators
+    /// <summary>
+    /// Връща списък с модераторите на даден хотел (само собственик или SuperAdmin).
+    /// </summary>
     [HttpGet("{id}/moderators")]
     [Authorize]
     public async Task<ActionResult<IEnumerable<ModeratorResponseDto>>> GetModerators(int id)
@@ -960,7 +994,7 @@ public class HotelsController : ControllerBase
 
         if (hotel == null) return NotFound("Hotel not found");
 
-        // Only owner or super admin can see moderators
+        // Само собственикът или SuperAdmin може да вижда модераторите
         if (hotel.CreatedById != userId && !User.IsInRole("SuperAdmin"))
         {
             return Forbid();
@@ -982,7 +1016,9 @@ public class HotelsController : ControllerBase
         return Ok(moderators);
     }
 
-    // DELETE: api/hotels/5/moderators/{userId}
+    /// <summary>
+    /// Премахва модератор от хотел (само собственик или SuperAdmin).
+    /// </summary>
     [HttpDelete("{id}/moderators/{moderatorId}")]
     [Authorize]
     public async Task<IActionResult> RemoveModerator(int id, string moderatorId)
@@ -992,7 +1028,7 @@ public class HotelsController : ControllerBase
 
         if (hotel == null) return NotFound("Hotel not found");
 
-        // Only owner or super admin can remove moderators
+        // Само собственикът или SuperAdmin може да премахва модератори
         if (hotel.CreatedById != userId && !User.IsInRole("SuperAdmin"))
         {
             return Forbid();

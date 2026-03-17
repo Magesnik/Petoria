@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Petoria.Constants;
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Ревю за хотел: рейтинг (1-5) и текст.
+/// </summary>
 public class HotelReview
 {
     [Key]
@@ -25,7 +28,7 @@ public class HotelReview
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation properties
+    // Навигационни свойства
     [ForeignKey("HotelId")]
     public Hotel Hotel { get; set; } = null!;
 

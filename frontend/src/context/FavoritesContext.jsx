@@ -2,8 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { api } from '../utils/api';
 import { useAuth } from './AuthContext';
 
+/** Контекст за любими хотели: списък с ID-та, toggle, проверка, детайли */
 const FavoritesContext = createContext();
 
+/** Хук за достъп до контекста за любими */
 export const useFavorites = () => {
     const context = useContext(FavoritesContext);
     if (!context) {
@@ -12,12 +14,13 @@ export const useFavorites = () => {
     return context;
 };
 
+/** Доставчик на контекста за любими хотели */
 export const FavoritesProvider = ({ children }) => {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(false);
     const { user } = useAuth();
 
-    // Fetch favorites from API when user logs in
+    /** Зарежда списъка с любими ID-та от API */
     const fetchFavorites = useCallback(async () => {
         if (!user) {
             setFavorites([]);
@@ -29,22 +32,22 @@ export const FavoritesProvider = ({ children }) => {
             const data = await api.get('/favorites/ids');
             setFavorites(data);
         } catch (error) {
-            console.error('Error fetching favorites:', error);
+            console.error('Грешка при зареждане на любими:', error);
             setFavorites([]);
         } finally {
             setLoading(false);
         }
     }, [user]);
 
-    // Fetch favorites when user changes
+    // Зареждане на любими при смяна на потребител
     useEffect(() => {
         fetchFavorites();
     }, [fetchFavorites]);
 
-    // Toggle favorite via API
+    /** Превключва любим статус на хотел чрез API */
     const toggleFavorite = async (hotelId) => {
         if (!user) {
-            console.warn('User must be logged in to manage favorites');
+            console.warn('Потребителят трябва да е логнат за да управлява любими');
             return false;
         }
 
@@ -52,25 +55,26 @@ export const FavoritesProvider = ({ children }) => {
             const data = await api.post(`/favorites/toggle/${hotelId}`);
 
             if (data.isFavorite) {
-                // Add to local state
+                // Добавяне към локалния state
                 setFavorites(prev => [...prev, hotelId]);
             } else {
-                // Remove from local state
+                // Премахване от локалния state
                 setFavorites(prev => prev.filter(id => id !== hotelId));
             }
 
             return data.isFavorite;
         } catch (error) {
-            console.error('Error toggling favorite:', error);
+            console.error('Грешка при превключване на любим:', error);
             return null;
         }
     };
 
+    /** Проверява дали хотел е в любими */
     const isFavorite = (hotelId) => {
         return favorites.includes(hotelId);
     };
 
-    // Get full favorites list with hotel details
+    /** Връща пълен списък с любими хотели с детайли */
     const getFavoritesWithDetails = async () => {
         if (!user) {
             return [];
@@ -80,7 +84,7 @@ export const FavoritesProvider = ({ children }) => {
             const data = await api.get('/favorites');
             return data;
         } catch (error) {
-            console.error('Error fetching favorites with details:', error);
+            console.error('Грешка при зареждане на любими с детайли:', error);
             return [];
         }
     };

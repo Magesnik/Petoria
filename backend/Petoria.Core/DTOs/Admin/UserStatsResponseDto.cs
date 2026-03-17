@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Admin;
 
-/// <summary>
-/// DTO за изходящи данни на потребителска статистика (списък с потребители).
-/// Използва се от SuperAdmin dashboard-а.
-/// </summary>
+/// <summary>Отговор: обобщена статистика за потребител</summary>
 public class UserStatsResponseDto
 {
     public string Id { get; set; } = string.Empty;

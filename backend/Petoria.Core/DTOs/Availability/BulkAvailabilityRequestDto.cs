@@ -3,9 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Availability;
 
-/// <summary>
-/// DTO за масово задаване на наличност за диапазон от дати.
-/// </summary>
+/// <summary>Заявка: масово задаване на наличност за период</summary>
 public class BulkAvailabilityRequestDto
 {
     [Required(ErrorMessage = ValidationConstants.Availability.RoomTypeRequired)]

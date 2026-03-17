@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Любим хотел на потребител.
+/// </summary>
 public class Favorite
 {
     [Key]

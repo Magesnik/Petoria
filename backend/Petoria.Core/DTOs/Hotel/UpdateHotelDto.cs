@@ -3,12 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Hotel;
 
-/// <summary>
-/// DTO за обновяване на хотел.
-/// Използва се от Controller-а при PUT заявка.
-/// Id идва от URL маршрута, не от тялото на заявката.
-/// НЕ съдържа: Id, CreatedById, CreatedAt, UpdatedAt, Rating.
-/// </summary>
+/// <summary>Заявка: обновяване на хотел</summary>
 public class UpdateHotelDto
 {
     [Required(ErrorMessage = ValidationConstants.Hotel.NameRequired)]

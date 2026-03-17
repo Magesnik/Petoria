@@ -9,7 +9,9 @@ import { useCart } from '../../context/CartContext';
 import logoImg from '../../assets/logo.png';
 import './Header.css';
 
+/** Главен хедър с навигация, потребителско меню, тема, език, валута и количка. */
 const Header = () => {
+  // Визуален ефект при скролиране
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

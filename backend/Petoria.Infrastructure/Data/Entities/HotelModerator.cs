@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Petoria.Infrastructure.Data.Entities;
 
+/// <summary>
+/// Връзка модератор-хотел.
+/// </summary>
 public class HotelModerator
 {
     [Key]

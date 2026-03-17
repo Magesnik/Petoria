@@ -3,10 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.DTOs.Discount;
 
-/// <summary>
-/// DTO за обновяване на отстъпка.
-/// RoomTypeId НЕ може да се променя — само дати и процент.
-/// </summary>
+/// <summary>Заявка: обновяване на отстъпка</summary>
 public class UpdateDiscountDto
 {
     [Required(ErrorMessage = ValidationConstants.Discount.StartDateRequired)]

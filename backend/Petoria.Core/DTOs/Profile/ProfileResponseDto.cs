@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Profile;
 
-/// <summary>
-/// DTO за изходящи данни на потребителски профил.
-/// НЕ връща пароли, хешове, SecurityStamp и други вътрешни Identity полета.
-/// </summary>
+/// <summary>Отговор: профил на потребителя (имена, аватар, роли, настройки)</summary>
 public class ProfileResponseDto
 {
     public string Id { get; set; } = string.Empty;

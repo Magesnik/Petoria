@@ -1,8 +1,6 @@
 namespace Petoria.Core.DTOs.Deals;
 
-/// <summary>
-/// DTO за пакетни оферти (7 нощувки с отстъпка).
-/// </summary>
+/// <summary>Отговор: пакетна оферта за 7 нощувки с 15% отстъпка</summary>
 public class PackageDealResponseDto
 {
     public int Id { get; set; }

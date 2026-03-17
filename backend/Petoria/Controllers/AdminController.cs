@@ -9,6 +9,9 @@ using Petoria.Infrastructure.Data.Entities;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за администрация: управление на потребители (повишаване/понижаване/блокиране), статистика, модератори, суспендиране на хотели.
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = Petoria.Constants.Roles.SuperAdmin)]
@@ -23,7 +26,9 @@ public class AdminController : ControllerBase
         _context = context;
     }
 
-    // GET: api/admin/users
+    /// <summary>
+    /// Връща списък с всички потвърдени потребители и тяхната статистика.
+    /// </summary>
     [HttpGet("users")]
     public async Task<ActionResult<IEnumerable<UserStatsResponseDto>>> GetAllUsers()
     {
@@ -63,7 +68,9 @@ public class AdminController : ControllerBase
         return Ok(userStats);
     }
 
-    // GET: api/admin/users/{id}
+    /// <summary>
+    /// Връща детайлна информация за конкретен потребител (любими, резервации, хотели, коментари, ревюта).
+    /// </summary>
     [HttpGet("users/{id}")]
     public async Task<ActionResult<UserDetailsResponseDto>> GetUserDetails(string id)
     {
@@ -75,7 +82,7 @@ public class AdminController : ControllerBase
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        // Get user's favorites with hotel details
+        // Вземане на любимите хотели на потребителя с детайли
         var favorites = await _context.Favorites
             .Where(f => f.UserId == id)
             .Include(f => f.Hotel)
@@ -91,7 +98,7 @@ public class AdminController : ControllerBase
             })
             .ToListAsync();
 
-        // Get user's reservations with hotel details
+        // Вземане на резервациите на потребителя с детайли за хотела
         var reservations = await _context.Reservations
             .Where(r => r.UserId == id)
             .Include(r => r.Hotel)
@@ -111,7 +118,7 @@ public class AdminController : ControllerBase
             })
             .ToListAsync();
 
-        // Get hotels created by user
+        // Вземане на хотелите, създадени от потребителя
         var hotelsCreated = await _context.Hotels
             .Where(h => h.CreatedById == id)
             .Select(h => new UserHotelDto
@@ -125,7 +132,7 @@ public class AdminController : ControllerBase
             })
             .ToListAsync();
 
-        // Get user's comments with hotel and rating details
+        // Вземане на коментарите на потребителя с детайли за хотел и рейтинг
         var comments = await _context.Comments
             .Where(c => c.UserId == id)
             .Include(c => c.Hotel)
@@ -146,7 +153,7 @@ public class AdminController : ControllerBase
             })
             .ToListAsync();
 
-        // Get user's reviews with hotel details
+        // Вземане на ревютата на потребителя с детайли за хотела
         var reviews = await _context.HotelReviews
             .Where(r => r.UserId == id)
             .Include(r => r.Hotel)
@@ -166,7 +173,7 @@ public class AdminController : ControllerBase
             .Where(r => r.UserId == id && (r.Status == "Completed" || r.Status == "Confirmed"))
             .SumAsync(r => (decimal?)r.TotalPrice) ?? 0;
 
-        // Map Entity → Response DTO
+        // Преобразуване на Entity → Response DTO
         return Ok(new UserDetailsResponseDto
         {
             Id = user.Id,
@@ -185,7 +192,9 @@ public class AdminController : ControllerBase
         });
     }
 
-    // PUT: api/admin/users/{id}/promote
+    /// <summary>
+    /// Повишава потребител до Admin роля.
+    /// </summary>
     [HttpPut("users/{id}/promote")]
     public async Task<ActionResult> PromoteToAdmin(string id)
     {
@@ -195,7 +204,7 @@ public class AdminController : ControllerBase
             return NotFound("User not found");
         }
 
-        // Check if already admin
+        // Проверка дали вече е Admin
         if (await _userManager.IsInRoleAsync(user, "Admin"))
         {
             return BadRequest("User is already an Admin");
@@ -210,7 +219,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = $"User {user.Email} has been promoted to Admin" });
     }
 
-    // DELETE: api/admin/users/{id}/demote
+    /// <summary>
+    /// Понижава потребител от Admin роля.
+    /// </summary>
     [HttpDelete("users/{id}/demote")]
     public async Task<ActionResult> DemoteFromAdmin(string id)
     {
@@ -220,13 +231,13 @@ public class AdminController : ControllerBase
             return NotFound("User not found");
         }
 
-        // Cannot demote SuperAdmin
+        // Не може да се понижи SuperAdmin
         if (await _userManager.IsInRoleAsync(user, "SuperAdmin"))
         {
             return BadRequest("Cannot demote a SuperAdmin");
         }
 
-        // Check if user is admin
+        // Проверка дали потребителят е Admin
         if (!await _userManager.IsInRoleAsync(user, "Admin"))
         {
             return BadRequest("User is not an Admin");
@@ -241,7 +252,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = $"User {user.Email} has been demoted from Admin" });
     }
 
-    // PUT: api/admin/users/{id}/promote-super
+    /// <summary>
+    /// Повишава потребител до SuperAdmin роля.
+    /// </summary>
     [HttpPut("users/{id}/promote-super")]
     public async Task<ActionResult> PromoteToSuperAdmin(string id)
     {
@@ -262,7 +275,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = $"User {user.Email} has been promoted to SuperAdmin" });
     }
 
-    // DELETE: api/admin/users/{id}/demote-super
+    /// <summary>
+    /// Понижава потребител от SuperAdmin роля.
+    /// </summary>
     [HttpDelete("users/{id}/demote-super")]
     public async Task<ActionResult> DemoteFromSuperAdmin(string id)
     {
@@ -281,7 +296,9 @@ public class AdminController : ControllerBase
     }
 
 
-    // DELETE: api/admin/users/{id}
+    /// <summary>
+    /// Изтрива потребител по ID (не може да се изтрие SuperAdmin или самия себе си).
+    /// </summary>
     [HttpDelete("users/{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
@@ -303,7 +320,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = $"User {user.Email} has been deleted" });
     }
 
-    // PUT: api/admin/users/{id}/block
+    /// <summary>
+    /// Блокира потребител (забранява достъпа му до системата).
+    /// </summary>
     [HttpPut("users/{id}/block")]
     public async Task<ActionResult> BlockUser(string id)
     {
@@ -324,7 +343,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = $"User {user.Email} has been blocked" });
     }
 
-    // PUT: api/admin/users/{id}/unblock
+    /// <summary>
+    /// Отблокира потребител.
+    /// </summary>
     [HttpPut("users/{id}/unblock")]
     public async Task<ActionResult> UnblockUser(string id)
     {
@@ -337,7 +358,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = $"User {user.Email} has been unblocked" });
     }
 
-    // GET: api/admin/stats
+    /// <summary>
+    /// Връща обобщена статистика за админ панела (потребители, резервации, приходи, хотели и т.н.).
+    /// </summary>
     [HttpGet("stats")]
     public async Task<ActionResult<DashboardStatsResponseDto>> GetDashboardStats()
     {
@@ -347,8 +370,8 @@ public class AdminController : ControllerBase
         var totalFavorites = await _context.Favorites.CountAsync();
         var totalReservations = await _context.Reservations.CountAsync();
         var totalRevenue = await _context.Reservations
-            .SumAsync(r => 
-                (r.Status == "Completed" || r.Status == "Confirmed") ? r.TotalPrice : 
+            .SumAsync(r =>
+                (r.Status == "Completed" || r.Status == "Confirmed") ? r.TotalPrice :
                 (r.Status == "Cancelled") ? r.RetainedAmount : 0
             );
         var totalHotels = await _context.Hotels.CountAsync();
@@ -358,7 +381,7 @@ public class AdminController : ControllerBase
         return Ok(new DashboardStatsResponseDto
         {
             TotalUsers = totalUsers,
-            AdminUsers = adminUsers - superAdminUsers, // Exclude super admins from admin count
+            AdminUsers = adminUsers - superAdminUsers, // Изключваме SuperAdmin от броя на Admin
             SuperAdminUsers = superAdminUsers,
             TotalFavorites = totalFavorites,
             TotalReservations = totalReservations,
@@ -369,7 +392,9 @@ public class AdminController : ControllerBase
         });
     }
 
-    // GET: api/admin/moderators
+    /// <summary>
+    /// Връща списък с всички модератори на хотели.
+    /// </summary>
     [HttpGet("moderators")]
     public async Task<ActionResult<IEnumerable<AdminModeratorDto>>> GetAllModerators()
     {
@@ -391,7 +416,9 @@ public class AdminController : ControllerBase
         return Ok(moderators);
     }
 
-    // DELETE: api/admin/moderators/{id}
+    /// <summary>
+    /// Премахва модераторска роля по ID на назначението.
+    /// </summary>
     [HttpDelete("moderators/{id}")]
     public async Task<IActionResult> RemoveModeratorRole(int id)
     {
@@ -407,7 +434,9 @@ public class AdminController : ControllerBase
         return Ok(new { message = "Moderator role removed successfully" });
     }
 
-    // GET: api/admin/hotels
+    /// <summary>
+    /// Връща всички хотели с информация за собственик (за админ панела).
+    /// </summary>
     [HttpGet("hotels")]
     public async Task<ActionResult<IEnumerable<object>>> GetAllHotelsForAdmin()
     {
@@ -432,7 +461,9 @@ public class AdminController : ControllerBase
         return Ok(hotels);
     }
 
-    // POST: api/admin/hotels/{id}/toggle-suspend
+    /// <summary>
+    /// Превключва суспендирането на хотел от SuperAdmin (активиране/деактивиране).
+    /// </summary>
     [HttpPost("hotels/{id}/toggle-suspend")]
     public async Task<IActionResult> ToggleHotelSuspend(int id)
     {

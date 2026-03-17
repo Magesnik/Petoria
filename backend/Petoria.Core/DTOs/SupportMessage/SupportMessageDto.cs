@@ -1,5 +1,6 @@
 namespace Petoria.Core.DTOs.SupportMessage
 {
+    /// <summary>Отговор: тикет за поддръжка с отговор и статус</summary>
     public class SupportMessageDto
     {
         public int Id { get; set; }

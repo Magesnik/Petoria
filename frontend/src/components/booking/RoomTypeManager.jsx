@@ -3,6 +3,7 @@ import { api } from '../../utils/api';
 import { useLanguage } from '../../context/LanguageContext';
 import './RoomTypeManager.css';
 
+/** Мениджър за типове стаи на хотел — добавяне, редактиране и изтриване. */
 const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
     const { t } = useLanguage();
     const [roomTypes, setRoomTypes] = useState([]);
@@ -10,7 +11,7 @@ const RoomTypeManager = ({ hotelId, onRoomsChange }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // Form state for adding/editing
+    // Данни за формуляра при добавяне/редактиране
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({

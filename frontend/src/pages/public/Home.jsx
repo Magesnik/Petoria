@@ -8,14 +8,17 @@ import { api } from '../../utils/api';
 import SearchBar from '../../components/hotel/SearchBar';
 import './Home.css';
 
+/** Начална страница с hero секция, търсачка и популярни дестинации. */
 const Home = () => {
     const { t } = useLanguage();
     const { convertAndFormat } = useCurrency();
     const { liveUsers } = useLiveUsers();
     const navigate = useNavigate();
+    // Популярни дестинации заредени от API
     const [popularDestinations, setPopularDestinations] = useState([]);
     const [loadingDestinations, setLoadingDestinations] = useState(true);
 
+    // Зарежда популярните дестинации при монтиране
     useEffect(() => {
         const fetchPopularDestinations = async () => {
             try {

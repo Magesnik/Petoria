@@ -2,6 +2,7 @@ using System;
 
 namespace Petoria.Core.Models.Email
 {
+    /// <summary>Контекст за имейл шаблон при анулиране на резервация</summary>
     public class CancellationEmailContext
     {
         public string UserLanguage { get; set; } = "bg";

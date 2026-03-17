@@ -3,6 +3,7 @@ using Petoria.Constants;
 
 namespace Petoria.Core.Models.Auth;
 
+/// <summary>Заявка: имейл и парола за логин</summary>
 public class LoginModel
 {
     [Required(ErrorMessage = ValidationConstants.User.EmailRequired)]

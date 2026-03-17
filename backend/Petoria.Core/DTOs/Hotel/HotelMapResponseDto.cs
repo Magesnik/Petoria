@@ -1,9 +1,6 @@
 namespace Petoria.Core.DTOs.Hotel;
 
-/// <summary>
-/// Олекотен DTO за показване на хотели на картата.
-/// Съдържа само полетата, необходими за маркерите на картата.
-/// </summary>
+/// <summary>Отговор: минимални данни за хотел на картата (координати, цена)</summary>
 public class HotelMapResponseDto
 {
     public int Id { get; set; }

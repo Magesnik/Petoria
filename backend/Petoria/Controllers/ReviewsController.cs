@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace Petoria.Controllers;
 
+/// <summary>
+/// Контролер за ревюта: създаване/обновяване, изтриване, преизчисляване на рейтинга
+/// </summary>
 [Route("api/hotels/{hotelId}/reviews")]
 [ApiController]
 public class ReviewsController : ControllerBase
@@ -19,7 +22,9 @@ public class ReviewsController : ControllerBase
         _context = context;
     }
 
-    // GET: api/hotels/{hotelId}/reviews
+    /// <summary>
+    /// Връща всички ревюта за даден хотел
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ReviewResponseDto>>> GetReviews(int hotelId)
     {
@@ -46,7 +51,9 @@ public class ReviewsController : ControllerBase
         return Ok(reviews);
     }
 
-    // POST: api/hotels/{hotelId}/reviews
+    /// <summary>
+    /// Създава ново или обновява съществуващо ревю за хотел
+    /// </summary>
     [HttpPost]
     [Authorize]
     public async Task<ActionResult> PostReview(int hotelId, [FromBody] CreateReviewDto dto)
@@ -63,20 +70,20 @@ public class ReviewsController : ControllerBase
             return NotFound("Hotel not found");
         }
 
-        // Check if user already reviewed this hotel
+        // Проверка дали потребителят вече е оставил ревю за този хотел
         var existingReview = await _context.HotelReviews
             .FirstOrDefaultAsync(r => r.HotelId == hotelId && r.UserId == userId);
 
         if (existingReview != null)
         {
-            // Update existing review — Map DTO → Entity (update)
+            // Обновяване на съществуващото ревю — DTO → Entity
             existingReview.Rating = dto.Rating;
             existingReview.ReviewText = dto.ReviewText;
             existingReview.UpdatedAt = DateTime.UtcNow;
         }
         else
         {
-            // Create new review — Map DTO → Entity
+            // Създаване на ново ревю — DTO → Entity
             var review = new HotelReview
             {
                 HotelId = hotelId,
@@ -91,13 +98,15 @@ public class ReviewsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        // Update Hotel Average Rating
+        // Преизчисляване на средния рейтинг на хотела
         await UpdateHotelRating(hotelId);
 
         return Ok(new { message = "Review submitted successfully" });
     }
 
-    // DELETE: api/hotels/{hotelId}/reviews/{id}
+    /// <summary>
+    /// Изтрива ревю по идентификатор (собственик или администратор)
+    /// </summary>
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteReview(int hotelId, int id)
@@ -115,7 +124,7 @@ public class ReviewsController : ControllerBase
             return BadRequest("Review does not belong to this hotel");
         }
 
-        // Check if user is owner or admin
+        // Проверка дали потребителят е автор или администратор
         if (review.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
         {
             return Forbid();
@@ -124,19 +133,22 @@ public class ReviewsController : ControllerBase
         _context.HotelReviews.Remove(review);
         await _context.SaveChangesAsync();
 
-        // Update Hotel Average Rating
+        // Преизчисляване на средния рейтинг на хотела
         await UpdateHotelRating(hotelId);
 
         return NoContent();
     }
 
+    /// <summary>
+    /// Преизчислява средния рейтинг на хотела
+    /// </summary>
     private async Task UpdateHotelRating(int hotelId)
     {
         var hotel = await _context.Hotels.FindAsync(hotelId);
         if (hotel == null) return;
 
         var reviews = await _context.HotelReviews.Where(r => r.HotelId == hotelId).ToListAsync();
-        
+
         if (reviews.Any())
         {
             hotel.Rating = (decimal)reviews.Average(r => r.Rating);

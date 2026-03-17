@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import './CookieBanner.css';
 
+/** Банер за съгласие с бисквитки — показва се еднократно на нови потребители. */
 const CookieBanner = () => {
     const { t } = useLanguage();
+    // Видимост на банера и анимация при затваряне
     const [visible, setVisible] = useState(false);
     const [animOut, setAnimOut] = useState(false);
 
+    // Проверява дали потребителят вече е дал съгласие
     useEffect(() => {
         const consent = localStorage.getItem('cookieConsent');
         if (!consent) {
@@ -17,11 +20,13 @@ const CookieBanner = () => {
         }
     }, []);
 
+    // Записва приемане на всички бисквитки
     const handleAccept = () => {
         localStorage.setItem('cookieConsent', 'accepted');
         dismiss();
     };
 
+    // Записва отказ — само основни бисквитки
     const handleDecline = () => {
         localStorage.setItem('cookieConsent', 'essential-only');
         dismiss();

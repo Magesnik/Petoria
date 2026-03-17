@@ -4,11 +4,13 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import './AddToCartDialog.css';
 
+/** Диалог при успешно добавяне в количката с детайли и навигация. */
 const AddToCartDialog = ({ item, onClose }) => {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const { convertAndFormat } = useCurrency();
 
+    // Затваря диалога и навигира към количката
     const handleViewCart = () => {
         onClose();
         navigate('/cart');

@@ -6,6 +6,10 @@ using Petoria.Core.Contracts;
 
 namespace Petoria.Core.Services
 {
+    /// <summary>
+    /// Услуга за качване и изтриване на снимки в Cloudinary.
+    /// Автоматично преоразмерява до 500x500 и центрира по лице.
+    /// </summary>
     public class CloudinaryService : IPhotoService
     {
         private readonly Cloudinary _cloudinary;
@@ -21,6 +25,7 @@ namespace Petoria.Core.Services
             _cloudinary = new Cloudinary(acc);
         }
 
+        /// <summary>Качва снимка в Cloudinary с трансформация 500x500, crop fill, gravity face.</summary>
         public async Task<ImageUploadResult> AddPhotoAsync(IFormFile file)
         {
             var uploadResult = new ImageUploadResult();
@@ -40,6 +45,7 @@ namespace Petoria.Core.Services
             return uploadResult;
         }
 
+        /// <summary>Изтрива снимка от Cloudinary по публично ID.</summary>
         public async Task<DeletionResult> DeletePhotoAsync(string publicId)
         {
             var deleteParams = new DeletionParams(publicId);

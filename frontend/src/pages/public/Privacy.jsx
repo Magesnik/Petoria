@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import './Privacy.css';
 
+/** Страница с политика за поверителност — accordion секции с правна информация. */
 const Privacy = () => {
     const { t } = useLanguage();
+    // Индекс на отворената accordion секция
     const [activeSection, setActiveSection] = useState(null);
 
     const sections = [

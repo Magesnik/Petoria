@@ -6,6 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 import './ContactHotel.css';
 
+/** Страница за изпращане на съобщение до хотела от потребителя. */
 const ContactHotel = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const ContactHotel = () => {
     const { t } = useLanguage();
 
     const [hotel, setHotel] = useState(null);
+    // Данни от формуляра за контакт
     const [formData, setFormData] = useState({
         subject: '',
         message: ''
