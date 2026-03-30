@@ -217,7 +217,10 @@ public class CommentsController : ControllerBase
     }
 
     /// <summary>
-    /// Изтрива собствен коментар заедно с всички отговори и оценки.
+    /// Изтрива коментар заедно с всички отговори и оценки.
+    /// SuperAdmin може да трие навсякъде.
+    /// Admin може да трие само в хотелите, които е създал.
+    /// Обикновен потребител може да трие само собствените си коментари.
     /// </summary>
     [HttpDelete("{id}")]
     [Authorize]
@@ -239,10 +242,30 @@ public class CommentsController : ControllerBase
             return NotFound();
         }
 
-        // Позволено е изтриване само на собствени коментари
-        if (comment.UserId != userId)
+        var isSuperAdmin = User.IsInRole(Petoria.Constants.Roles.SuperAdmin);
+        var isAdmin = User.IsInRole(Petoria.Constants.Roles.Admin);
+
+        if (!isSuperAdmin)
         {
-            return Forbid();
+            if (isAdmin)
+            {
+                // Admin може да трие само коментари в хотелите, които е създал
+                var isOwnerOfHotel = await _context.Hotels
+                    .AnyAsync(h => h.Id == comment.HotelId && h.CreatedById == userId);
+
+                if (!isOwnerOfHotel)
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                // Обикновен потребител — само собствени коментари
+                if (comment.UserId != userId)
+                {
+                    return Forbid();
+                }
+            }
         }
 
         // Първо изтриваме всички оценки

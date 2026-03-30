@@ -1,9 +1,10 @@
 .auth-page {
     min-height: 100vh;
     background-color: #f5f7fa;
-    padding-top: 80px;
+    padding-top: 100px;
+    padding-bottom: 60px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
 }
 
@@ -179,8 +180,8 @@
 
 @media (max-width: 768px) {
     .auth-page {
-        padding-top: 70px;
-        padding-bottom: 40px;
+        padding-top: 90px;
+        padding-bottom: 50px;
     }
 
     .auth-container {
@@ -223,7 +224,8 @@
 
 @media (max-width: 480px) {
     .auth-page {
-        padding-top: 60px;
+        padding-top: 80px;
+        padding-bottom: 50px;
     }
 
     .auth-card {

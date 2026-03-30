@@ -348,16 +348,3 @@ Petoria sends transactional emails using **MailKit** over SMTP:
 Email templates are rendered from embedded HTML/CSS via `EmailTemplateBuilder` and support both EN and BG locale.
 
 ---
-
-## 👥 Team
-
-| Name | Role |
-|---|---|
-| **Georgi Magesnik** | Full Stack Developer |
-| **Nikolay Stoyanov** | Full Stack Developer |
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.
