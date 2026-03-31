@@ -24,6 +24,11 @@ public static class DatabaseSeeder
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
+        // ----------------------------------------------------------------
+        // 0. Гарантиране, че SuperAdmin съществува
+        // ----------------------------------------------------------------
+        await EnsureSuperAdminAsync(userManager, roleManager);
+
         // Зарежда данни само ако таблицата Hotels е празна
         if (await db.Hotels.AnyAsync())
             return;
@@ -111,6 +116,41 @@ public static class DatabaseSeeder
         var promoCodes = SeedPromoCodes(hotels);
         await db.PromoCodes.AddRangeAsync(promoCodes);
         await db.SaveChangesAsync();
+    }
+
+    // -----------------------------------------------------------------------
+    // 0. SuperAdmin
+    // -----------------------------------------------------------------------
+    private static async Task EnsureSuperAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    {
+        if (!await roleManager.RoleExistsAsync(Roles.SuperAdmin))
+        {
+            await roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin));
+        }
+
+        var superAdminEmail = "sigmichka@petoria.com";
+        var existingSuperAdmin = await userManager.FindByNameAsync("Sigmichka") ?? await userManager.FindByEmailAsync(superAdminEmail);
+        
+        if (existingSuperAdmin == null)
+        {
+            var superAdminUser = new ApplicationUser
+            {
+                UserName = "Sigmichka",
+                Email = superAdminEmail,
+                EmailConfirmed = true,
+                FirstName = "Sigmichka",
+                LastName = "SuperAdmin",
+                Language = "bg",
+                Currency = "BGN",
+                Theme = "dark"
+            };
+
+            var saResult = await userManager.CreateAsync(superAdminUser, "B3ar#Sk1_Mtn!");
+            if (saResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(superAdminUser, Roles.SuperAdmin);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------
