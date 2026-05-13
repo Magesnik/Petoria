@@ -73,7 +73,8 @@ public class AuthController : ControllerBase
             {
                 return BadRequest(new { message = ex.Message });
             }
-            return BadRequest(new { message = "Registration failed. Please try again." });
+            // ВРЪЩАМЕ ДЕТАЙЛНА ГРЕШКА ЗА ДЕБЪГВАНЕ
+            return BadRequest(new { message = ex.Message, detail = ex.ToString() });
         }
     }
 
