@@ -124,10 +124,27 @@ public class ReviewsController : ControllerBase
             return BadRequest("Review does not belong to this hotel");
         }
 
-        // Проверка дали потребителят е автор или администратор
-        if (review.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("SuperAdmin"))
+        // Проверка дали потребителят е автор, SuperAdmin или Admin-собственик на хотела
+        var isSuperAdmin = User.IsInRole("SuperAdmin");
+        var isAdmin = User.IsInRole("Admin");
+
+        if (review.UserId != userId && !isSuperAdmin)
         {
-            return Forbid();
+            if (isAdmin)
+            {
+                // Admin може да трие само ревюта в хотелите, които е създал
+                var isOwnerOfHotel = await _context.Hotels
+                    .AnyAsync(h => h.Id == hotelId && h.CreatedById == userId);
+
+                if (!isOwnerOfHotel)
+                {
+                    return Forbid();
+                }
+            }
+            else
+            {
+                return Forbid();
+            }
         }
 
         _context.HotelReviews.Remove(review);

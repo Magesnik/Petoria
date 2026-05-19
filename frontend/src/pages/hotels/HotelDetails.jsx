@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
@@ -243,7 +243,7 @@ const HotelDetails = () => {
                 )}
 
                 {/* Review Section */}
-                <ReviewSection hotelId={parseInt(id)} />
+                <ReviewSection hotelId={parseInt(id)} hotelCreatedById={hotel.createdById} />
             </div>
         </div>
     );

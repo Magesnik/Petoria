@@ -5,7 +5,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import './ReviewSection.css';
 
 /** Секция с отзиви — среден рейтинг, форма за оценка и списък с рецензии. */
-const ReviewSection = ({ hotelId }) => {
+const ReviewSection = ({ hotelId, hotelCreatedById }) => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     // Данни за потребителския отзив (рейтинг и текст)
@@ -166,14 +166,19 @@ const ReviewSection = ({ hotelId }) => {
                             </div>
                             <p className="review-text">{review.reviewText}</p>
 
-                            {(user?.id === review.user.id || (isAdmin && isAdmin()) || (isSuperAdmin && isSuperAdmin())) && (
-                                <button
-                                    onClick={() => handleDeleteReview(review.id)}
-                                    className="btn-delete-review"
-                                >
-                                    {t('delete')}
-                                </button>
-                            )}
+                            {(() => {
+                                const isReviewOwner = user?.id === review.user.id;
+                                const isSuper = isSuperAdmin && isSuperAdmin();
+                                const isHotelOwnerAdmin = isAdmin && isAdmin() && user?.id === hotelCreatedById;
+                                return (isReviewOwner || isSuper || isHotelOwnerAdmin) && (
+                                    <button
+                                        onClick={() => handleDeleteReview(review.id)}
+                                        className="btn-delete-review"
+                                    >
+                                        {t('delete')}
+                                    </button>
+                                );
+                            })()}
                         </div>
                     ))
                 )}
