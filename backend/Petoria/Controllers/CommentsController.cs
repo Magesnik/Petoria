@@ -220,6 +220,7 @@ public class CommentsController : ControllerBase
     /// Изтрива коментар заедно с всички отговори и оценки.
     /// SuperAdmin може да трие навсякъде.
     /// Admin може да трие само в хотелите, които е създал.
+    /// HotelModerator може да трие само в хотелите, които модерира.
     /// Обикновен потребител може да трие само собствените си коментари.
     /// </summary>
     [HttpDelete("{id}")]
@@ -244,6 +245,7 @@ public class CommentsController : ControllerBase
 
         var isSuperAdmin = User.IsInRole(Petoria.Constants.Roles.SuperAdmin);
         var isAdmin = User.IsInRole(Petoria.Constants.Roles.Admin);
+        var isModerator = User.IsInRole(Petoria.Constants.Roles.HotelModerator);
 
         if (!isSuperAdmin)
         {
@@ -254,6 +256,17 @@ public class CommentsController : ControllerBase
                     .AnyAsync(h => h.Id == comment.HotelId && h.CreatedById == userId);
 
                 if (!isOwnerOfHotel)
+                {
+                    return Forbid();
+                }
+            }
+            else if (isModerator)
+            {
+                // HotelModerator може да трие само коментари в хотелите, които модерира
+                var isModeratorOfHotel = await _context.HotelModerators
+                    .AnyAsync(hm => hm.HotelId == comment.HotelId && hm.UserId == userId);
+
+                if (!isModeratorOfHotel)
                 {
                     return Forbid();
                 }
